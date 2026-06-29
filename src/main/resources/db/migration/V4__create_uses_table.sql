@@ -8,5 +8,6 @@ CREATE TABLE uses (
   reasons TEXT,
   -- Bisa simpan multi-link untuk opsi download atau marketplace
   links JSONB,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

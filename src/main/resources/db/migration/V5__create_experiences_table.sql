@@ -8,5 +8,6 @@ CREATE TABLE experiences (
   end_date DATE,
   -- Di-set NULL jika statusnya masih aktif bekerja
   is_current BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

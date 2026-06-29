@@ -6,5 +6,6 @@ CREATE TABLE blog_attachments (
   -- Contoh: 'application/pdf', 'image/jpeg'
   file_type VARCHAR(100) NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_blog FOREIGN KEY (blog_id) REFERENCES blogs (id) ON DELETE CASCADE
 );
