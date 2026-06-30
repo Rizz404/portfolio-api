@@ -1,0 +1,19 @@
+package com.api.rizz.portfolio_api.mapper;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
+
+import com.api.rizz.portfolio_api.dto.request.BlogRequest;
+import com.api.rizz.portfolio_api.dto.response.BlogResponse;
+import com.api.rizz.portfolio_api.entity.Blog;
+
+// * componentModel = "spring" bikin mapper ini jadi Bean yang bisa di-@Autowired
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+public interface BlogMapper {
+
+  // * Konversi dari DTO ke Entity (Saat nyimpen data)
+  Blog toEntity(BlogRequest request);
+
+  // * MapStruct otomatis ubah Long ID ke String ID karena nama variabelnya sama!
+  BlogResponse toResponse(Blog entity);
+}
