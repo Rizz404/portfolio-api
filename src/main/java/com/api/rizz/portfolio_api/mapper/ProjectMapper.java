@@ -2,6 +2,7 @@ package com.api.rizz.portfolio_api.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
 
 import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
 import com.api.rizz.portfolio_api.dto.response.ProjectResponse;
@@ -16,4 +17,7 @@ public interface ProjectMapper {
 
   // * MapStruct otomatis ubah Long ID ke String ID karena nama variabelnya sama!
   ProjectResponse toResponse(Project entity);
+
+  // Mapper bakal otomatis ngisi data dari Request ke Entity lama yang udah ada
+  void updateEntityFromRequest(ProjectRequest request, @MappingTarget Project entity);
 }

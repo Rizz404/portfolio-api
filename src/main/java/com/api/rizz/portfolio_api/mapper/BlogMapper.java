@@ -2,6 +2,7 @@ package com.api.rizz.portfolio_api.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
 
 import com.api.rizz.portfolio_api.dto.request.BlogRequest;
 import com.api.rizz.portfolio_api.dto.response.BlogResponse;
@@ -16,4 +17,7 @@ public interface BlogMapper {
 
   // * MapStruct otomatis ubah Long ID ke String ID karena nama variabelnya sama!
   BlogResponse toResponse(Blog entity);
+
+  void updateEntityFromRequest(BlogRequest request, @MappingTarget Blog entity);
+
 }

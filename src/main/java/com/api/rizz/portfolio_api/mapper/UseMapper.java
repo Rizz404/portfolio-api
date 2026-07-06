@@ -2,9 +2,12 @@ package com.api.rizz.portfolio_api.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
 
 import com.api.rizz.portfolio_api.dto.request.UseRequest;
+import com.api.rizz.portfolio_api.dto.request.UseRequest;
 import com.api.rizz.portfolio_api.dto.response.UseResponse;
+import com.api.rizz.portfolio_api.entity.Use;
 import com.api.rizz.portfolio_api.entity.Use;
 
 // * componentModel = "spring" bikin mapper ini jadi Bean yang bisa di-@Autowired
@@ -16,4 +19,7 @@ public interface UseMapper {
 
   // * MapStruct otomatis ubah Long ID ke String ID karena nama variabelnya sama!
   UseResponse toResponse(Use entity);
+
+  void updateEntityFromRequest(UseRequest request, @MappingTarget Use entity);
+
 }

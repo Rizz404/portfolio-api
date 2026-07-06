@@ -2,6 +2,7 @@ package com.api.rizz.portfolio_api.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
 
 import com.api.rizz.portfolio_api.dto.request.ExperienceRequest;
 import com.api.rizz.portfolio_api.dto.response.ExperienceResponse;
@@ -16,4 +17,6 @@ public interface ExperienceMapper {
 
   // * MapStruct otomatis ubah Long ID ke String ID karena nama variabelnya sama!
   ExperienceResponse toResponse(Experience entity);
+
+  void updateEntityFromRequest(ExperienceRequest request, @MappingTarget Experience entity);
 }
