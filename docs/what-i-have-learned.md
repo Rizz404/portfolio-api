@@ -6,3 +6,4 @@
 2. pakai flyway didepan file harus V1 dan seterusnaya biar migrasinya bisa dibuat berurutan
 3. launch json diperhatikan kalo salah dikit bakal error
 4. selalu petik 2 kalau string
+5. di java bind web annotation @PostMapping("") = /projects bisa juga @PostMapping doang kalo @PostMapping("/") = /projects/

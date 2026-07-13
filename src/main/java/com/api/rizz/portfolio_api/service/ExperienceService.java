@@ -47,8 +47,8 @@ public class ExperienceService {
 
   public Object findAllExperiences(String search, Boolean isCurrent, LocalDate startDate,
       LocalDate endDate, Long cursor, int page, int size,
-      String sortBy,
-      String sortDir) {
+      List<String> sortBy,
+      List<String> sortDir) {
     Specification<Experience> spec = (root, query, cb) -> {
       // * 1. Siapkan Filter (Where Clause Dinamis)
       List<Predicate> predicates = new ArrayList<>();
@@ -85,20 +85,34 @@ public class ExperienceService {
     };
 
     // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort sort = sortDir.equalsIgnoreCase("asc")
-        ? Sort.by(sortBy).ascending()
-        : Sort.by(sortBy).descending();
+    Sort finalSort = Sort.unsorted();
+
+    for (int i = 0; i < sortBy.size(); i++) {
+      String field = sortBy.get(i);
+
+      // Jaga-jaga kalau user ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
+      // ke 'asc'
+      String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
+
+      // Bikin gerbong saat ini
+      Sort currentSort = direction.equalsIgnoreCase("desc")
+          ? Sort.by(field).descending()
+          : Sort.by(field).ascending();
+
+      // Sambungin ke kereta utama pakai .and() !
+      finalSort = finalSort.and(currentSort);
+    }
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {
       // * LOGIKA CURSOR: Biasanya gak butuh info total halaman, cukup ambil 'size'
       // * datanya aja
-      Pageable limitOnly = PageRequest.of(0, size, sort);
+      Pageable limitOnly = PageRequest.of(0, size, finalSort);
       Page<Experience> result = experienceRepository.findAll(spec, limitOnly);
       return result.getContent().stream().map(experienceMapper::toResponse).toList();
     } else {
       // * LOGIKA OFFSET (Default): Butuh info total halaman dan total data
-      Pageable pageable = PageRequest.of(page, size, sort);
+      Pageable pageable = PageRequest.of(page, size, finalSort);
       Page<Experience> result = experienceRepository.findAll(spec, pageable);
       return result.map(experienceMapper::toResponse);
     }

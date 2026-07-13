@@ -1,5 +1,7 @@
 package com.api.rizz.portfolio_api.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,21 +30,23 @@ import lombok.RequiredArgsConstructor;
 public class ProjectController {
   final ProjectService projectService;
 
-  @PostMapping
+  // * String kosong = /projects bisa juga @PostMapping doang kalo
+  // * @PostMapping("/") = /projects/
+  @PostMapping("")
   public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody ProjectRequest request) {
     ProjectResponse projectResponse = projectService.createProject(request);
 
     return new ResponseEntity<>(projectResponse, HttpStatus.CREATED);
   }
 
-  @GetMapping()
-  public ResponseEntity<Object> getAllProjects(@RequestParam(required = false) String search,
+  @GetMapping("")
+  public ResponseEntity<Object> findAllProjects(@RequestParam(required = false) String search,
       @RequestParam(required = false) String status,
       @RequestParam(required = false) Long cursor,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
-      @RequestParam(defaultValue = "createdAt") String sortBy,
-      @RequestParam(defaultValue = "desc") String sortDir) {
+      @RequestParam(defaultValue = "createdAt") List<String> sortBy,
+      @RequestParam(defaultValue = "desc") List<String> sortDir) {
     Object response = projectService.findAllProjects(search, status, cursor, page, size, sortBy, sortDir);
 
     return new ResponseEntity<>(response, HttpStatus.OK);
