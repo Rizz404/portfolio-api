@@ -52,7 +52,7 @@ public class UseService {
 
       // * Kalau ada keyword pencarian di title dan content
       if (search != null && !search.isBlank()) {
-        predicates.add(cb.like(cb.lower(root.get("item_name")), "%" + search.toLowerCase() + "%"));
+        predicates.add(cb.like(cb.lower(root.get("itemName")), "%" + search.toLowerCase() + "%"));
       }
 
       // * Kalau mau filter berdasarkan category

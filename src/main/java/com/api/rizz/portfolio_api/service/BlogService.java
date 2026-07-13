@@ -48,7 +48,7 @@ public class BlogService {
     return blogMapper.toResponse(savedBlog);
   }
 
-  public Object findAllBlogs(String search, String status, Long cursor, int page, int size, List<String> sortBy,
+  public Object findAllBlogs(String search, Long cursor, int page, int size, List<String> sortBy,
       List<String> sortDir) {
     Specification<Blog> spec = (root, query, cb) -> {
       // * 1. Siapkan Filter (Where Clause Dinamis)
@@ -56,14 +56,13 @@ public class BlogService {
 
       // * Kalau ada keyword pencarian di title dan content
       if (search != null && !search.isBlank()) {
+        String searchKeyword = "%" + search.toLowerCase() + "%";
 
-      }
+        // * cb.or() = Pilih salah satu yang cocok (OR)
+        Predicate searchTitle = cb.like(cb.lower(root.get("title")), searchKeyword);
+        Predicate searchContent = cb.like(cb.lower(root.get("content")), searchKeyword);
 
-      // * views count terbanyak
-
-      // * Kalau mau filter berdasarkan status (active/development)
-      if (status != null && !status.isBlank()) {
-        predicates.add(cb.equal(root.get("status"), status));
+        predicates.add(cb.or(searchTitle, searchContent));
       }
 
       // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)

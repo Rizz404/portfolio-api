@@ -58,7 +58,7 @@ public class ExperienceService {
         String searchKeyword = "%" + search.toLowerCase() + "%";
 
         // * cb.or() = Pilih salah satu yang cocok (OR)
-        Predicate searchCompanyName = cb.like(cb.lower(root.get("company_name")), searchKeyword);
+        Predicate searchCompanyName = cb.like(cb.lower(root.get("companyName")), searchKeyword);
         Predicate searchPosition = cb.like(cb.lower(root.get("position")), searchKeyword);
 
         predicates.add(cb.or(searchCompanyName, searchPosition));
@@ -66,15 +66,15 @@ public class ExperienceService {
 
       // * Harus kek gini kalo bool
       if (Boolean.TRUE.equals(isCurrent)) {
-        predicates.add(cb.equal(root.get("is_current"), isCurrent));
+        predicates.add(cb.equal(root.get("isCurrent"), isCurrent));
       }
 
       // * Start date end date logic yang sering dipake
       if (startDate != null) {
-        predicates.add(cb.greaterThanOrEqualTo(root.get("start_date"), startDate));
+        predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), startDate));
       }
-      if (startDate != null) {
-        predicates.add(cb.greaterThanOrEqualTo(root.get("end_date"), endDate));
+      if (endDate != null) {
+        predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), endDate));
       }
 
       // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)

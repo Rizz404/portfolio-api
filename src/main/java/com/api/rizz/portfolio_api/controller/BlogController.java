@@ -35,13 +35,12 @@ public class BlogController {
 
   @GetMapping("")
   public ResponseEntity<Object> findAllBlogs(@RequestParam(required = false) String search,
-      @RequestParam(required = false) String status,
       @RequestParam(required = false) Long cursor,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
-    Object response = blogService.findAllBlogs(search, status, cursor, page, size, sortBy, sortDir);
+    Object response = blogService.findAllBlogs(search, cursor, page, size, sortBy, sortDir);
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
