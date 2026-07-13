@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -63,6 +64,6 @@ public class Blog {
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
 
-  @OneToMany(fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<BlogAttachment> blogAttachments;
 }
