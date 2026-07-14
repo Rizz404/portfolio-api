@@ -1,0 +1,48 @@
+info:
+  name: update by id
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/uses/{{useId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "itemName": "Visual Studio Code Insiders",
+        "category": "software",
+        "logoUrl": "https://example.com/images/vscode-insiders-logo.png",
+        "pictures": [
+          "https://example.com/images/vscode-insiders-1.png"
+        ],
+        "reasons": "Pindah ke build Insiders untuk fitur terbaru.",
+        "links": [
+          "https://code.visualstudio.com/insiders"
+        ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("use should reflect the updated fields", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("useId"));
+          expect(body.itemName).to.equal("Visual Studio Code Insiders");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  UseController does not apply @Valid on update, and the mapper overwrites every
+  field, so send the full body here rather than a partial patch.

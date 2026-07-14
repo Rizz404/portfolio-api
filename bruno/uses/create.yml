@@ -1,0 +1,47 @@
+info:
+  name: create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/uses"
+  body:
+    type: json
+    data: |-
+      {
+        "itemName": "Visual Studio Code",
+        "category": "software",
+        "logoUrl": "https://example.com/images/vscode-logo.png",
+        "pictures": [
+          "https://example.com/images/vscode-1.png"
+        ],
+        "reasons": "Editor utama untuk sehari-hari coding, ringan dan extensible.",
+        "links": [
+          "https://code.visualstudio.com"
+        ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the use and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("response body should contain the generated id and submitted fields", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("id");
+          expect(body.itemName).to.equal("Visual Studio Code");
+          expect(body.category).to.equal("software");
+
+          bru.setVar("useId", body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

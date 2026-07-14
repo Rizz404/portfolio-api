@@ -1,0 +1,32 @@
+info:
+  name: get by id
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{BASE_URL}}/uses/{{useId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("response body should match the created use", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("useId"));
+          expect(body.itemName).to.equal("Visual Studio Code");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Depends on `create` having run first in this run/session so `useId` is set.
