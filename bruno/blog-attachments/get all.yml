@@ -1,0 +1,29 @@
+info:
+  name: get all
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{BASE_URL}}/blog-attachments"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("default (offset) pagination should return a Page object", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("content").that.is.an("array");
+          expect(body).to.have.property("totalElements");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

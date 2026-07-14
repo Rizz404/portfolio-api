@@ -1,0 +1,43 @@
+info:
+  name: update by id
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/blog-attachments/{{blogAttachmentId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "blogId": {{attachmentParentBlogId}},
+        "fileName": "architecture-diagram-v2.png",
+        "fileUrl": "https://example.com/files/architecture-diagram-v2.png",
+        "fileType": "image/png"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("attachment should reflect the updated fields", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("blogAttachmentId"));
+          expect(body.fileName).to.equal("architecture-diagram-v2.png");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  updateEntityFromRequest intentionally never touches the blog relation (only
+  fileName/fileUrl/fileType), so the parent blog stays the one set at creation
+  regardless of the blogId sent here.

@@ -1,0 +1,42 @@
+info:
+  name: create
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/blog-attachments"
+  body:
+    type: json
+    data: |-
+      {
+        "blogId": {{attachmentParentBlogId}},
+        "fileName": "architecture-diagram.png",
+        "fileUrl": "https://example.com/files/architecture-diagram.png",
+        "fileType": "image/png"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the blog attachment and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("response body should contain the generated id and submitted fields", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("id");
+          expect(body.blogId).to.equal(bru.getVar("attachmentParentBlogId"));
+          expect(body.fileName).to.equal("architecture-diagram.png");
+          expect(body.fileType).to.equal("image/png");
+
+          bru.setVar("blogAttachmentId", body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

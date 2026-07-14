@@ -1,0 +1,28 @@
+info:
+  name: get by id - not found
+  type: http
+  seq: 8
+
+http:
+  method: GET
+  url: "{{BASE_URL}}/blog-attachments/{{blogAttachmentId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("a deleted/unknown blog attachment id currently surfaces as 500", function () {
+          expect(res.getStatus()).to.equal(500);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  BlogAttachmentService throws NoSuchElementException when an attachment is missing,
+  but there is no @RestControllerAdvice mapping it to 404, so it currently bubbles up
+  as a 500 Internal Server Error.

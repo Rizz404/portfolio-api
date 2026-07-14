@@ -1,0 +1,23 @@
+info:
+  name: cleanup - delete parent blog
+  type: http
+  seq: 9
+
+http:
+  method: DELETE
+  url: "{{BASE_URL}}/blogs/{{attachmentParentBlogId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("parent blog created for this suite should be removed", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

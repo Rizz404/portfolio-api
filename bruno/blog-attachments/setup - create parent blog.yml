@@ -1,0 +1,44 @@
+info:
+  name: setup - create parent blog
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/blogs"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Blog Post with Attachments",
+        "content": "Parent blog created solely to exercise the blog-attachments endpoints.",
+        "featuredImage": "https://example.com/images/attachments-post.png",
+        "isPublished": true,
+        "viewsCount": 0,
+        "likesCount": 0,
+        "dislikesCount": 0
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("parent blog should be created", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          expect(body).to.have.property("id");
+
+          bru.setVar("attachmentParentBlogId", body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  BlogAttachment.blog is a required (NOT NULL) FK, so every attachment needs a real,
+  existing blog id. This request creates that parent blog and is cleaned up by
+  `cleanup - delete parent blog`.
