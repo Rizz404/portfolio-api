@@ -60,7 +60,7 @@ public class Blog {
   @Column(name = "created_at", updatable = false, nullable = false)
   private OffsetDateTime createdAt;
 
-  @CreationTimestamp
+  @UpdateTimestamp
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
 
