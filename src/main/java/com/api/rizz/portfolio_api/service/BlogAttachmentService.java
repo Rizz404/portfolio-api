@@ -107,6 +107,9 @@ public class BlogAttachmentService {
         .orElseThrow(
             () -> new NoSuchElementException("BlogAttachment with ID: %d not found".formatted(id)));
 
+    // * Update data entity lama pakai data request baru
+    blogAttachmentMapper.updateEntityFromRequest(blogAttachmentRequest, blogAttachment);
+
     BlogAttachment updatedBlogAttachment = blogAttachmentRepository.save(blogAttachment);
     return blogAttachmentMapper.toResponse(updatedBlogAttachment);
   }
