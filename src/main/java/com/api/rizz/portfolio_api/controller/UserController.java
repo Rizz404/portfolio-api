@@ -1,0 +1,74 @@
+package com.api.rizz.portfolio_api.controller;
+
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.api.rizz.portfolio_api.dto.request.UserRequest;
+import com.api.rizz.portfolio_api.dto.response.UserResponse;
+import com.api.rizz.portfolio_api.service.UserService;
+
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/users")
+@RequiredArgsConstructor
+public class UserController {
+  final UserService userService;
+
+  @PostMapping("")
+  public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
+    UserResponse userResponse = userService.createUser(request);
+
+    return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
+  }
+
+  @GetMapping("")
+  public ResponseEntity<Object> findAllUsers(@RequestParam(required = false) String search,
+      @RequestParam(required = false) String role,
+      @RequestParam(required = false) String provider,
+      @RequestParam(required = false) String gender,
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "createdAt") List<String> sortBy,
+      @RequestParam(defaultValue = "desc") List<String> sortDir) {
+    Object response = userService.findAllUsers(search, role, provider, gender, cursor, page, size,
+        sortBy,
+        sortDir);
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<UserResponse> findUserById(@PathVariable("id") Long id) {
+    UserResponse userResponse = userService.findUserById(id);
+
+    return new ResponseEntity<>(userResponse, HttpStatus.OK);
+  }
+
+  @PatchMapping("/{id}")
+  public ResponseEntity<UserResponse> updateUser(@PathVariable("id") Long id,
+      @RequestBody UserRequest request) {
+    UserResponse userResponse = userService.updateUser(id, request);
+
+    return new ResponseEntity<>(userResponse, HttpStatus.OK);
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<String> deleteUser(@PathVariable("id") Long id) {
+    userService.deleteUser(id);
+
+    return new ResponseEntity<>("User with ID: %d deleted".formatted(id), HttpStatus.OK);
+  }
+}
