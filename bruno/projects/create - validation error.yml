@@ -1,0 +1,38 @@
+info:
+  name: create - validation error
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/projects"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "",
+        "description": "Missing required fields",
+        "status": "",
+        "logoUrl": null,
+        "imageUrls": [],
+        "projectLinks": {}
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("blank required fields should be rejected with 400", function () {
+          expect(res.getStatus()).to.equal(400);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  createProject is the only endpoint annotated with @Valid across all controllers,
+  so this is the only resource where a blank required field actually fails validation.

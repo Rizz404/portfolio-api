@@ -1,0 +1,51 @@
+info:
+  name: update by id
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/projects/{{projectId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Vue 4 Portfolio Dashboard",
+        "description": "Dashboard v4 dengan perbaikan performa dan UI.",
+        "status": "development",
+        "logoUrl": "https://example.com/images/vue-logo-v4.png",
+        "imageUrls": [
+          "https://example.com/images/dash-v4-1.png"
+        ],
+        "projectLinks": {
+          "repo": "https://github.com/rizqiansyah/vue-portfolio"
+        }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("project should reflect the updated fields and regenerated slug", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("projectId"));
+          expect(body.name).to.equal("Vue 4 Portfolio Dashboard");
+          expect(body.status).to.equal("development");
+          expect(body.slug).to.equal("vue-4-portfolio-dashboard");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ProjectController does not apply @Valid on update, and the mapper overwrites every
+  field (no null-ignore strategy), so send the full body here rather than a partial
+  patch to avoid silently nulling out fields like status/description.

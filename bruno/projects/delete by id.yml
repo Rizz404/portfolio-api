@@ -1,0 +1,28 @@
+info:
+  name: delete by id
+  type: http
+  seq: 7
+
+http:
+  method: DELETE
+  url: "{{BASE_URL}}/projects/{{projectId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("confirmation message should mention the deleted id", function () {
+          const body = res.getBody();
+          expect(String(body)).to.include(String(bru.getVar("projectId")));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

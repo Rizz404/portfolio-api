@@ -1,0 +1,52 @@
+info:
+  name: create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/projects"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Vue 3 Portfolio Dashboard",
+        "description": "Dashboard interaktif untuk mengelola portofolio, dibangun dengan Vue 3 dan Tailwind CSS v4.",
+        "status": "active",
+        "logoUrl": "https://example.com/images/vue-logo.png",
+        "imageUrls": [
+          "https://example.com/images/dash-1.png",
+          "https://example.com/images/dash-2.png"
+        ],
+        "projectLinks": {
+          "repo": "https://github.com/rizqiansyah/vue-portfolio",
+          "demo": "https://rizqiansyah-portfolio.vercel.app",
+          "figma": "https://figma.com/file/xyz123"
+        }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the project and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("response body should contain the generated id, slug and submitted fields", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("id");
+          expect(body).to.have.property("slug");
+          expect(body.name).to.equal("Vue 3 Portfolio Dashboard");
+          expect(body.status).to.equal("active");
+          expect(body.imageUrls).to.have.lengthOf(2);
+
+          bru.setVar("projectId", body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
