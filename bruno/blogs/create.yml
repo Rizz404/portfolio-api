@@ -1,0 +1,45 @@
+info:
+  name: create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/blogs"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Belajar Spring Boot 3 dari Nol",
+        "content": "Artikel ini membahas dasar-dasar Spring Boot 3 untuk pemula.",
+        "featuredImage": "https://example.com/images/spring-boot-3.png",
+        "isPublished": true,
+        "viewsCount": 0,
+        "likesCount": 0,
+        "dislikesCount": 0
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the blog and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("response body should contain the generated id, slug and submitted fields", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("id");
+          expect(body).to.have.property("slug");
+          expect(body.title).to.equal("Belajar Spring Boot 3 dari Nol");
+          expect(body.isPublished).to.equal(true);
+
+          bru.setVar("blogId", body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

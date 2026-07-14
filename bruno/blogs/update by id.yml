@@ -1,0 +1,46 @@
+info:
+  name: update by id
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/blogs/{{blogId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Belajar Spring Boot 3 dari Nol (Updated)",
+        "content": "Revisi artikel dengan contoh kode terbaru.",
+        "featuredImage": "https://example.com/images/spring-boot-3-v2.png",
+        "isPublished": true,
+        "viewsCount": 10,
+        "likesCount": 2,
+        "dislikesCount": 0
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("blog should reflect the updated fields and regenerated slug", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("blogId"));
+          expect(body.title).to.equal("Belajar Spring Boot 3 dari Nol (Updated)");
+          expect(body.slug).to.equal("belajar-spring-boot-3-dari-nol-updated");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  BlogController does not apply @Valid on update, and the mapper overwrites every
+  field, so send the full body here rather than a partial patch.
