@@ -1,13 +1,16 @@
 package com.api.rizz.portfolio_api.entity;
 
-import java.security.AuthProvider;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,7 +34,7 @@ import lombok.Setter;
 /**
  * User
  */
-public class User {
+public class User implements UserDetails {
 
   public enum Role {
     USER,
@@ -101,4 +104,37 @@ public class User {
   @CreationTimestamp
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
+
+  // * Spring Security wajib implement method ini
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+  }
+
+  // * Udah best practice ternyata
+  @Override
+  public String getUsername() {
+    return email; // * Pakai email sebagai username
+  }
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return true; // diubah nanti kalau kamu mau fitur ban/suspend akun
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return true;
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return true;
+  }
+
 }
