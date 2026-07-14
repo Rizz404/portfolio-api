@@ -1,0 +1,47 @@
+info:
+  name: create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/experiences"
+  body:
+    type: json
+    data: |-
+      {
+        "companyName": "PT Teknologi Nusantara",
+        "position": "Backend Engineer",
+        "description": "Mengembangkan dan memelihara layanan backend berbasis Spring Boot.",
+        "jobdesks": [
+          "Membangun REST API",
+          "Optimasi query database"
+        ],
+        "startDate": "2023-01-15",
+        "endDate": null,
+        "isCurrent": true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the experience and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("response body should contain the generated id and submitted fields", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("id");
+          expect(body.companyName).to.equal("PT Teknologi Nusantara");
+          expect(body.isCurrent).to.equal(true);
+
+          bru.setVar("experienceId", body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

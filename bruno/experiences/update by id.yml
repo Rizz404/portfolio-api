@@ -1,0 +1,50 @@
+info:
+  name: update by id
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/experiences/{{experienceId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "companyName": "PT Teknologi Nusantara",
+        "position": "Senior Backend Engineer",
+        "description": "Naik jabatan, memimpin tim backend.",
+        "jobdesks": [
+          "Membangun REST API",
+          "Code review",
+          "Mentoring junior engineer"
+        ],
+        "startDate": "2023-01-15",
+        "endDate": "2026-06-30",
+        "isCurrent": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("experience should reflect the updated fields", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("experienceId"));
+          expect(body.position).to.equal("Senior Backend Engineer");
+          expect(body.isCurrent).to.equal(false);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ExperienceController does not apply @Valid on update, and the mapper overwrites
+  every field, so send the full body here rather than a partial patch.

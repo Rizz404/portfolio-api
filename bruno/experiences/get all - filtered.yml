@@ -1,0 +1,44 @@
+info:
+  name: get all - filtered
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{BASE_URL}}/experiences"
+  params:
+    - name: search
+      value: Nusantara
+      type: query
+      disabled: false
+    - name: isCurrent
+      value: "true"
+      type: query
+      disabled: false
+    - name: startDate
+      value: "2020-01-01"
+      type: query
+      disabled: false
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("results should only contain matching, current experiences", function () {
+          const body = res.getBody();
+          expect(body.content).to.be.an("array");
+          body.content.forEach((experience) => {
+            expect(experience.isCurrent).to.equal(true);
+          });
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
