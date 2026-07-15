@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
   final UserService userService;
 
+  // * Jangan dihiraukan dulu soal role soalnya ini kan web portfolio
+  @PreAuthorize("hasRole('USER', 'ADMIN')")
   @PostMapping("")
   public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
     UserResponse userResponse = userService.createUser(request);
@@ -57,6 +60,7 @@ public class UserController {
     return new ResponseEntity<>(userResponse, HttpStatus.OK);
   }
 
+  @PreAuthorize("")
   @PatchMapping("/{id}")
   public ResponseEntity<UserResponse> updateUser(@PathVariable("id") Long id,
       @RequestBody UserRequest request) {
@@ -65,6 +69,7 @@ public class UserController {
     return new ResponseEntity<>(userResponse, HttpStatus.OK);
   }
 
+  @PreAuthorize("")
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteUser(@PathVariable("id") Long id) {
     userService.deleteUser(id);

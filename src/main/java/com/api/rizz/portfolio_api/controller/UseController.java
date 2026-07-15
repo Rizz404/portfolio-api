@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class UseController {
   final UseService useService;
 
+  @PreAuthorize("")
   @PostMapping("")
   public ResponseEntity<UseResponse> createUse(@RequestBody UseRequest request) {
     UseResponse useResponse = useService.createUse(request);
@@ -55,6 +57,7 @@ public class UseController {
     return new ResponseEntity<>(useResponse, HttpStatus.OK);
   }
 
+  @PreAuthorize("")
   @PatchMapping("/{id}")
   public ResponseEntity<UseResponse> updateUse(@PathVariable("id") Long id,
       @RequestBody UseRequest request) {
@@ -63,6 +66,7 @@ public class UseController {
     return new ResponseEntity<>(useResponse, HttpStatus.OK);
   }
 
+  @PreAuthorize("")
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteUse(@PathVariable("id") Long id) {
     useService.deleteUse(id);

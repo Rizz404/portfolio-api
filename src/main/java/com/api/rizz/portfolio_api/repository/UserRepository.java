@@ -15,5 +15,5 @@ import com.api.rizz.portfolio_api.entity.User;
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
   Optional<User> findByEmail(String email);
 
-  Boolean existEmail(String email);
+  boolean existsByEmail(String email);
 }

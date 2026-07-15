@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,6 +33,7 @@ public class ProjectController {
 
   // * String kosong = /projects bisa juga @PostMapping doang kalo
   // * @PostMapping("/") = /projects/
+  @PreAuthorize("")
   @PostMapping("")
   public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody ProjectRequest request) {
     ProjectResponse projectResponse = projectService.createProject(request);
@@ -59,6 +61,7 @@ public class ProjectController {
     return new ResponseEntity<>(projectResponse, HttpStatus.OK);
   }
 
+  @PreAuthorize("")
   @PatchMapping("/{id}")
   public ResponseEntity<ProjectResponse> updateProject(@PathVariable("id") Long id,
       @RequestBody ProjectRequest request) {
@@ -67,6 +70,7 @@ public class ProjectController {
     return new ResponseEntity<>(projectResponse, HttpStatus.OK);
   }
 
+  @PreAuthorize("")
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteProject(@PathVariable("id") Long id) {
     projectService.deleteProject(id);

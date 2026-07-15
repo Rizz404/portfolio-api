@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class BlogController {
   final BlogService blogService;
 
+  @PreAuthorize("")
   @PostMapping("")
   public ResponseEntity<BlogResponse> createBlog(@RequestBody BlogRequest request) {
     BlogResponse blogResponse = blogService.createBlog(request);
@@ -52,6 +54,7 @@ public class BlogController {
     return new ResponseEntity<>(blogResponse, HttpStatus.OK);
   }
 
+  @PreAuthorize("")
   @PatchMapping("/{id}")
   public ResponseEntity<BlogResponse> updateBlog(@PathVariable("id") Long id, @RequestBody BlogRequest request) {
     BlogResponse blogResponse = blogService.updateBlog(id, request);
@@ -59,6 +62,7 @@ public class BlogController {
     return new ResponseEntity<>(blogResponse, HttpStatus.OK);
   }
 
+  @PreAuthorize("")
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteBlog(@PathVariable("id") Long id) {
     blogService.deleteBlog(id);

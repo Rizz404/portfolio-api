@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class ExperienceController {
   final ExperienceService experienceService;
 
+  @PreAuthorize("")
   @PostMapping("")
   public ResponseEntity<ExperienceResponse> createExperience(@RequestBody ExperienceRequest request) {
     ExperienceResponse experienceResponse = experienceService.createExperience(request);
@@ -60,6 +62,7 @@ public class ExperienceController {
     return new ResponseEntity<>(experienceResponse, HttpStatus.OK);
   }
 
+  @PreAuthorize("")
   @PatchMapping("/{id}")
   public ResponseEntity<ExperienceResponse> updateExperience(@PathVariable("id") Long id,
       @RequestBody ExperienceRequest request) {
@@ -68,6 +71,7 @@ public class ExperienceController {
     return new ResponseEntity<>(experienceResponse, HttpStatus.OK);
   }
 
+  @PreAuthorize("")
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteExperience(@PathVariable("id") Long id) {
     experienceService.deleteExperience(id);
