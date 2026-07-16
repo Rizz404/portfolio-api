@@ -1,0 +1,66 @@
+info:
+  name: create - multipart
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/uses"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "itemName": "Multipart Upload Test Tool",
+            "category": "software",
+            "reasons": "Created via multipart/form-data with a real logo and picture files.",
+            "links": ["https://example.com/multipart-test-tool"]
+          }
+      - type: file
+        name: logoFile
+        value:
+          - fixtures/sample-1.png
+      - type: file
+        name: pictureFiles
+        value:
+          - fixtures/sample-1.png
+          - fixtures/sample-2.png
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the use and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("logoFile and pictureFiles should be uploaded to Cloudinary and returned as URLs", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("id");
+          expect(body.logoUrl).to.be.a("string").and.not.empty;
+          expect(body.pictures).to.be.an("array").with.lengthOf(2);
+          body.pictures.forEach((url) => expect(url).to.be.a("string").and.not.empty);
+
+          bru.setVar("useMultipartId", body.id);
+          bru.setVar("useMultipartPictureUrlToDelete", body.pictures[0]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises UseController.createUseMultipart, which is untouched by `create` (that one
+  only hits createUseJson). The "data" text part must be sent with
+  contentType: application/json, otherwise Spring can't deserialize the
+  @RequestPart("data") UseRequest.
+
+  Actually uploads fixtures/sample-1.png and fixtures/sample-2.png to Cloudinary.
+  Cleaned up (including the Cloudinary files) by
+  `cleanup - delete multipart fixture`.

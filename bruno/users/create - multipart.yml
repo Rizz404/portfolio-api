@@ -1,0 +1,64 @@
+info:
+  name: create - multipart
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/users"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "nickname": "Multipart",
+            "fullName": "Multipart Upload Test User",
+            "email": "multipart.test@example.com",
+            "password": "SuperSecret123!",
+            "role": "USER",
+            "provider": "LOCAL",
+            "gender": "OTHER"
+          }
+      - type: file
+        name: profilePictFile
+        value:
+          - fixtures/sample-1.png
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the user and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("profilePictFile should be uploaded to Cloudinary and returned as a URL", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("id");
+          expect(body.profilePict).to.be.a("string").and.not.empty;
+          expect(body.email).to.equal("multipart.test@example.com");
+
+          bru.setVar("userMultipartId", body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Unlike `create` (createUserJson, blocked by the malformed
+  @PreAuthorize("hasRole('USER', 'ADMIN')")), createUserMultipart is only guarded by
+  @PreAuthorize("isAuthenticated()"), so this one actually works and is a second,
+  independent way to provision a user (besides /auth/register).
+
+  The "data" text part must be sent with contentType: application/json, otherwise
+  Spring can't deserialize the @RequestPart("data") UserRequest.
+
+  Actually uploads fixtures/sample-1.png to Cloudinary. Cleaned up (including the
+  Cloudinary file) by `cleanup - delete multipart fixture`.

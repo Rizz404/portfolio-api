@@ -1,0 +1,63 @@
+info:
+  name: update by id - multipart
+  type: http
+  seq: 10
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/uses/{{useMultipartId}}"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "itemName": "Multipart Upload Test Tool (Updated)",
+            "category": "software",
+            "reasons": "Updated via multipart/form-data with a replacement logo and an extra picture.",
+            "links": ["https://example.com/multipart-test-tool"],
+            "deletedPictures": ["{{useMultipartPictureUrlToDelete}}"]
+          }
+      - type: file
+        name: logoFile
+        value:
+          - fixtures/sample-2.png
+      - type: file
+        name: newPictureFiles
+        value:
+          - fixtures/sample-2.png
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("logo should be replaced and picture list should reflect the deletion + addition", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("useMultipartId"));
+          expect(body.itemName).to.equal("Multipart Upload Test Tool (Updated)");
+          expect(body.logoUrl).to.be.a("string").and.not.empty;
+          // 2 original picture files, minus 1 deleted, plus 1 newly uploaded = 2
+          expect(body.pictures).to.be.an("array").with.lengthOf(2);
+          expect(body.pictures).to.not.include(bru.getVar("useMultipartPictureUrlToDelete"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises UseController.updateUseMultipart (untouched by `update by id`, which only
+  hits updateUseJson). Replacing logoFile also exercises the branch in
+  UseService.updateUse that deletes the old logo from Cloudinary first.
+
+  Depends on `create - multipart` having run first so `useMultipartId` and
+  `useMultipartPictureUrlToDelete` are set.

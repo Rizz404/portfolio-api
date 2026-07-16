@@ -1,0 +1,51 @@
+info:
+  name: create
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/users"
+  body:
+    type: json
+    data: |-
+      {
+        "nickname": "Siti",
+        "fullName": "Siti Aminah",
+        "email": "siti.aminah@example.com",
+        "password": "SuperSecret123!",
+        "role": "USER",
+        "provider": "LOCAL",
+        "gender": "FEMALE",
+        "phoneNumber": "081234567890",
+        "bio": "Frontend enthusiast.",
+        "address": "Jakarta, Indonesia"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("hasRole('USER', 'ADMIN') is malformed and currently surfaces as 500", function () {
+          expect(res.getStatus()).to.equal(500);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  UserController.createUserJson is annotated @PreAuthorize("hasRole('USER', 'ADMIN')"),
+  but hasRole(String) only accepts a single role argument (hasAnyRole(String...) is the
+  varargs one). SpEL fails to resolve a matching method for the 2-arg call, throws a
+  SpelEvaluationException while the security interceptor evaluates the expression, and
+  since there is no @RestControllerAdvice for it, the request currently fails with 500
+  regardless of the caller's role. This test documents that current (not ideal)
+  behavior; update the expected status (and probably the annotation, to
+  @PreAuthorize("hasAnyRole('USER', 'ADMIN')")) once it's fixed.
+
+  Because this endpoint cannot reliably create a user, the rest of this folder uses
+  `setup - register fixture user` (via /auth/register) to get a usable fixture instead.

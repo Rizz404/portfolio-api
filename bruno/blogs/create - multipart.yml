@@ -1,0 +1,69 @@
+info:
+  name: create - multipart
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/blogs"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "title": "Multipart Upload Test Blog",
+            "content": "Created via multipart/form-data with a real featured image and attachments.",
+            "isPublished": true,
+            "viewsCount": 0,
+            "likesCount": 0,
+            "dislikesCount": 0
+          }
+      - type: file
+        name: featuredImageFile
+        value:
+          - fixtures/sample-1.png
+      - type: file
+        name: attachments
+        value:
+          - fixtures/sample-1.png
+          - fixtures/sample-2.png
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the blog and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("featuredImageFile and attachments should be uploaded to Cloudinary", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("id");
+          expect(body.featuredImage).to.be.a("string").and.not.empty;
+          expect(body.blogAttachments).to.be.an("array").with.lengthOf(2);
+          body.blogAttachments.forEach((attachment) => {
+            expect(attachment.fileUrl).to.be.a("string").and.not.empty;
+          });
+
+          bru.setVar("blogMultipartId", body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises BlogController.createBlogMultipart, which is untouched by `create` (that
+  one only hits createBlogJson). The "data" text part must be sent with
+  contentType: application/json, otherwise Spring can't deserialize the
+  @RequestPart("data") BlogRequest.
+
+  Actually uploads fixtures/sample-1.png and fixtures/sample-2.png to Cloudinary, each
+  becoming its own BlogAttachment row. Cleaned up (including the Cloudinary files) by
+  `cleanup - delete multipart fixture`.

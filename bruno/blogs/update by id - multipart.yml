@@ -1,0 +1,66 @@
+info:
+  name: update by id - multipart
+  type: http
+  seq: 10
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/blogs/{{blogMultipartId}}"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "title": "Multipart Upload Test Blog (Updated)",
+            "content": "Updated via multipart/form-data with a replacement featured image and an extra attachment.",
+            "isPublished": true,
+            "viewsCount": 5,
+            "likesCount": 1,
+            "dislikesCount": 0
+          }
+      - type: file
+        name: featuredImageFile
+        value:
+          - fixtures/sample-2.png
+      - type: file
+        name: newAttachments
+        value:
+          - fixtures/sample-2.png
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("featured image should be replaced and a third attachment should be appended", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("blogMultipartId"));
+          expect(body.title).to.equal("Multipart Upload Test Blog (Updated)");
+          expect(body.featuredImage).to.be.a("string").and.not.empty;
+          // 2 attachments from create - multipart, plus 1 new one = 3
+          expect(body.blogAttachments).to.be.an("array").with.lengthOf(3);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises BlogController.updateBlogMultipart (untouched by `update by id`, which
+  only hits updateBlogJson). Replacing featuredImageFile also exercises the branch in
+  BlogService.updateBlog that deletes the old featured image from Cloudinary first.
+
+  BlogRequest.deletedAttachmentIds is not actually read anywhere in
+  BlogService.updateBlog, so it currently has no effect — this test only appends via
+  newAttachments rather than exercising deletion, since there's nothing to exercise.
+
+  Depends on `create - multipart` having run first so `blogMultipartId` is set.

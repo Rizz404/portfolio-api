@@ -1,0 +1,65 @@
+info:
+  name: update by id - multipart
+  type: http
+  seq: 11
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/projects/{{projectMultipartId}}"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "name": "Multipart Upload Test Project (Updated)",
+            "description": "Updated via multipart/form-data with a replacement logo and an extra image.",
+            "status": "active",
+            "projectLinks": {
+              "repo": "https://github.com/rizqiansyah/multipart-test"
+            },
+            "deletedImageUrls": ["{{projectMultipartImageUrlToDelete}}"]
+          }
+      - type: file
+        name: logoFile
+        value:
+          - fixtures/sample-2.png
+      - type: file
+        name: newImageFiles
+        value:
+          - fixtures/sample-2.png
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("logo should be replaced and image list should reflect the deletion + addition", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("projectMultipartId"));
+          expect(body.name).to.equal("Multipart Upload Test Project (Updated)");
+          expect(body.logoUrl).to.be.a("string").and.not.empty;
+          // 2 original image files, minus 1 deleted, plus 1 newly uploaded = 2
+          expect(body.imageUrls).to.be.an("array").with.lengthOf(2);
+          expect(body.imageUrls).to.not.include(bru.getVar("projectMultipartImageUrlToDelete"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises ProjectController.updateProjectMultipart (untouched by `update by id`,
+  which only hits updateProjectJson). Replacing logoFile also exercises the branch
+  in ProjectService.updateProject that deletes the old logo from Cloudinary first.
+
+  Depends on `create - multipart` having run first so `projectMultipartId` and
+  `projectMultipartImageUrlToDelete` are set.

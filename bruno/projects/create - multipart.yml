@@ -1,0 +1,68 @@
+info:
+  name: create - multipart
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/projects"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "name": "Multipart Upload Test Project",
+            "description": "Created via multipart/form-data with a real logo and image files.",
+            "status": "active",
+            "projectLinks": {
+              "repo": "https://github.com/rizqiansyah/multipart-test"
+            }
+          }
+      - type: file
+        name: logoFile
+        value:
+          - fixtures/sample-1.png
+      - type: file
+        name: imageFiles
+        value:
+          - fixtures/sample-1.png
+          - fixtures/sample-2.png
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the project and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("logoFile and imageFiles should be uploaded to Cloudinary and returned as URLs", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("id");
+          expect(body.logoUrl).to.be.a("string").and.not.empty;
+          expect(body.imageUrls).to.be.an("array").with.lengthOf(2);
+          body.imageUrls.forEach((url) => expect(url).to.be.a("string").and.not.empty);
+
+          bru.setVar("projectMultipartId", body.id);
+          bru.setVar("projectMultipartImageUrlToDelete", body.imageUrls[0]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises ProjectController.createProjectMultipart, which is untouched by `create`
+  (that one only hits createProjectJson, since a JSON content-type body routes there).
+  The "data" text part must be sent with contentType: application/json, otherwise
+  Spring can't deserialize the @RequestPart("data") ProjectRequest.
+
+  Actually uploads fixtures/sample-1.png and fixtures/sample-2.png to Cloudinary.
+  Cleaned up (including the Cloudinary files) by
+  `cleanup - delete multipart fixture`.

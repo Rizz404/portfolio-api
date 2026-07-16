@@ -1,0 +1,62 @@
+info:
+  name: update by id - multipart
+  type: http
+  seq: 11
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/users/{{userMultipartId}}"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "nickname": "Multipart",
+            "fullName": "Multipart Upload Test User (Updated)",
+            "email": "multipart.test@example.com",
+            "role": "USER",
+            "provider": "LOCAL",
+            "gender": "OTHER"
+          }
+      - type: file
+        name: profilePictFile
+        value:
+          - fixtures/sample-2.png
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("profile picture should be replaced", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("userMultipartId"));
+          expect(body.fullName).to.equal("Multipart Upload Test User (Updated)");
+          expect(body.profilePict).to.be.a("string").and.not.empty;
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises UserController.updateUserMultipart (untouched by `update by id`, which
+  only hits updateUserJson). Replacing profilePictFile also exercises the branch in
+  UserService.updateUser that deletes the old profile picture from Cloudinary first.
+
+  Like `update by id`, UserMapper.updateEntityFromRequest overwrites every field
+  including `password` with no null-ignore strategy. This body has no `password` key,
+  so Jackson binds it to null the same as an explicit null would, meaning this request
+  also nulls out the fixture user's password hash - there's no way to avoid that on
+  this endpoint short of resending the original hash, which we don't have.
+
+  Depends on `create - multipart` having run first so `userMultipartId` is set.

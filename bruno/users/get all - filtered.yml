@@ -1,0 +1,57 @@
+info:
+  name: get all - filtered
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{BASE_URL}}/users"
+  params:
+    - name: search
+      value: Budi
+      type: query
+      disabled: false
+    - name: role
+      value: USER
+      type: query
+      disabled: false
+    - name: sortBy
+      value: nickname
+      type: query
+      disabled: false
+    - name: sortDir
+      value: asc
+      type: query
+      disabled: false
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("results should only contain matching users with role USER", function () {
+          const body = res.getBody();
+          expect(body.content).to.be.an("array");
+          body.content.forEach((user) => {
+            expect(user.role).to.equal("USER");
+            expect(
+              user.nickname.toLowerCase().includes("budi") ||
+                (user.fullName && user.fullName.toLowerCase().includes("budi")) ||
+                user.email.toLowerCase().includes("budi")
+            ).to.equal(true);
+          });
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Depends on `setup - register fixture user` having run first in this run/session so a
+  matching "Budi" user exists.

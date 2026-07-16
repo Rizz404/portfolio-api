@@ -1,0 +1,43 @@
+info:
+  name: setup - register fixture user
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/auth/register"
+  body:
+    type: json
+    data: |-
+      {
+        "email": "budi.pratama@example.com",
+        "password": "SuperSecret123!",
+        "confirmPassword": "SuperSecret123!",
+        "nickname": "Budi"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("fixture user should be created", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          expect(body.user).to.have.property("id");
+
+          bru.setVar("testUserId", body.user.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  UserController.createUserJson is guarded by @PreAuthorize("hasRole('USER', 'ADMIN')"),
+  which is malformed (see `create`) and currently always fails, so it cannot be used to
+  provision a fixture user. This request goes through /auth/register instead, which
+  creates a real row via AuthService and is a reliable way to get a usable user id for
+  the rest of this folder. Cleaned up by `delete by id`.

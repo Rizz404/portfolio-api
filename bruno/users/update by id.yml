@@ -1,0 +1,50 @@
+info:
+  name: update by id
+  type: http
+  seq: 7
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/users/{{testUserId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nickname": "Budi",
+        "fullName": "Budi Pratama",
+        "email": "budi.pratama@example.com",
+        "role": "USER",
+        "provider": "LOCAL",
+        "gender": "MALE",
+        "phoneNumber": "081298765432",
+        "bio": "Backend enthusiast, updated bio.",
+        "address": "Bandung, Indonesia"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("user should reflect the updated fields", function () {
+          const body = res.getBody();
+          expect(body.id).to.equal(bru.getVar("testUserId"));
+          expect(body.fullName).to.equal("Budi Pratama");
+          expect(body.bio).to.equal("Backend enthusiast, updated bio.");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  UserMapper.updateEntityFromRequest has no null-ignore strategy and overwrites every
+  field, including `password` (there's no @NotBlank on it), so a partial patch here
+  would null out the fixture user's password hash. Send the full body (keeping `email`
+  identical, since it's a unique column) rather than a partial patch.

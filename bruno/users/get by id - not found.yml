@@ -1,0 +1,32 @@
+info:
+  name: get by id - not found
+  type: http
+  seq: 9
+
+http:
+  method: GET
+  url: "{{BASE_URL}}/users/{{testUserId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("a deleted/unknown user id currently surfaces as 500", function () {
+          expect(res.getStatus()).to.equal(500);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  UserService throws NoSuchElementException when a user is missing, but there is no
+  @RestControllerAdvice mapping it to 404, so it currently bubbles up as a 500 Internal
+  Server Error. This test documents the current (not ideal) behavior; update the
+  expected status to 404 if/when a global exception handler is added.
+
+  Depends on `delete by id` having run first in this run/session so `testUserId` no
+  longer exists.

@@ -1,0 +1,33 @@
+info:
+  name: delete by id
+  type: http
+  seq: 8
+
+http:
+  method: DELETE
+  url: "{{BASE_URL}}/users/{{testUserId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("confirmation message should mention the deleted id", function () {
+          const body = res.getBody();
+          expect(String(body)).to.include(String(bru.getVar("testUserId")));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Also serves as cleanup for the fixture user created by
+  `setup - register fixture user`, mirroring the setup/cleanup pattern used in
+  blog-attachments.

@@ -1,0 +1,28 @@
+info:
+  name: cleanup - delete multipart fixture
+  type: http
+  seq: 11
+
+http:
+  method: DELETE
+  url: "{{BASE_URL}}/blogs/{{blogMultipartId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("blog created by create - multipart should be removed", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Also removes the featured image and attachment files this suite uploaded to
+  Cloudinary, since BlogService.deleteBlog cleans those up as part of deleting the
+  blog.
