@@ -35,18 +35,6 @@ public class BlogService {
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
 
-  private String extractCloudinaryPublicId(String fileUrl) {
-    if (fileUrl == null || !fileUrl.contains("/upload/"))
-      return null;
-    try {
-      String afterUpload = fileUrl.split("/upload/")[1];
-      String withoutVersion = afterUpload.substring(afterUpload.indexOf("/") + 1);
-      return withoutVersion.substring(0, withoutVersion.lastIndexOf("."));
-    } catch (Exception e) {
-      return null; // Fallback jika regex parsing gagal
-    }
-  }
-
   @Transactional
   public BlogResponse createBlog(BlogRequest blogRequest, MultipartFile featuredImage,
       List<MultipartFile> attachments) {
@@ -194,7 +182,7 @@ public class BlogService {
       if (hasFile) {
         // Hapus file lama di Cloudinary jika ada
         if (blog.getFeaturedImage() != null) {
-          String oldPublicId = extractCloudinaryPublicId(blog.getFeaturedImage());
+          String oldPublicId = fileUploadService.extractCloudinaryPublicId(blog.getFeaturedImage());
           if (oldPublicId != null)
             fileUploadService.deleteFile(oldPublicId);
         }
@@ -237,7 +225,7 @@ public class BlogService {
     }
 
     if (blog.getFeaturedImage() != null) {
-      String featuredPublicId = extractCloudinaryPublicId(blog.getFeaturedImage());
+      String featuredPublicId = fileUploadService.extractCloudinaryPublicId(blog.getFeaturedImage());
       if (featuredPublicId != null) {
         try {
           fileUploadService.deleteFile(featuredPublicId);
@@ -248,7 +236,7 @@ public class BlogService {
 
     if (blog.getBlogAttachments() != null) {
       for (BlogAttachment attachment : blog.getBlogAttachments()) {
-        String publicId = extractCloudinaryPublicId(attachment.getFileUrl());
+        String publicId = fileUploadService.extractCloudinaryPublicId(attachment.getFileUrl());
         if (publicId != null) {
           try {
             fileUploadService.deleteFile(publicId);

@@ -10,9 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.api.rizz.portfolio_api.dto.request.UseRequest;
+import com.api.rizz.portfolio_api.dto.request.UseRequest;
 import com.api.rizz.portfolio_api.dto.response.UseResponse;
+import com.api.rizz.portfolio_api.dto.response.UseResponse;
+import com.api.rizz.portfolio_api.entity.Use;
 import com.api.rizz.portfolio_api.entity.Use;
 import com.api.rizz.portfolio_api.mapper.UseMapper;
 import com.api.rizz.portfolio_api.repository.UseRepository;
@@ -31,17 +35,49 @@ public class UseService {
   private final UseRepository useRepository;
   private final UseMapper useMapper;
   private final SnowflakeGenerator snowflakeGenerator;
+  private final FileUploadService fileUploadService;
 
   @Transactional
-  public UseResponse createUse(UseRequest useRequest) {
-    long newId = snowflakeGenerator.nextId();
-    Use use = useMapper.toEntity(useRequest);
+  public UseResponse createUse(UseRequest useRequest, MultipartFile logoFile,
+      List<MultipartFile> pictureFiles) {
+    try {
+      long newId = snowflakeGenerator.nextId();
+      Use use = useMapper.toEntity(useRequest);
 
-    use.setId(newId);
+      use.setId(newId);
 
-    Use savedUse = useRepository.save(use);
+      boolean hasLogoString = useRequest.logoUrl() != null && !useRequest.logoUrl().isBlank();
+      boolean hasLogoFile = logoFile != null && !logoFile.isEmpty();
 
-    return useMapper.toResponse(savedUse);
+      if (hasLogoString && hasLogoFile) {
+        // * Gak bisa keduanya
+        throw new IllegalArgumentException(
+            "Cannot accept both 'logoUrl' string and 'logoFileFile'. Choose one.");
+      }
+
+      if (hasLogoFile) {
+        String logoUrl = fileUploadService.uploadFile(logoFile, "portfolio/uses/logo");
+        use.setLogoUrl(logoUrl);
+      } else if (hasLogoString) {
+        use.setLogoUrl(useRequest.logoUrl());
+      }
+
+      boolean hasImageStrings = useRequest.pictures() != null && !useRequest.pictures().isEmpty();
+      boolean hasImageFiles = pictureFiles != null && !pictureFiles.isEmpty();
+
+      if (hasImageFiles) {
+        List<String> pictures = fileUploadService.uploadFiles(pictureFiles, "portfolio/uses/picture");
+        use.setPictures(pictures);
+      } else if (hasImageStrings) {
+        use.setPictures(useRequest.pictures());
+      }
+
+      Use savedUse = useRepository.save(use);
+
+      return useMapper.toResponse(savedUse);
+    } catch (Exception e) {
+      throw new RuntimeException("Error when communicate with cloudinary: " + e.getMessage(), e);
+    }
   }
 
   public Object findAllUses(String search, String category, Long cursor, int page, int size, List<String> sortBy,
@@ -111,26 +147,82 @@ public class UseService {
   }
 
   @Transactional
-  public UseResponse updateUse(Long id, UseRequest useRequest) {
-    Use use = useRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new NoSuchElementException("Use with ID: %d not found".formatted(id)));
+  public UseResponse updateUse(Long id, UseRequest useRequest, MultipartFile logoFile, List<MultipartFile> pictures) {
+    try {
+      Use use = useRepository
+          .findById(id)
+          .orElseThrow(
+              () -> new NoSuchElementException("Use with ID: %d not found".formatted(id)));
 
-    // * Update data entity lama pakai data request baru
-    useMapper.updateEntityFromRequest(useRequest, use);
+      // * Update data entity lama pakai data request baru
+      useMapper.updateEntityFromRequest(useRequest, use);
 
-    Use updatedUse = useRepository.save(use);
-    return useMapper.toResponse(updatedUse);
+      boolean hasStringUrl = useRequest.logoUrl() != null && !useRequest.logoUrl().isBlank();
+      boolean hasFile = logoFile != null && !logoFile.isEmpty();
+
+      if (hasStringUrl && hasFile) {
+        throw new IllegalArgumentException(
+            "Cannot accept both 'logoUrl' string and 'logoFile'. Choose one.");
+      }
+
+      if (hasFile) {
+        // Hapus file lama di Cloudinary jika ada
+        if (use.getLogoUrl() != null) {
+          String oldPublicId = fileUploadService.extractCloudinaryPublicId(use.getLogoUrl());
+          if (oldPublicId != null)
+            fileUploadService.deleteFile(oldPublicId);
+        }
+        String uploadedUrl = fileUploadService.uploadFile(logoFile, "portfolio/uses/logo");
+        use.setLogoUrl(uploadedUrl);
+      } else if (hasStringUrl) {
+        use.setLogoUrl(useRequest.logoUrl());
+      }
+
+      if (useRequest.deletedPictures() != null && !useRequest.deletedPictures().isEmpty()) {
+        fileUploadService.deleteFilesByUrls(useRequest.deletedPictures());
+        if (use.getPictures() != null) {
+          use.getPictures().removeAll(useRequest.deletedPictures());
+        }
+      }
+
+      if (pictures != null && !pictures.isEmpty()) {
+        List<String> newUrls = fileUploadService.uploadFiles(pictures, "portfolio/uses/picture");
+        if (use.getPictures() == null)
+          use.setPictures(new ArrayList<>());
+        use.getPictures().addAll(newUrls);
+      }
+
+      Use updatedUse = useRepository.save(use);
+      return useMapper.toResponse(updatedUse);
+    } catch (Exception e) {
+      throw new RuntimeException("Error during update mutation: " + e.getMessage(), e);
+
+    }
   }
 
   @Transactional
   public void deleteUse(Long id) {
+    Use use = useRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+
     if (!useRepository.existsById(id)) {
       throw new NoSuchElementException("Use with ID: %d not found".formatted(id));
     }
 
+    if (use.getLogoUrl() != null) {
+      String logoPublicId = fileUploadService.extractCloudinaryPublicId(use.getLogoUrl());
+      if (logoPublicId != null) {
+        try {
+          fileUploadService.deleteFile(logoPublicId);
+        } catch (Exception ignored) {
+        }
+      }
+    }
+
+    if (use.getPictures() != null && !use.getPictures().isEmpty()) {
+      fileUploadService.deleteFilesByUrls(use.getPictures());
+    }
+
     useRepository.deleteById(id);
   }
-
 }

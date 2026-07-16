@@ -47,4 +47,34 @@ public class FileUploadService {
   public Map<?, ?> deleteFile(String publicId) throws IOException {
     return cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
   }
+
+  public String extractCloudinaryPublicId(String fileUrl) {
+    if (fileUrl == null || !fileUrl.contains("/upload/"))
+      return null;
+    try {
+      String afterUpload = fileUrl.split("/upload/")[1];
+      String withoutVersion = afterUpload.substring(afterUpload.indexOf("/") + 1);
+      return withoutVersion.substring(0, withoutVersion.lastIndexOf("."));
+    } catch (Exception e) {
+      return null; // Fallback jika regex parsing gagal
+    }
+  }
+
+  // * Fitur baru: Menghapus banyak file sekaligus berdasarkan List URL-nya
+  public void deleteFilesByUrls(List<String> fileUrls) {
+    if (fileUrls == null || fileUrls.isEmpty())
+      return;
+
+    for (String url : fileUrls) {
+      String publicId = extractCloudinaryPublicId(url);
+      if (publicId != null) {
+        try {
+          deleteFile(publicId);
+        } catch (Exception e) {
+          // Log error, tapi biarkan loop berlanjut ke file berikutnya
+          System.err.println("Failed to remove cloudinary file: " + publicId);
+        }
+      }
+    }
+  }
 }

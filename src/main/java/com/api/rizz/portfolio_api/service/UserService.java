@@ -1,5 +1,6 @@
 package com.api.rizz.portfolio_api.service;
 
+import com.api.rizz.portfolio_api.dto.request.UseRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -10,9 +11,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.api.rizz.portfolio_api.dto.request.UserRequest;
 import com.api.rizz.portfolio_api.dto.response.UserResponse;
+import com.api.rizz.portfolio_api.entity.Blog;
 import com.api.rizz.portfolio_api.entity.User;
 import com.api.rizz.portfolio_api.mapper.UserMapper;
 import com.api.rizz.portfolio_api.repository.UserRepository;
@@ -31,17 +34,39 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserMapper userMapper;
   private final SnowflakeGenerator snowflakeGenerator;
+  private final FileUploadService fileUploadService;
 
   @Transactional
-  public UserResponse createUser(UserRequest userRequest) {
-    long newId = snowflakeGenerator.nextId();
-    User user = userMapper.toEntity(userRequest);
+  public UserResponse createUser(UserRequest userRequest, MultipartFile profilePictFile) {
+    try {
+      long newId = snowflakeGenerator.nextId();
+      User user = userMapper.toEntity(userRequest);
 
-    user.setId(newId);
+      user.setId(newId);
 
-    User savedUser = userRepository.save(user);
+      boolean hasStringUrl = userRequest.profilePictUrl() != null && !userRequest.profilePictUrl().isBlank();
+      boolean hasFile = profilePictFile != null && !profilePictFile.isEmpty();
 
-    return userMapper.toResponse(savedUser);
+      if (hasStringUrl && hasFile) {
+        // * Gak bisa keduanya
+        throw new IllegalArgumentException(
+            "Cannot accept both 'profilePictUrl' string and 'profilePictFile'. Choose one.");
+
+      }
+
+      if (hasFile) {
+        String profileUrl = fileUploadService.uploadFile(profilePictFile, "portfolio/users/profile");
+        user.setProfilePict(profileUrl);
+      } else if (hasStringUrl) {
+        user.setProfilePict(userRequest.profilePictUrl());
+      }
+
+      User savedUser = userRepository.save(user);
+
+      return userMapper.toResponse(savedUser);
+    } catch (Exception e) {
+      throw new RuntimeException("Error during create mutation: " + e.getMessage(), e);
+    }
   }
 
   public Object findAllUsers(String search, String role, String provider, String gender, Long cursor, int page,
@@ -128,23 +153,62 @@ public class UserService {
   }
 
   @Transactional
-  public UserResponse updateUser(Long id, UserRequest userRequest) {
-    User user = userRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
+  public UserResponse updateUser(Long id, UserRequest userRequest, MultipartFile profilePictFile) {
+    try {
+      User user = userRepository
+          .findById(id)
+          .orElseThrow(
+              () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
 
-    // * Update data entity lama pakai data request baru
-    userMapper.updateEntityFromRequest(userRequest, user);
+      // * Update data entity lama pakai data request baru
+      userMapper.updateEntityFromRequest(userRequest, user);
 
-    User updatedUser = userRepository.save(user);
-    return userMapper.toResponse(updatedUser);
+      boolean hasStringUrl = userRequest.profilePictUrl() != null && !userRequest.profilePictUrl().isBlank();
+      boolean hasFile = profilePictFile != null && !profilePictFile.isEmpty();
+
+      if (hasStringUrl && hasFile) {
+        throw new IllegalArgumentException(
+            "Cannot accept both 'profilePictUrl' string and 'profilePictFile'. Choose one.");
+      }
+
+      if (hasFile) {
+        // Hapus file lama di Cloudinary jika ada
+        if (user.getProfilePict() != null) {
+          String oldPublicId = fileUploadService.extractCloudinaryPublicId(user.getProfilePict());
+          if (oldPublicId != null)
+            fileUploadService.deleteFile(oldPublicId);
+        }
+        String uploadedUrl = fileUploadService.uploadFile(profilePictFile, "portfolio/users/profilePict");
+        user.setProfilePict(uploadedUrl);
+      } else if (hasStringUrl) {
+        user.setProfilePict(userRequest.profilePictUrl());
+      }
+
+      User updatedUser = userRepository.save(user);
+      return userMapper.toResponse(updatedUser);
+    } catch (Exception e) {
+      throw new RuntimeException("Error during update mutation: " + e.getMessage(), e);
+
+    }
   }
 
   @Transactional
   public void deleteUser(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+
     if (!userRepository.existsById(id)) {
       throw new NoSuchElementException("User with ID: %d not found".formatted(id));
+    }
+
+    if (user.getProfilePict() != null) {
+      String profilePictPublicId = fileUploadService.extractCloudinaryPublicId(user.getProfilePict());
+      if (profilePictPublicId != null) {
+        try {
+          fileUploadService.deleteFile(profilePictPublicId);
+        } catch (Exception ignored) {
+        }
+      }
     }
 
     userRepository.deleteById(id);

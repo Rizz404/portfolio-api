@@ -31,6 +31,7 @@ public class BlogAttachmentService {
   private final BlogAttachmentRepository blogAttachmentRepository;
   private final BlogAttachmentMapper blogAttachmentMapper;
   private final SnowflakeGenerator snowflakeGenerator;
+  private final FileUploadService fileUploadService;
 
   @Transactional
   public BlogAttachmentResponse createBlogAttachment(BlogAttachmentRequest blogAttachmentRequest) {
@@ -116,10 +117,19 @@ public class BlogAttachmentService {
 
   @Transactional
   public void deleteBlogAttachment(Long id) {
-    if (!blogAttachmentRepository.existsById(id)) {
-      throw new NoSuchElementException("BlogAttachment with ID: %d not found".formatted(id));
+    BlogAttachment attachment = blogAttachmentRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("BlogAttachment with ID: %d not found".formatted(id)));
+
+    // Hapus fisik di Cloudinary
+    String publicId = fileUploadService.extractCloudinaryPublicId(attachment.getFileUrl());
+    if (publicId != null) {
+      try {
+        fileUploadService.deleteFile(publicId);
+      } catch (Exception ignored) {
+      }
     }
 
+    // Hapus dari DB
     blogAttachmentRepository.deleteById(id);
   }
 
