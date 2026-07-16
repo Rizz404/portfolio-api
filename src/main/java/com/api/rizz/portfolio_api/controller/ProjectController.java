@@ -1,7 +1,10 @@
 package com.api.rizz.portfolio_api.controller;
 
+import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
+import com.api.rizz.portfolio_api.dto.response.ProjectResponse;
+import com.api.rizz.portfolio_api.service.ProjectService;
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,21 +21,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
-import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
-import com.api.rizz.portfolio_api.dto.response.ProjectResponse;
-import com.api.rizz.portfolio_api.dto.response.ProjectResponse;
-import com.api.rizz.portfolio_api.service.ProjectService;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor
-/**
- * ProjectController
- */
+/** ProjectController */
 public class ProjectController {
   final ProjectService projectService;
 
@@ -58,14 +50,16 @@ public class ProjectController {
   }
 
   @GetMapping("")
-  public ResponseEntity<Object> findAllProjects(@RequestParam(required = false) String search,
+  public ResponseEntity<Object> findAllProjects(
+      @RequestParam(required = false) String search,
       @RequestParam(required = false) String status,
       @RequestParam(required = false) Long cursor,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
-    Object response = projectService.findAllProjects(search, status, cursor, page, size, sortBy, sortDir);
+    Object response =
+        projectService.findAllProjects(search, status, cursor, page, size, sortBy, sortDir);
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
@@ -80,8 +74,7 @@ public class ProjectController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<ProjectResponse> updateProjectJson(
-      @PathVariable("id") Long id,
-      @RequestBody ProjectRequest request) {
+      @PathVariable("id") Long id, @RequestBody ProjectRequest request) {
 
     ProjectResponse projectResponse = projectService.updateProject(id, request, null, null);
     return new ResponseEntity<>(projectResponse, HttpStatus.OK);
@@ -96,7 +89,8 @@ public class ProjectController {
       @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
       @RequestPart(value = "newImageFiles", required = false) List<MultipartFile> newImageFiles) {
 
-    ProjectResponse projectResponse = projectService.updateProject(id, request, logoFile, newImageFiles);
+    ProjectResponse projectResponse =
+        projectService.updateProject(id, request, logoFile, newImageFiles);
     return new ResponseEntity<>(projectResponse, HttpStatus.OK);
   }
 
@@ -107,5 +101,4 @@ public class ProjectController {
 
     return new ResponseEntity<>("Project with ID: %d deleted".formatted(id), HttpStatus.OK);
   }
-
 }

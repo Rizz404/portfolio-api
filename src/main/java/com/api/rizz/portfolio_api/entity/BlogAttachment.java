@@ -1,10 +1,5 @@
 package com.api.rizz.portfolio_api.entity;
 
-import java.time.OffsetDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,11 +7,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "blog_attachments")
@@ -25,12 +23,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-/**
- * BlogAttachment
- */
+/** BlogAttachment */
 public class BlogAttachment {
-  @Id
-  private Long id;
+  @Id private Long id;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "blog_id", nullable = false)

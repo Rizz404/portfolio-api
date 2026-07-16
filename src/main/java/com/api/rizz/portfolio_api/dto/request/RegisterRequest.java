@@ -4,8 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public record RegisterRequest(
-        @Email(message = "Format is not valid email") @NotBlank(message = "Email must be filled") String email,
-        @NotBlank(message = "Password must be filled") String password,
-        @NotBlank(message = "Confirm Password must be filled") String confirmPassword,
-        @NotBlank(message = "Nickname must be filled") String nickname) {
-}
+    @Email(message = "Format is not valid email") @NotBlank(message = "Email must be filled") String email,
+    @NotBlank(message = "Password must be filled") String password,
+    @NotBlank(message = "Confirm Password must be filled") String confirmPassword,
+    @NotBlank(message = "Nickname must be filled") String nickname) {}

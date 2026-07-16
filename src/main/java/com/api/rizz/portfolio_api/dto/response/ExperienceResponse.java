@@ -14,5 +14,4 @@ public record ExperienceResponse(
     LocalDate endDate,
     Boolean isCurrent,
     OffsetDateTime createdAt,
-    OffsetDateTime updatedAt) {
-}
+    OffsetDateTime updatedAt) {}

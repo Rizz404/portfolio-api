@@ -17,7 +17,8 @@ public class SnowflakeGenerator {
 
   private static final long WORKER_ID_SHIFT = SEQUENCE_BITS;
   private static final long DATACENTER_ID_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
-  private static final long TIMESTAMP_LEFT_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS + DATACENTER_ID_BITS;
+  private static final long TIMESTAMP_LEFT_SHIFT =
+      SEQUENCE_BITS + WORKER_ID_BITS + DATACENTER_ID_BITS;
   private static final long SEQUENCE_MASK = ~(-1L << SEQUENCE_BITS);
 
   private final long datacenterId;
@@ -45,7 +46,9 @@ public class SnowflakeGenerator {
 
     if (timestamp < lastTimestamp) {
       throw new IllegalStateException(
-          "Clock moved backwards. Refusing to generate id for " + (lastTimestamp - timestamp) + " ms");
+          "Clock moved backwards. Refusing to generate id for "
+              + (lastTimestamp - timestamp)
+              + " ms");
     }
 
     if (timestamp == lastTimestamp) {

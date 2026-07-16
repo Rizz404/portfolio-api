@@ -1,17 +1,18 @@
 package com.api.rizz.portfolio_api.mapper;
 
+import com.api.rizz.portfolio_api.dto.request.BlogAttachmentRequest;
+import com.api.rizz.portfolio_api.dto.response.BlogAttachmentResponse;
+import com.api.rizz.portfolio_api.entity.BlogAttachment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
-import com.api.rizz.portfolio_api.dto.request.BlogAttachmentRequest;
-import com.api.rizz.portfolio_api.dto.response.BlogAttachmentResponse;
-import com.api.rizz.portfolio_api.entity.BlogAttachment;
-
 // * componentModel = "spring" bikin mapper ini jadi Bean yang bisa di-@Autowired
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(
+    componentModel = MappingConstants.ComponentModel.SPRING,
+    unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface BlogAttachmentMapper {
 
   // * Konversi dari DTO ke Entity (Saat nyimpen data)
@@ -23,5 +24,4 @@ public interface BlogAttachmentMapper {
   BlogAttachmentResponse toResponse(BlogAttachment entity);
 
   void updateEntityFromRequest(BlogAttachmentRequest request, @MappingTarget BlogAttachment entity);
-
 }

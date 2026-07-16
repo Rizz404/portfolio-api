@@ -1,9 +1,17 @@
 package com.api.rizz.portfolio_api.service;
 
+import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
+import com.api.rizz.portfolio_api.dto.response.ProjectResponse;
+import com.api.rizz.portfolio_api.entity.Project;
+import com.api.rizz.portfolio_api.mapper.ProjectMapper;
+import com.api.rizz.portfolio_api.repository.ProjectRepository;
+import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,27 +20,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
-import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
-import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
-import com.api.rizz.portfolio_api.dto.response.ProjectResponse;
-import com.api.rizz.portfolio_api.dto.response.ProjectResponse;
-import com.api.rizz.portfolio_api.dto.response.ProjectResponse;
-import com.api.rizz.portfolio_api.entity.Project;
-import com.api.rizz.portfolio_api.entity.Project;
-import com.api.rizz.portfolio_api.mapper.ProjectMapper;
-import com.api.rizz.portfolio_api.repository.ProjectRepository;
-import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
-
-import jakarta.persistence.criteria.Predicate;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor // * Otomatis buatin Dependency Injection buat variabel "final"
-/**
- * ProjectService
- */
+/** ProjectService */
 public class ProjectService {
   private final ProjectRepository projectRepository;
   private final ProjectMapper projectMapper;
@@ -40,8 +30,8 @@ public class ProjectService {
   private final FileUploadService fileUploadService;
 
   @Transactional
-  public ProjectResponse createProject(ProjectRequest projectRequest, MultipartFile logoFile,
-      List<MultipartFile> imageFiles) {
+  public ProjectResponse createProject(
+      ProjectRequest projectRequest, MultipartFile logoFile, List<MultipartFile> imageFiles) {
     try {
       long newId = snowflakeGenerator.nextId();
       String generatedSlug = projectRequest.name().toLowerCase().replaceAll("[^a-z0-9]+", "-");
@@ -50,7 +40,8 @@ public class ProjectService {
       project.setId(newId);
       project.setSlug(generatedSlug);
 
-      boolean hasLogoString = projectRequest.logoUrl() != null && !projectRequest.logoUrl().isBlank();
+      boolean hasLogoString =
+          projectRequest.logoUrl() != null && !projectRequest.logoUrl().isBlank();
       boolean hasLogoFile = logoFile != null && !logoFile.isEmpty();
 
       if (hasLogoString && hasLogoFile) {
@@ -66,11 +57,13 @@ public class ProjectService {
         project.setLogoUrl(projectRequest.logoUrl());
       }
 
-      boolean hasImageStrings = projectRequest.imageUrls() != null && !projectRequest.imageUrls().isEmpty();
+      boolean hasImageStrings =
+          projectRequest.imageUrls() != null && !projectRequest.imageUrls().isEmpty();
       boolean hasImageFiles = imageFiles != null && !imageFiles.isEmpty();
 
       if (hasImageFiles) {
-        List<String> imageUrls = fileUploadService.uploadFiles(imageFiles, "portfolio/projects/image");
+        List<String> imageUrls =
+            fileUploadService.uploadFiles(imageFiles, "portfolio/projects/image");
         project.setImageUrls(imageUrls);
       } else if (hasImageStrings) {
         project.setImageUrls(projectRequest.imageUrls());
@@ -84,28 +77,35 @@ public class ProjectService {
     }
   }
 
-  public Object findAllProjects(String search, String status, Long cursor, int page, int size, List<String> sortBy,
+  public Object findAllProjects(
+      String search,
+      String status,
+      Long cursor,
+      int page,
+      int size,
+      List<String> sortBy,
       List<String> sortDir) {
-    Specification<Project> spec = (root, query, cb) -> {
-      // * 1. Siapkan Filter (Where Clause Dinamis)
-      List<Predicate> predicates = new ArrayList<>();
+    Specification<Project> spec =
+        (root, query, cb) -> {
+          // * 1. Siapkan Filter (Where Clause Dinamis)
+          List<Predicate> predicates = new ArrayList<>();
 
-      // * Kalau ada keyword pencarian di nama project
-      if (search != null && !search.isBlank()) {
-        predicates.add(cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"));
-      }
+          // * Kalau ada keyword pencarian di nama project
+          if (search != null && !search.isBlank()) {
+            predicates.add(cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"));
+          }
 
-      // * Kalau mau filter berdasarkan status (active/development)
-      if (status != null && !status.isBlank()) {
-        predicates.add(cb.equal(root.get("status"), status));
-      }
+          // * Kalau mau filter berdasarkan status (active/development)
+          if (status != null && !status.isBlank()) {
+            predicates.add(cb.equal(root.get("status"), status));
+          }
 
-      // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
-      if (cursor != null) {
-        predicates.add(cb.lessThan(root.get("id"), cursor));
-      }
-      return cb.and(predicates.toArray(Predicate[]::new));
-    };
+          // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
+          if (cursor != null) {
+            predicates.add(cb.lessThan(root.get("id"), cursor));
+          }
+          return cb.and(predicates.toArray(Predicate[]::new));
+        };
 
     // * 2. Siapkan Sorting (Ascending / Descending)
     Sort finalSort = Sort.unsorted();
@@ -119,9 +119,10 @@ public class ProjectService {
       String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
 
       // Bikin gerbong saat ini
-      Sort currentSort = direction.equalsIgnoreCase("desc")
-          ? Sort.by(field).descending()
-          : Sort.by(field).ascending();
+      Sort currentSort =
+          direction.equalsIgnoreCase("desc")
+              ? Sort.by(field).descending()
+              : Sort.by(field).ascending();
 
       // Sambungin ke kereta utama pakai .and() !
       finalSort = finalSort.and(currentSort);
@@ -143,27 +144,33 @@ public class ProjectService {
   }
 
   public ProjectResponse findProjectById(Long id) {
-    Project project = projectRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new NoSuchElementException("Project with ID: %d not found".formatted(id)));
+    Project project =
+        projectRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new NoSuchElementException("Project with ID: %d not found".formatted(id)));
 
     return projectMapper.toResponse(project);
   }
 
   @Transactional
-  public ProjectResponse updateProject(Long id, ProjectRequest projectRequest, MultipartFile logoFile,
+  public ProjectResponse updateProject(
+      Long id,
+      ProjectRequest projectRequest,
+      MultipartFile logoFile,
       List<MultipartFile> projectImageFiles) {
     try {
-      Project project = projectRepository
-          .findById(id)
-          .orElseThrow(
-              () -> new NoSuchElementException("Project with ID: %d not found".formatted(id)));
+      Project project =
+          projectRepository
+              .findById(id)
+              .orElseThrow(
+                  () -> new NoSuchElementException("Project with ID: %d not found".formatted(id)));
 
       // * Update data entity lama pakai data request baru
       projectMapper.updateEntityFromRequest(projectRequest, project);
 
-      boolean hasStringUrl = projectRequest.logoUrl() != null && !projectRequest.logoUrl().isBlank();
+      boolean hasStringUrl =
+          projectRequest.logoUrl() != null && !projectRequest.logoUrl().isBlank();
       boolean hasFile = logoFile != null && !logoFile.isEmpty();
 
       if (hasStringUrl && hasFile) {
@@ -175,8 +182,7 @@ public class ProjectService {
         // Hapus file lama di Cloudinary jika ada
         if (project.getLogoUrl() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(project.getLogoUrl());
-          if (oldPublicId != null)
-            fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
         }
         String uploadedUrl = fileUploadService.uploadFile(logoFile, "portfolio/projects/logo");
         project.setLogoUrl(uploadedUrl);
@@ -184,7 +190,8 @@ public class ProjectService {
         project.setLogoUrl(projectRequest.logoUrl());
       }
 
-      if (projectRequest.deletedImageUrls() != null && !projectRequest.deletedImageUrls().isEmpty()) {
+      if (projectRequest.deletedImageUrls() != null
+          && !projectRequest.deletedImageUrls().isEmpty()) {
         // Hapus fisik di Cloudinary
         fileUploadService.deleteFilesByUrls(projectRequest.deletedImageUrls());
         // Hapus string URL dari List Entity Database
@@ -194,7 +201,8 @@ public class ProjectService {
       }
 
       if (projectImageFiles != null && !projectImageFiles.isEmpty()) {
-        List<String> newUrls = fileUploadService.uploadFiles(projectImageFiles, "portfolio/projects/image");
+        List<String> newUrls =
+            fileUploadService.uploadFiles(projectImageFiles, "portfolio/projects/image");
 
         // Jaga-jaga jika array di DB masih null
         if (project.getImageUrls() == null) {
@@ -208,14 +216,16 @@ public class ProjectService {
       return projectMapper.toResponse(updatedProject);
     } catch (Exception e) {
       throw new RuntimeException("Error during update mutation: " + e.getMessage(), e);
-
     }
   }
 
   @Transactional
   public void deleteProject(Long id) {
-    Project project = projectRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+    Project project =
+        projectRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
 
     if (!projectRepository.existsById(id)) {
       throw new NoSuchElementException("Project with ID: %d not found".formatted(id));
@@ -237,5 +247,4 @@ public class ProjectService {
 
     projectRepository.deleteById(id);
   }
-
 }

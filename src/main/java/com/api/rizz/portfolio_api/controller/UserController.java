@@ -1,7 +1,10 @@
 package com.api.rizz.portfolio_api.controller;
 
+import com.api.rizz.portfolio_api.dto.request.UserRequest;
+import com.api.rizz.portfolio_api.dto.response.UserResponse;
+import com.api.rizz.portfolio_api.service.UserService;
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.api.rizz.portfolio_api.dto.request.UserRequest;
-import com.api.rizz.portfolio_api.dto.request.UserRequest;
-import com.api.rizz.portfolio_api.dto.request.UserRequest;
-import com.api.rizz.portfolio_api.dto.response.UserResponse;
-import com.api.rizz.portfolio_api.dto.response.UserResponse;
-import com.api.rizz.portfolio_api.dto.response.UserResponse;
-import com.api.rizz.portfolio_api.service.UserService;
-
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/users")
@@ -54,7 +47,8 @@ public class UserController {
   }
 
   @GetMapping("")
-  public ResponseEntity<Object> findAllUsers(@RequestParam(required = false) String search,
+  public ResponseEntity<Object> findAllUsers(
+      @RequestParam(required = false) String search,
       @RequestParam(required = false) String role,
       @RequestParam(required = false) String provider,
       @RequestParam(required = false) String gender,
@@ -63,9 +57,9 @@ public class UserController {
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
-    Object response = userService.findAllUsers(search, role, provider, gender, cursor, page, size,
-        sortBy,
-        sortDir);
+    Object response =
+        userService.findAllUsers(
+            search, role, provider, gender, cursor, page, size, sortBy, sortDir);
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
@@ -80,8 +74,7 @@ public class UserController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<UserResponse> updateUserJson(
-      @PathVariable("id") Long id,
-      @RequestBody UserRequest request) {
+      @PathVariable("id") Long id, @RequestBody UserRequest request) {
 
     UserResponse userResponse = userService.updateUser(id, request, null);
     return new ResponseEntity<>(userResponse, HttpStatus.OK);

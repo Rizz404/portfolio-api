@@ -1,5 +1,8 @@
 package com.api.rizz.portfolio_api.config;
 
+import com.api.rizz.portfolio_api.security.JwtAuthFilter;
+import com.api.rizz.portfolio_api.service.UserDetailServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,14 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.api.rizz.portfolio_api.security.JwtAuthFilter;
-import com.api.rizz.portfolio_api.service.UserDetailServiceImpl;
-
-import lombok.RequiredArgsConstructor;
-
-/**
- * SecurityConfig
- */
+/** SecurityConfig */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -33,16 +29,16 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
+    http.csrf(csrf -> csrf.disable())
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         // Mengubah otorisasi endpoint
-        .authorizeHttpRequests(auth -> auth
-            .anyRequest().permitAll())
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
         .authenticationProvider(authenticationProvider())
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Mengizinkan seluruh akses tanpa
-                                                                                     // kredensial login
+        .addFilterBefore(
+            jwtAuthFilter,
+            UsernamePasswordAuthenticationFilter.class); // Mengizinkan seluruh akses tanpa
+    // kredensial login
 
     return http.build();
   }

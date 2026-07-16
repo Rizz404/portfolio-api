@@ -1,10 +1,17 @@
 package com.api.rizz.portfolio_api.service;
 
-import com.api.rizz.portfolio_api.dto.request.UseRequest;
+import com.api.rizz.portfolio_api.dto.request.UserRequest;
+import com.api.rizz.portfolio_api.dto.response.UserResponse;
+import com.api.rizz.portfolio_api.entity.User;
+import com.api.rizz.portfolio_api.mapper.UserMapper;
+import com.api.rizz.portfolio_api.repository.UserRepository;
+import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,23 +20,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.api.rizz.portfolio_api.dto.request.UserRequest;
-import com.api.rizz.portfolio_api.dto.response.UserResponse;
-import com.api.rizz.portfolio_api.entity.Blog;
-import com.api.rizz.portfolio_api.entity.User;
-import com.api.rizz.portfolio_api.mapper.UserMapper;
-import com.api.rizz.portfolio_api.repository.UserRepository;
-import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
-
-import jakarta.persistence.criteria.Predicate;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor // * Otomatis buatin Dependency Injection buat variabel "final"
-/**
- * UserService
- */
+/** UserService */
 public class UserService {
   private final UserRepository userRepository;
   private final UserMapper userMapper;
@@ -44,18 +37,19 @@ public class UserService {
 
       user.setId(newId);
 
-      boolean hasStringUrl = userRequest.profilePictUrl() != null && !userRequest.profilePictUrl().isBlank();
+      boolean hasStringUrl =
+          userRequest.profilePictUrl() != null && !userRequest.profilePictUrl().isBlank();
       boolean hasFile = profilePictFile != null && !profilePictFile.isEmpty();
 
       if (hasStringUrl && hasFile) {
         // * Gak bisa keduanya
         throw new IllegalArgumentException(
             "Cannot accept both 'profilePictUrl' string and 'profilePictFile'. Choose one.");
-
       }
 
       if (hasFile) {
-        String profileUrl = fileUploadService.uploadFile(profilePictFile, "portfolio/users/profile");
+        String profileUrl =
+            fileUploadService.uploadFile(profilePictFile, "portfolio/users/profile");
         user.setProfilePict(profileUrl);
       } else if (hasStringUrl) {
         user.setProfilePict(userRequest.profilePictUrl());
@@ -69,45 +63,53 @@ public class UserService {
     }
   }
 
-  public Object findAllUsers(String search, String role, String provider, String gender, Long cursor, int page,
-      int size, List<String> sortBy,
+  public Object findAllUsers(
+      String search,
+      String role,
+      String provider,
+      String gender,
+      Long cursor,
+      int page,
+      int size,
+      List<String> sortBy,
       List<String> sortDir) {
-    Specification<User> spec = (root, query, cb) -> {
-      // * 1. Siapkan Filter (Where Clauser Dinamis)
-      List<Predicate> predicates = new ArrayList<>();
+    Specification<User> spec =
+        (root, query, cb) -> {
+          // * 1. Siapkan Filter (Where Clauser Dinamis)
+          List<Predicate> predicates = new ArrayList<>();
 
-      if (search != null && !search.isBlank()) {
-        String searchKeyword = "%" + search.toLowerCase() + "%";
+          if (search != null && !search.isBlank()) {
+            String searchKeyword = "%" + search.toLowerCase() + "%";
 
-        // * cb.or() = Pilih salah satu yang cocok (OR)
-        Predicate searchEmail = cb.like(cb.lower(root.get("email")), searchKeyword);
-        Predicate searchNickname = cb.like(cb.lower(root.get("nickname")), searchKeyword);
-        Predicate searchFullname = cb.like(cb.lower(root.get("fullName")), searchKeyword);
+            // * cb.or() = Pilih salah satu yang cocok (OR)
+            Predicate searchEmail = cb.like(cb.lower(root.get("email")), searchKeyword);
+            Predicate searchNickname = cb.like(cb.lower(root.get("nickname")), searchKeyword);
+            Predicate searchFullname = cb.like(cb.lower(root.get("fullName")), searchKeyword);
 
-        predicates.add(cb.or(searchEmail, searchNickname, searchFullname));
-      }
+            predicates.add(cb.or(searchEmail, searchNickname, searchFullname));
+          }
 
-      // * Kalau mau filter berdasarkan role
-      if (role != null && !role.isBlank()) {
-        predicates.add(cb.equal(root.get("role"), role));
-      }
+          // * Kalau mau filter berdasarkan role
+          if (role != null && !role.isBlank()) {
+            predicates.add(cb.equal(root.get("role"), role));
+          }
 
-      // * Kalau mau filter berdasarkan provider
-      if (provider != null && !provider.isBlank()) {
-        predicates.add(cb.equal(root.get("provider"), provider));
-      }
+          // * Kalau mau filter berdasarkan provider
+          if (provider != null && !provider.isBlank()) {
+            predicates.add(cb.equal(root.get("provider"), provider));
+          }
 
-      // * Kalau mau filter berdasarkan gender
-      if (gender != null && !gender.isBlank()) {
-        predicates.add(cb.equal(root.get("gender"), gender));
-      }
+          // * Kalau mau filter berdasarkan gender
+          if (gender != null && !gender.isBlank()) {
+            predicates.add(cb.equal(root.get("gender"), gender));
+          }
 
-      // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
-      if (cursor != null) {
-        predicates.add(cb.lessThan(root.get("id"), cursor));
-      }
-      return cb.and(predicates.toArray(Predicate[]::new));
-    };
+          // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
+          if (cursor != null) {
+            predicates.add(cb.lessThan(root.get("id"), cursor));
+          }
+          return cb.and(predicates.toArray(Predicate[]::new));
+        };
 
     // * 2. Siapkan Sorting (Ascending / Descending)
     Sort finalSort = Sort.unsorted();
@@ -120,9 +122,10 @@ public class UserService {
       String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
 
       // Bikin gerbong saat ini
-      Sort currentSort = direction.equalsIgnoreCase("desc")
-          ? Sort.by(field).descending()
-          : Sort.by(field).ascending();
+      Sort currentSort =
+          direction.equalsIgnoreCase("desc")
+              ? Sort.by(field).descending()
+              : Sort.by(field).ascending();
 
       // Sambungin ke kereta utama pakai .and() !
       finalSort = finalSort.and(currentSort);
@@ -144,10 +147,11 @@ public class UserService {
   }
 
   public UserResponse findUserById(Long id) {
-    User user = userRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
+    User user =
+        userRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
 
     return userMapper.toResponse(user);
   }
@@ -155,15 +159,17 @@ public class UserService {
   @Transactional
   public UserResponse updateUser(Long id, UserRequest userRequest, MultipartFile profilePictFile) {
     try {
-      User user = userRepository
-          .findById(id)
-          .orElseThrow(
-              () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
+      User user =
+          userRepository
+              .findById(id)
+              .orElseThrow(
+                  () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
 
       // * Update data entity lama pakai data request baru
       userMapper.updateEntityFromRequest(userRequest, user);
 
-      boolean hasStringUrl = userRequest.profilePictUrl() != null && !userRequest.profilePictUrl().isBlank();
+      boolean hasStringUrl =
+          userRequest.profilePictUrl() != null && !userRequest.profilePictUrl().isBlank();
       boolean hasFile = profilePictFile != null && !profilePictFile.isEmpty();
 
       if (hasStringUrl && hasFile) {
@@ -175,10 +181,10 @@ public class UserService {
         // Hapus file lama di Cloudinary jika ada
         if (user.getProfilePict() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(user.getProfilePict());
-          if (oldPublicId != null)
-            fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
         }
-        String uploadedUrl = fileUploadService.uploadFile(profilePictFile, "portfolio/users/profilePict");
+        String uploadedUrl =
+            fileUploadService.uploadFile(profilePictFile, "portfolio/users/profilePict");
         user.setProfilePict(uploadedUrl);
       } else if (hasStringUrl) {
         user.setProfilePict(userRequest.profilePictUrl());
@@ -188,21 +194,24 @@ public class UserService {
       return userMapper.toResponse(updatedUser);
     } catch (Exception e) {
       throw new RuntimeException("Error during update mutation: " + e.getMessage(), e);
-
     }
   }
 
   @Transactional
   public void deleteUser(Long id) {
-    User user = userRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+    User user =
+        userRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
 
     if (!userRepository.existsById(id)) {
       throw new NoSuchElementException("User with ID: %d not found".formatted(id));
     }
 
     if (user.getProfilePict() != null) {
-      String profilePictPublicId = fileUploadService.extractCloudinaryPublicId(user.getProfilePict());
+      String profilePictPublicId =
+          fileUploadService.extractCloudinaryPublicId(user.getProfilePict());
       if (profilePictPublicId != null) {
         try {
           fileUploadService.deleteFile(profilePictPublicId);
@@ -213,5 +222,4 @@ public class UserService {
 
     userRepository.deleteById(id);
   }
-
 }

@@ -1,23 +1,21 @@
 package com.api.rizz.portfolio_api.entity;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.List;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "experiences")
@@ -26,13 +24,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-/**
- * Experience
- */
+/** Experience */
 public class Experience {
 
-  @Id
-  private Long id;
+  @Id private Long id;
 
   @Column(name = "company_name", nullable = false)
   private String companyName;

@@ -1,11 +1,5 @@
 package com.api.rizz.portfolio_api.entity;
 
-import java.time.OffsetDateTime;
-import java.util.List;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,11 +7,15 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.OffsetDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "blogs")
@@ -26,12 +24,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-/**
- * Blog
- */
+/** Blog */
 public class Blog {
-  @Id
-  private Long id;
+  @Id private Long id;
 
   @Column(nullable = false, unique = true)
   private String slug;
@@ -65,6 +60,10 @@ public class Blog {
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
 
-  @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+  @OneToMany(
+      mappedBy = "blog",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
   private List<BlogAttachment> blogAttachments;
 }

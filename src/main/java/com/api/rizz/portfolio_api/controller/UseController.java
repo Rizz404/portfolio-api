@@ -1,7 +1,10 @@
 package com.api.rizz.portfolio_api.controller;
 
+import com.api.rizz.portfolio_api.dto.request.UseRequest;
+import com.api.rizz.portfolio_api.dto.response.UseResponse;
+import com.api.rizz.portfolio_api.service.UseService;
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,14 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.api.rizz.portfolio_api.dto.request.UseRequest;
-import com.api.rizz.portfolio_api.dto.request.UseRequest;
-import com.api.rizz.portfolio_api.dto.response.UseResponse;
-import com.api.rizz.portfolio_api.dto.response.UseResponse;
-import com.api.rizz.portfolio_api.service.UseService;
-
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/uses")
@@ -52,16 +47,15 @@ public class UseController {
   }
 
   @GetMapping("")
-  public ResponseEntity<Object> findAllUses(@RequestParam(required = false) String search,
+  public ResponseEntity<Object> findAllUses(
+      @RequestParam(required = false) String search,
       @RequestParam(required = false) String category,
       @RequestParam(required = false) Long cursor,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
-    Object response = useService.findAllUses(search, category, cursor, page, size,
-        sortBy,
-        sortDir);
+    Object response = useService.findAllUses(search, category, cursor, page, size, sortBy, sortDir);
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
@@ -76,8 +70,7 @@ public class UseController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<UseResponse> updateUseJson(
-      @PathVariable("id") Long id,
-      @RequestBody UseRequest request) {
+      @PathVariable("id") Long id, @RequestBody UseRequest request) {
 
     UseResponse useResponse = useService.updateUse(id, request, null, null);
     return new ResponseEntity<>(useResponse, HttpStatus.OK);
@@ -90,7 +83,8 @@ public class UseController {
       @PathVariable("id") Long id,
       @RequestPart("data") UseRequest request,
       @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
-      @RequestPart(value = "newPictureFiles", required = false) List<MultipartFile> newPictureFiles) {
+      @RequestPart(value = "newPictureFiles", required = false)
+          List<MultipartFile> newPictureFiles) {
 
     UseResponse useResponse = useService.updateUse(id, request, logoFile, newPictureFiles);
     return new ResponseEntity<>(useResponse, HttpStatus.OK);

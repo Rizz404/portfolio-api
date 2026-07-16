@@ -1,24 +1,22 @@
 package com.api.rizz.portfolio_api.config;
 
+import com.cloudinary.Cloudinary;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.cloudinary.Cloudinary;
-
 @Configuration
-/**
- * ClaudinaryConfig
- */
+/** ClaudinaryConfig */
 public class CloudinaryConfig {
 
   @Value("${cloudinary.cloud.name}")
   private String cloudName;
+
   @Value("${cloudinary.api.key}")
   private String cloudApiKey;
+
   @Value("${cloudinary.api.secret}")
   private String cloudApiSecret;
 

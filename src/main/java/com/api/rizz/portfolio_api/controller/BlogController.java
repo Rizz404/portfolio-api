@@ -1,7 +1,10 @@
 package com.api.rizz.portfolio_api.controller;
 
+import com.api.rizz.portfolio_api.dto.request.BlogRequest;
+import com.api.rizz.portfolio_api.dto.response.BlogResponse;
+import com.api.rizz.portfolio_api.service.BlogService;
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.api.rizz.portfolio_api.dto.request.BlogRequest;
-import com.api.rizz.portfolio_api.dto.response.BlogResponse;
-import com.api.rizz.portfolio_api.service.BlogService;
-
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/blogs")
@@ -50,7 +47,8 @@ public class BlogController {
   }
 
   @GetMapping("")
-  public ResponseEntity<Object> findAllBlogs(@RequestParam(required = false) String search,
+  public ResponseEntity<Object> findAllBlogs(
+      @RequestParam(required = false) String search,
       @RequestParam(required = false) Long cursor,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
@@ -71,8 +69,7 @@ public class BlogController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<BlogResponse> updateBlogJson(
-      @PathVariable("id") Long id,
-      @RequestBody BlogRequest request) {
+      @PathVariable("id") Long id, @RequestBody BlogRequest request) {
 
     BlogResponse blogResponse = blogService.updateBlog(id, request, null, null);
     return new ResponseEntity<>(blogResponse, HttpStatus.OK);
@@ -87,7 +84,8 @@ public class BlogController {
       @RequestPart(value = "featuredImageFile", required = false) MultipartFile featuredImageFile,
       @RequestPart(value = "newAttachments", required = false) List<MultipartFile> newAttachments) {
 
-    BlogResponse blogResponse = blogService.updateBlog(id, request, featuredImageFile, newAttachments);
+    BlogResponse blogResponse =
+        blogService.updateBlog(id, request, featuredImageFile, newAttachments);
     return new ResponseEntity<>(blogResponse, HttpStatus.OK);
   }
 

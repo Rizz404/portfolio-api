@@ -1,9 +1,17 @@
 package com.api.rizz.portfolio_api.service;
 
+import com.api.rizz.portfolio_api.dto.request.BlogAttachmentRequest;
+import com.api.rizz.portfolio_api.dto.response.BlogAttachmentResponse;
+import com.api.rizz.portfolio_api.entity.BlogAttachment;
+import com.api.rizz.portfolio_api.mapper.BlogAttachmentMapper;
+import com.api.rizz.portfolio_api.repository.BlogAttachmentRepository;
+import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,22 +19,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.api.rizz.portfolio_api.dto.request.BlogAttachmentRequest;
-import com.api.rizz.portfolio_api.dto.response.BlogAttachmentResponse;
-import com.api.rizz.portfolio_api.entity.BlogAttachment;
-import com.api.rizz.portfolio_api.mapper.BlogAttachmentMapper;
-import com.api.rizz.portfolio_api.repository.BlogAttachmentRepository;
-import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
-
-import jakarta.persistence.criteria.Predicate;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor // * Otomatis buatin Dependency Injection buat variabel "final"
-/**
- * BlogAttachmentService
- */
+/** BlogAttachmentService */
 public class BlogAttachmentService {
   private final BlogAttachmentRepository blogAttachmentRepository;
   private final BlogAttachmentMapper blogAttachmentMapper;
@@ -45,18 +40,19 @@ public class BlogAttachmentService {
     return blogAttachmentMapper.toResponse(savedBlogAttachment);
   }
 
-  public Object findAllBlogAttachments(Long cursor, int page, int size, List<String> sortBy,
-      List<String> sortDir) {
-    Specification<BlogAttachment> spec = (root, query, cb) -> {
-      // * 1. Siapkan Filter (Where Clause Dinamis)
-      List<Predicate> predicates = new ArrayList<>();
+  public Object findAllBlogAttachments(
+      Long cursor, int page, int size, List<String> sortBy, List<String> sortDir) {
+    Specification<BlogAttachment> spec =
+        (root, query, cb) -> {
+          // * 1. Siapkan Filter (Where Clause Dinamis)
+          List<Predicate> predicates = new ArrayList<>();
 
-      // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
-      if (cursor != null) {
-        predicates.add(cb.lessThan(root.get("id"), cursor));
-      }
-      return cb.and(predicates.toArray(Predicate[]::new));
-    };
+          // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
+          if (cursor != null) {
+            predicates.add(cb.lessThan(root.get("id"), cursor));
+          }
+          return cb.and(predicates.toArray(Predicate[]::new));
+        };
 
     // * 2. Siapkan Sorting (Ascending / Descending)
     Sort finalSort = Sort.unsorted();
@@ -69,9 +65,10 @@ public class BlogAttachmentService {
       String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
 
       // Bikin gerbong saat ini
-      Sort currentSort = direction.equalsIgnoreCase("desc")
-          ? Sort.by(field).descending()
-          : Sort.by(field).ascending();
+      Sort currentSort =
+          direction.equalsIgnoreCase("desc")
+              ? Sort.by(field).descending()
+              : Sort.by(field).ascending();
 
       // Sambungin ke kereta utama pakai .and() !
       finalSort = finalSort.and(currentSort);
@@ -93,20 +90,27 @@ public class BlogAttachmentService {
   }
 
   public BlogAttachmentResponse findBlogAttachmentById(Long id) {
-    BlogAttachment blogAttachment = blogAttachmentRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new NoSuchElementException("BlogAttachment with ID: %d not found".formatted(id)));
+    BlogAttachment blogAttachment =
+        blogAttachmentRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new NoSuchElementException(
+                        "BlogAttachment with ID: %d not found".formatted(id)));
 
     return blogAttachmentMapper.toResponse(blogAttachment);
   }
 
   @Transactional
-  public BlogAttachmentResponse updateBlogAttachment(Long id, BlogAttachmentRequest blogAttachmentRequest) {
-    BlogAttachment blogAttachment = blogAttachmentRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new NoSuchElementException("BlogAttachment with ID: %d not found".formatted(id)));
+  public BlogAttachmentResponse updateBlogAttachment(
+      Long id, BlogAttachmentRequest blogAttachmentRequest) {
+    BlogAttachment blogAttachment =
+        blogAttachmentRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new NoSuchElementException(
+                        "BlogAttachment with ID: %d not found".formatted(id)));
 
     // * Update data entity lama pakai data request baru
     blogAttachmentMapper.updateEntityFromRequest(blogAttachmentRequest, blogAttachment);
@@ -117,8 +121,13 @@ public class BlogAttachmentService {
 
   @Transactional
   public void deleteBlogAttachment(Long id) {
-    BlogAttachment attachment = blogAttachmentRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("BlogAttachment with ID: %d not found".formatted(id)));
+    BlogAttachment attachment =
+        blogAttachmentRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new NoSuchElementException(
+                        "BlogAttachment with ID: %d not found".formatted(id)));
 
     // Hapus fisik di Cloudinary
     String publicId = fileUploadService.extractCloudinaryPublicId(attachment.getFileUrl());
@@ -132,5 +141,4 @@ public class BlogAttachmentService {
     // Hapus dari DB
     blogAttachmentRepository.deleteById(id);
   }
-
 }

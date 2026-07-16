@@ -1,12 +1,10 @@
 package com.api.rizz.portfolio_api.dto.request;
 
-import java.time.LocalDate;
-
 import com.api.rizz.portfolio_api.entity.User.AuthProvider;
 import com.api.rizz.portfolio_api.entity.User.Gender;
 import com.api.rizz.portfolio_api.entity.User.Role;
-
 import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDate;
 
 public record UserRequest(
     @NotBlank(message = "Nickname cannot be empty") String nickname,
@@ -21,5 +19,4 @@ public record UserRequest(
     Gender gender,
     String phoneNumber,
     String bio,
-    String address) {
-}
+    String address) {}

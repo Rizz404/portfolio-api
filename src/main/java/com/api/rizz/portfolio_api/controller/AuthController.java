@@ -1,18 +1,16 @@
 package com.api.rizz.portfolio_api.controller;
 
+import com.api.rizz.portfolio_api.dto.request.LoginRequest;
+import com.api.rizz.portfolio_api.dto.request.RegisterRequest;
+import com.api.rizz.portfolio_api.dto.response.AuthResponse;
+import com.api.rizz.portfolio_api.service.AuthService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.api.rizz.portfolio_api.dto.request.LoginRequest;
-import com.api.rizz.portfolio_api.dto.request.RegisterRequest;
-import com.api.rizz.portfolio_api.dto.response.AuthResponse;
-import com.api.rizz.portfolio_api.service.AuthService;
-
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/auth")
@@ -32,5 +30,4 @@ public class AuthController {
     AuthResponse authResponse = authService.login(request);
     return new ResponseEntity<>(authResponse, HttpStatus.OK);
   }
-
 }

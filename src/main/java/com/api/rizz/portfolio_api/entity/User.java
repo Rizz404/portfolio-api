@@ -1,29 +1,25 @@
 package com.api.rizz.portfolio_api.entity;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.List;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
@@ -32,9 +28,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-/**
- * User
- */
+/** User */
 public class User implements UserDetails {
 
   public enum Role {
@@ -54,8 +48,7 @@ public class User implements UserDetails {
     PREFER_NOT_TO_SAY
   }
 
-  @Id
-  private Long id;
+  @Id private Long id;
 
   @Column(nullable = false)
   private String nickname;
@@ -137,5 +130,4 @@ public class User implements UserDetails {
   public boolean isEnabled() {
     return true;
   }
-
 }

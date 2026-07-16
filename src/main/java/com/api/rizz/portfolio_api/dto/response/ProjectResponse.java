@@ -14,5 +14,4 @@ public record ProjectResponse(
     List<String> imageUrls,
     Map<String, String> projectLinks,
     OffsetDateTime createdAt,
-    OffsetDateTime updatedAt) {
-}
+    OffsetDateTime updatedAt) {}
