@@ -33,7 +33,7 @@ public class ProjectController {
 
   // * String kosong = /projects bisa juga @PostMapping doang kalo
   // * @PostMapping("/") = /projects/
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("")
   public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody ProjectRequest request) {
     ProjectResponse projectResponse = projectService.createProject(request);
@@ -61,7 +61,7 @@ public class ProjectController {
     return new ResponseEntity<>(projectResponse, HttpStatus.OK);
   }
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @PatchMapping("/{id}")
   public ResponseEntity<ProjectResponse> updateProject(@PathVariable("id") Long id,
       @RequestBody ProjectRequest request) {
@@ -70,7 +70,7 @@ public class ProjectController {
     return new ResponseEntity<>(projectResponse, HttpStatus.OK);
   }
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteProject(@PathVariable("id") Long id) {
     projectService.deleteProject(id);

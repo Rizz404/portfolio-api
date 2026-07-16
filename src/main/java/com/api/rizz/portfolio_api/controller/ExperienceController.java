@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class ExperienceController {
   final ExperienceService experienceService;
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("")
   public ResponseEntity<ExperienceResponse> createExperience(@RequestBody ExperienceRequest request) {
     ExperienceResponse experienceResponse = experienceService.createExperience(request);
@@ -62,7 +62,7 @@ public class ExperienceController {
     return new ResponseEntity<>(experienceResponse, HttpStatus.OK);
   }
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @PatchMapping("/{id}")
   public ResponseEntity<ExperienceResponse> updateExperience(@PathVariable("id") Long id,
       @RequestBody ExperienceRequest request) {
@@ -71,7 +71,7 @@ public class ExperienceController {
     return new ResponseEntity<>(experienceResponse, HttpStatus.OK);
   }
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteExperience(@PathVariable("id") Long id) {
     experienceService.deleteExperience(id);

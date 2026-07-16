@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class BlogAttachmentController {
   final BlogAttachmentService blogAttachmentService;
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("")
   public ResponseEntity<BlogAttachmentResponse> createBlogAttachment(@RequestBody BlogAttachmentRequest request) {
     BlogAttachmentResponse blogAttachmentResponse = blogAttachmentService.createBlogAttachment(request);
@@ -56,7 +56,7 @@ public class BlogAttachmentController {
     return new ResponseEntity<>(blogAttachmentResponse, HttpStatus.OK);
   }
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @PatchMapping("/{id}")
   public ResponseEntity<BlogAttachmentResponse> updateBlogAttachment(@PathVariable("id") Long id,
       @RequestBody BlogAttachmentRequest request) {
@@ -65,7 +65,7 @@ public class BlogAttachmentController {
     return new ResponseEntity<>(blogAttachmentResponse, HttpStatus.OK);
   }
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteBlogAttachment(@PathVariable("id") Long id) {
     blogAttachmentService.deleteBlogAttachment(id);

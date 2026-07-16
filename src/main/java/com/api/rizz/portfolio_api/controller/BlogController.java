@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class BlogController {
   final BlogService blogService;
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("")
   public ResponseEntity<BlogResponse> createBlog(@RequestBody BlogRequest request) {
     BlogResponse blogResponse = blogService.createBlog(request);
@@ -54,7 +54,7 @@ public class BlogController {
     return new ResponseEntity<>(blogResponse, HttpStatus.OK);
   }
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @PatchMapping("/{id}")
   public ResponseEntity<BlogResponse> updateBlog(@PathVariable("id") Long id, @RequestBody BlogRequest request) {
     BlogResponse blogResponse = blogService.updateBlog(id, request);
@@ -62,7 +62,7 @@ public class BlogController {
     return new ResponseEntity<>(blogResponse, HttpStatus.OK);
   }
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteBlog(@PathVariable("id") Long id) {
     blogService.deleteBlog(id);

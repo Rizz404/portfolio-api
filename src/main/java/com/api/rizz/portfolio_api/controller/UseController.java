@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class UseController {
   final UseService useService;
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("")
   public ResponseEntity<UseResponse> createUse(@RequestBody UseRequest request) {
     UseResponse useResponse = useService.createUse(request);
@@ -57,7 +57,7 @@ public class UseController {
     return new ResponseEntity<>(useResponse, HttpStatus.OK);
   }
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @PatchMapping("/{id}")
   public ResponseEntity<UseResponse> updateUse(@PathVariable("id") Long id,
       @RequestBody UseRequest request) {
@@ -66,7 +66,7 @@ public class UseController {
     return new ResponseEntity<>(useResponse, HttpStatus.OK);
   }
 
-  @PreAuthorize("")
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteUse(@PathVariable("id") Long id) {
     useService.deleteUse(id);
