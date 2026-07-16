@@ -8,3 +8,4 @@
 4. selalu petik 2 kalau string
 5. di java bind web annotation @PostMapping("") = /projects bisa juga @PostMapping doang kalo @PostMapping("/") = /projects/
 6. otomatis redirect kehalaman login kalo cuma install dependency security tanpa buat config
+7. @PreAuthorize("isAuthenticated()") bukan  @PreAuthorize("") kalo mau auth tanpa peduli role

@@ -1,0 +1,43 @@
+info:
+  name: login
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/auth/login"
+  body:
+    type: json
+    data: |-
+      {
+        "email": "rizky.tester@example.com",
+        "password": "SuperSecret123!"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should log in and return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("response body should contain a fresh token for the registered user", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("token");
+          expect(body.user.email).to.equal("rizky.tester@example.com");
+
+          bru.setVar("accessToken", body.token);
+          bru.setVar("authUserId", body.user.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Depends on `register` having run first in this run/session to create the account.
+  Overwrites `accessToken` with a freshly issued token.

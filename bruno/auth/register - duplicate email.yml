@@ -1,0 +1,39 @@
+info:
+  name: register - duplicate email
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/auth/register"
+  body:
+    type: json
+    data: |-
+      {
+        "email": "rizky.tester@example.com",
+        "password": "SuperSecret123!",
+        "confirmPassword": "SuperSecret123!",
+        "nickname": "Rizky"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("registering an already-used email currently surfaces as 500", function () {
+          expect(res.getStatus()).to.equal(500);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Same root cause as `register - password mismatch`: AuthService's
+  IllegalArgumentException("Email has been used") has no matching
+  @RestControllerAdvice handler, so it surfaces as 500 instead of 409/400.
+
+  Depends on `register` having run first in this run/session so the email exists.

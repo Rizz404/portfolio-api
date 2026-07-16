@@ -1,0 +1,28 @@
+info:
+  name: cleanup - delete registered user
+  type: http
+  seq: 6
+
+http:
+  method: DELETE
+  url: "{{BASE_URL}}/users/{{authUserId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("user created by register should be removed", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Removes the user created by `register` so the suite can be re-run without hitting
+  `register - duplicate email`'s 500. Mirrors the setup/cleanup pattern used in
+  blog-attachments.

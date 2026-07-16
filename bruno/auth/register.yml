@@ -1,0 +1,50 @@
+info:
+  name: register
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/auth/register"
+  body:
+    type: json
+    data: |-
+      {
+        "email": "rizky.tester@example.com",
+        "password": "SuperSecret123!",
+        "confirmPassword": "SuperSecret123!",
+        "nickname": "Rizky"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should register the user and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("response body should contain a token and the created user", function () {
+          const body = res.getBody();
+          expect(body).to.have.property("token");
+          expect(body.user).to.have.property("id");
+          expect(body.user.email).to.equal("rizky.tester@example.com");
+
+          bru.setVar("accessToken", body.token);
+          bru.setVar("authUserId", body.user.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Stores the JWT in the `accessToken` collection variable, which the collection's
+  root-level bearer auth reads from. Every other request using `auth: inherit`
+  therefore becomes authenticated once this request has run.
+
+  Re-running this request will fail (see `register - duplicate email`) unless
+  `cleanup - delete registered user` removed the user from the previous run first.

@@ -10,10 +10,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.api.rizz.portfolio_api.dto.request.BlogRequest;
 import com.api.rizz.portfolio_api.dto.response.BlogResponse;
 import com.api.rizz.portfolio_api.entity.Blog;
+import com.api.rizz.portfolio_api.entity.BlogAttachment;
 import com.api.rizz.portfolio_api.mapper.BlogMapper;
 import com.api.rizz.portfolio_api.repository.BlogRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
@@ -31,21 +33,74 @@ public class BlogService {
   private final BlogRepository blogRepository;
   private final BlogMapper blogMapper;
   private final SnowflakeGenerator snowflakeGenerator;
+  private final FileUploadService fileUploadService;
+
+  private String extractCloudinaryPublicId(String fileUrl) {
+    if (fileUrl == null || !fileUrl.contains("/upload/"))
+      return null;
+    try {
+      String afterUpload = fileUrl.split("/upload/")[1];
+      String withoutVersion = afterUpload.substring(afterUpload.indexOf("/") + 1);
+      return withoutVersion.substring(0, withoutVersion.lastIndexOf("."));
+    } catch (Exception e) {
+      return null; // Fallback jika regex parsing gagal
+    }
+  }
 
   @Transactional
-  public BlogResponse createBlog(BlogRequest blogRequest) {
-    long newId = snowflakeGenerator.nextId();
-    Blog blog = blogMapper.toEntity(blogRequest);
+  public BlogResponse createBlog(BlogRequest blogRequest, MultipartFile featuredImage,
+      List<MultipartFile> attachments) {
+    try {
+      long newId = snowflakeGenerator.nextId();
+      String generatedSlug = blogRequest.title().toLowerCase().replaceAll("[^a-z0-9]+", "-");
+      Blog blog = blogMapper.toEntity(blogRequest);
 
-    blog.setId(newId);
+      blog.setId(newId);
+      blog.setSlug(generatedSlug);
 
-    String generatedSlug = blogRequest.title().toLowerCase().replaceAll("[^a-z0-9]+", "-");
+      boolean hasStringUrl = blogRequest.featuredImageUrl() != null && !blogRequest.featuredImageUrl().isBlank();
+      boolean hasFile = featuredImage != null && !featuredImage.isEmpty();
 
-    blog.setSlug(generatedSlug);
+      if (hasStringUrl && hasFile) {
+        // * Gak bisa keduanya
+        throw new IllegalArgumentException(
+            "Cannot accept both 'featuredImageUrl' string and 'featuredImageFile'. Choose one.");
+      }
 
-    Blog savedBlog = blogRepository.save(blog);
+      if (hasFile) {
+        String featuredUrl = fileUploadService.uploadFile(featuredImage, "portfolio/blogs/featured");
+        blog.setFeaturedImage(featuredUrl);
+      } else if (hasStringUrl) {
+        blog.setFeaturedImage(blogRequest.featuredImageUrl());
+      }
 
-    return blogMapper.toResponse(savedBlog);
+      List<BlogAttachment> attachmentEntities = new ArrayList<>();
+
+      if (attachments != null && !attachments.isEmpty()) {
+        for (MultipartFile file : attachments) {
+          if (!file.isEmpty()) {
+            String fileUrl = fileUploadService.uploadFile(file, "portfolio/blogs/attachments");
+
+            BlogAttachment attachment = BlogAttachment.builder()
+                .id(snowflakeGenerator.nextId())
+                .blog(blog)
+                .fileName(file.getOriginalFilename())
+                .fileUrl(fileUrl)
+                .fileType(file.getContentType())
+                .build();
+
+            attachmentEntities.add(attachment);
+          }
+        }
+      }
+
+      blog.setBlogAttachments(attachmentEntities);
+      Blog savedBlog = blogRepository.save(blog);
+
+      return blogMapper.toResponse(savedBlog);
+    } catch (Exception e) {
+      throw new RuntimeException("Error when communicate with cloudinary: " + e.getMessage(), e);
+    }
   }
 
   public Object findAllBlogs(String search, Long cursor, int page, int size, List<String> sortBy,
@@ -116,26 +171,91 @@ public class BlogService {
   }
 
   @Transactional
-  public BlogResponse updateBlog(Long id, BlogRequest blogRequest) {
-    Blog blog = blogRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+  public BlogResponse updateBlog(Long id, BlogRequest blogRequest, MultipartFile featuredImageFile,
+      List<MultipartFile> newAttachments) {
+    try {
+      Blog blog = blogRepository
+          .findById(id)
+          .orElseThrow(
+              () -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
 
-    // * Update data entity lama pakai data request baru
-    blogMapper.updateEntityFromRequest(blogRequest, blog);
+      // * Update data entity lama pakai data request baru
+      blogMapper.updateEntityFromRequest(blogRequest, blog);
+      blog.setSlug(blogRequest.title().toLowerCase().replaceAll("[^a-z0-9]+", "-"));
 
-    String generatedSlug = blogRequest.title().toLowerCase().replaceAll("[^a-z0-9]+", "-");
-    blog.setSlug(generatedSlug);
+      boolean hasStringUrl = blogRequest.featuredImageUrl() != null && !blogRequest.featuredImageUrl().isBlank();
+      boolean hasFile = featuredImageFile != null && !featuredImageFile.isEmpty();
 
-    Blog updatedBlog = blogRepository.save(blog);
-    return blogMapper.toResponse(updatedBlog);
+      if (hasStringUrl && hasFile) {
+        throw new IllegalArgumentException(
+            "Cannot accept both 'featuredImageUrl' string and 'featuredImageFile'. Choose one.");
+      }
+
+      if (hasFile) {
+        // Hapus file lama di Cloudinary jika ada
+        if (blog.getFeaturedImage() != null) {
+          String oldPublicId = extractCloudinaryPublicId(blog.getFeaturedImage());
+          if (oldPublicId != null)
+            fileUploadService.deleteFile(oldPublicId);
+        }
+        String uploadedUrl = fileUploadService.uploadFile(featuredImageFile, "portfolio/blogs/featured");
+        blog.setFeaturedImage(uploadedUrl);
+      } else if (hasStringUrl) {
+        blog.setFeaturedImage(blogRequest.featuredImageUrl());
+      }
+
+      if (newAttachments != null && !newAttachments.isEmpty()) {
+        for (MultipartFile file : newAttachments) {
+          if (!file.isEmpty()) {
+            String fileUrl = fileUploadService.uploadFile(file, "portfolio/blogs/attachments");
+            BlogAttachment attachment = BlogAttachment.builder()
+                .id(snowflakeGenerator.nextId())
+                .blog(blog)
+                .fileName(file.getOriginalFilename())
+                .fileUrl(fileUrl)
+                .fileType(file.getContentType())
+                .build();
+            blog.getBlogAttachments().add(attachment); // Tambahkan ke relasi yang sudah ada
+          }
+        }
+      }
+
+      Blog updatedBlog = blogRepository.save(blog);
+      return blogMapper.toResponse(updatedBlog);
+    } catch (Exception e) {
+      throw new RuntimeException("Error during update mutation: " + e.getMessage(), e);
+    }
   }
 
   @Transactional
   public void deleteBlog(Long id) {
+    Blog blog = blogRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+
     if (!blogRepository.existsById(id)) {
       throw new NoSuchElementException("Blog with ID: %d not found".formatted(id));
+    }
+
+    if (blog.getFeaturedImage() != null) {
+      String featuredPublicId = extractCloudinaryPublicId(blog.getFeaturedImage());
+      if (featuredPublicId != null) {
+        try {
+          fileUploadService.deleteFile(featuredPublicId);
+        } catch (Exception ignored) {
+        }
+      }
+    }
+
+    if (blog.getBlogAttachments() != null) {
+      for (BlogAttachment attachment : blog.getBlogAttachments()) {
+        String publicId = extractCloudinaryPublicId(attachment.getFileUrl());
+        if (publicId != null) {
+          try {
+            fileUploadService.deleteFile(publicId);
+          } catch (Exception ignored) {
+          }
+        }
+      }
     }
 
     blogRepository.deleteById(id);
