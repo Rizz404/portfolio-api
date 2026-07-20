@@ -37,8 +37,7 @@ public class UseController {
 
   @PreAuthorize("isAuthenticated()")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<UseResponse> createUseMultipart(
-      @RequestPart("data") UseRequest request,
+  public ResponseEntity<UseResponse> createUseMultipart(@RequestPart("data") UseRequest request,
       @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
       @RequestPart(value = "pictureFiles", required = false) List<MultipartFile> pictureFiles) {
 
@@ -47,12 +46,9 @@ public class UseController {
   }
 
   @GetMapping("")
-  public ResponseEntity<Object> findAllUses(
-      @RequestParam(required = false) String search,
-      @RequestParam(required = false) String category,
-      @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
+  public ResponseEntity<Object> findAllUses(@RequestParam(required = false) String search,
+      @RequestParam(required = false) String category, @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
     Object response = useService.findAllUses(search, category, cursor, page, size, sortBy, sortDir);
@@ -69,8 +65,8 @@ public class UseController {
 
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<UseResponse> updateUseJson(
-      @PathVariable("id") Long id, @RequestBody UseRequest request) {
+  public ResponseEntity<UseResponse> updateUseJson(@PathVariable("id") Long id,
+      @RequestBody UseRequest request) {
 
     UseResponse useResponse = useService.updateUse(id, request, null, null);
     return new ResponseEntity<>(useResponse, HttpStatus.OK);
@@ -79,12 +75,11 @@ public class UseController {
   // Endpoint untuk update berbasis Multipart
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<UseResponse> updateUseMultipart(
-      @PathVariable("id") Long id,
+  public ResponseEntity<UseResponse> updateUseMultipart(@PathVariable("id") Long id,
       @RequestPart("data") UseRequest request,
       @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
-      @RequestPart(value = "newPictureFiles", required = false)
-          List<MultipartFile> newPictureFiles) {
+      @RequestPart(value = "newPictureFiles",
+          required = false) List<MultipartFile> newPictureFiles) {
 
     UseResponse useResponse = useService.updateUse(id, request, logoFile, newPictureFiles);
     return new ResponseEntity<>(useResponse, HttpStatus.OK);

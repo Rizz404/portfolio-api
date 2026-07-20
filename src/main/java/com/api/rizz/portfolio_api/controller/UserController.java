@@ -38,8 +38,7 @@ public class UserController {
 
   @PreAuthorize("isAuthenticated()")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<UserResponse> createUserMultipart(
-      @RequestPart("data") UserRequest request,
+  public ResponseEntity<UserResponse> createUserMultipart(@RequestPart("data") UserRequest request,
       @RequestPart(value = "profilePictFile", required = false) MultipartFile profilePictFile) {
 
     UserResponse userResponse = userService.createUser(request, profilePictFile);
@@ -47,19 +46,14 @@ public class UserController {
   }
 
   @GetMapping("")
-  public ResponseEntity<Object> findAllUsers(
-      @RequestParam(required = false) String search,
-      @RequestParam(required = false) String role,
-      @RequestParam(required = false) String provider,
-      @RequestParam(required = false) String gender,
-      @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
+  public ResponseEntity<Object> findAllUsers(@RequestParam(required = false) String search,
+      @RequestParam(required = false) String role, @RequestParam(required = false) String provider,
+      @RequestParam(required = false) String gender, @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
-    Object response =
-        userService.findAllUsers(
-            search, role, provider, gender, cursor, page, size, sortBy, sortDir);
+    Object response = userService.findAllUsers(search, role, provider, gender, cursor, page, size,
+        sortBy, sortDir);
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
@@ -73,8 +67,8 @@ public class UserController {
 
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<UserResponse> updateUserJson(
-      @PathVariable("id") Long id, @RequestBody UserRequest request) {
+  public ResponseEntity<UserResponse> updateUserJson(@PathVariable("id") Long id,
+      @RequestBody UserRequest request) {
 
     UserResponse userResponse = userService.updateUser(id, request, null);
     return new ResponseEntity<>(userResponse, HttpStatus.OK);
@@ -83,8 +77,7 @@ public class UserController {
   // Endpoint untuk update berbasis Multipart
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<UserResponse> updateUserMultipart(
-      @PathVariable("id") Long id,
+  public ResponseEntity<UserResponse> updateUserMultipart(@PathVariable("id") Long id,
       @RequestPart("data") UserRequest request,
       @RequestPart(value = "profilePictFile", required = false) MultipartFile profilePictFile) {
 

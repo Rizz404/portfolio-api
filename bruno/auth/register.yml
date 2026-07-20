@@ -19,6 +19,16 @@ http:
 
 runtime:
   scripts:
+    - type: before-request
+      code: |-
+        const data = res.getBody()
+
+        if (data && data.token){
+          bru.setEnvVar("TOKEN", data.token)
+          console.log("Get token success")
+        } else{
+          console.log("Get token failed")
+        }
     - type: tests
       code: |-
         test("should register the user and return 201", function () {

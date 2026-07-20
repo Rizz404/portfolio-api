@@ -35,10 +35,8 @@ public class BlogAttachmentController {
   }
 
   @GetMapping("")
-  public ResponseEntity<Object> findAllBlogAttachments(
-      @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
+  public ResponseEntity<Object> findAllBlogAttachments(@RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
     Object response =
@@ -58,8 +56,8 @@ public class BlogAttachmentController {
 
   @PreAuthorize("isAuthenticated()")
   @PatchMapping("/{id}")
-  public ResponseEntity<BlogAttachmentResponse> updateBlogAttachment(
-      @PathVariable("id") Long id, @RequestBody BlogAttachmentRequest request) {
+  public ResponseEntity<BlogAttachmentResponse> updateBlogAttachment(@PathVariable("id") Long id,
+      @RequestBody BlogAttachmentRequest request) {
     BlogAttachmentResponse blogAttachmentResponse =
         blogAttachmentService.updateBlogAttachment(id, request);
 

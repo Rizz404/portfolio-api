@@ -9,3 +9,4 @@
 5. di java bind web annotation @PostMapping("") = /projects bisa juga @PostMapping doang kalo @PostMapping("/") = /projects/
 6. otomatis redirect kehalaman login kalo cuma install dependency security tanpa buat config
 7. @PreAuthorize("isAuthenticated()") bukan  @PreAuthorize("") kalo mau auth tanpa peduli role
+8. jwt token jangan ada - (strip)
