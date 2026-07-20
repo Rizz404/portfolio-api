@@ -1,7 +1,12 @@
 package com.api.rizz.portfolio_api.controller;
 
+import com.api.rizz.portfolio_api.CursorResponse;
 import com.api.rizz.portfolio_api.dto.request.BlogAttachmentRequest;
 import com.api.rizz.portfolio_api.dto.response.BlogAttachmentResponse;
+import com.api.rizz.portfolio_api.dto.response.CursorInfo;
+import com.api.rizz.portfolio_api.dto.response.PagedResponse;
+import com.api.rizz.portfolio_api.dto.response.PagingInfo;
+import com.api.rizz.portfolio_api.dto.response.SuccessResponse;
 import com.api.rizz.portfolio_api.service.BlogAttachmentService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,49 +31,85 @@ public class BlogAttachmentController {
 
   @PreAuthorize("isAuthenticated()")
   @PostMapping("")
-  public ResponseEntity<BlogAttachmentResponse> createBlogAttachment(
+  public ResponseEntity<SuccessResponse<BlogAttachmentResponse>> createBlogAttachment(
       @RequestBody BlogAttachmentRequest request) {
     BlogAttachmentResponse blogAttachmentResponse =
         blogAttachmentService.createBlogAttachment(request);
 
-    return new ResponseEntity<>(blogAttachmentResponse, HttpStatus.CREATED);
+    SuccessResponse<BlogAttachmentResponse> successResponse =
+        new SuccessResponse<>("BlogAttachment created", blogAttachmentResponse);
+    return ResponseEntity.status(HttpStatus.CREATED).body(successResponse);
   }
 
   @GetMapping("")
-  public ResponseEntity<Object> findAllBlogAttachments(@RequestParam(required = false) Long cursor,
+  public ResponseEntity<?> findAllBlogAttachments(@RequestParam(required = false) Long cursor,
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
     Object response =
         blogAttachmentService.findAllBlogAttachments(cursor, page, size, sortBy, sortDir);
 
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
+      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
+          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
+          pageResult.hasPrevious(), pageResult.hasNext());
+
+      PagedResponse<?> pagedResponse = new PagedResponse<>(
+          "Berhasil mengambil daftar blog attachment", pageResult.getContent(), pagingInfo);
+
+      return ResponseEntity.ok(pagedResponse);
+    } else if (response instanceof java.util.List<?> listResult) {
+      @SuppressWarnings("unchecked")
+      List<BlogAttachmentResponse> data = (List<BlogAttachmentResponse>) listResult;
+
+      Long nextCursor = null;
+      boolean hasNextPage = false;
+
+      if (!data.isEmpty()) {
+        nextCursor = Long.valueOf(data.get(data.size() - 1).id());
+        hasNextPage = data.size() == size;
+      }
+
+      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
+      CursorResponse<List<BlogAttachmentResponse>> cursorResponse = new CursorResponse<>(
+          "Berhasil mengambil daftar blog attachment dengan cursor", data, cursorInfo);
+
+      return ResponseEntity.ok(cursorResponse);
+    }
+
+    return ResponseEntity.internalServerError().build();
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<BlogAttachmentResponse> findBlogAttachmentById(
+  public ResponseEntity<SuccessResponse<BlogAttachmentResponse>> findBlogAttachmentById(
       @PathVariable("id") Long id) {
     BlogAttachmentResponse blogAttachmentResponse =
         blogAttachmentService.findBlogAttachmentById(id);
 
-    return new ResponseEntity<>(blogAttachmentResponse, HttpStatus.OK);
+    SuccessResponse<BlogAttachmentResponse> successResponse =
+        new SuccessResponse<>("BlogAttachment retrieved", blogAttachmentResponse);
+    return ResponseEntity.ok(successResponse);
   }
 
   @PreAuthorize("isAuthenticated()")
   @PatchMapping("/{id}")
-  public ResponseEntity<BlogAttachmentResponse> updateBlogAttachment(@PathVariable("id") Long id,
-      @RequestBody BlogAttachmentRequest request) {
+  public ResponseEntity<SuccessResponse<BlogAttachmentResponse>> updateBlogAttachment(
+      @PathVariable("id") Long id, @RequestBody BlogAttachmentRequest request) {
     BlogAttachmentResponse blogAttachmentResponse =
         blogAttachmentService.updateBlogAttachment(id, request);
 
-    return new ResponseEntity<>(blogAttachmentResponse, HttpStatus.OK);
+    SuccessResponse<BlogAttachmentResponse> successResponse =
+        new SuccessResponse<>("BlogAttachment updated", blogAttachmentResponse);
+    return ResponseEntity.ok(successResponse);
   }
 
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/{id}")
-  public ResponseEntity<String> deleteBlogAttachment(@PathVariable("id") Long id) {
+  public ResponseEntity<SuccessResponse<String>> deleteBlogAttachment(@PathVariable("id") Long id) {
     blogAttachmentService.deleteBlogAttachment(id);
 
-    return new ResponseEntity<>("BlogAttachment with ID: %d deleted".formatted(id), HttpStatus.OK);
+    SuccessResponse<String> successResponse = new SuccessResponse<>("BlogAttachment deleted",
+        "BlogAttachment with ID: %d deleted".formatted(id));
+    return ResponseEntity.ok(successResponse);
   }
 }

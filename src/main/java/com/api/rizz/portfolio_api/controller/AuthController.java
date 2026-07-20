@@ -3,6 +3,7 @@ package com.api.rizz.portfolio_api.controller;
 import com.api.rizz.portfolio_api.dto.request.LoginRequest;
 import com.api.rizz.portfolio_api.dto.request.RegisterRequest;
 import com.api.rizz.portfolio_api.dto.response.AuthResponse;
+import com.api.rizz.portfolio_api.dto.response.SuccessResponse;
 import com.api.rizz.portfolio_api.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,14 +21,23 @@ public class AuthController {
 
   // * Jangan dihiraukan dulu soal role soalnya ini kan web portfolio
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+  public ResponseEntity<SuccessResponse<AuthResponse>> register(
+      @RequestBody RegisterRequest request) {
     AuthResponse authResponse = authService.register(request);
-    return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
+
+    SuccessResponse<AuthResponse> successResponse =
+        new SuccessResponse<>("User registered", authResponse);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(successResponse);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+  public ResponseEntity<SuccessResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
     AuthResponse authResponse = authService.login(request);
-    return new ResponseEntity<>(authResponse, HttpStatus.OK);
+
+    SuccessResponse<AuthResponse> successResponse =
+        new SuccessResponse<>("User logged", authResponse);
+
+    return ResponseEntity.ok(successResponse);
   }
 }
