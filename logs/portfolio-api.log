@@ -939,3 +939,1323 @@ Unconditional classes:
         Authenticated user
 2026-07-20 10:53:03.968  INFO --- [http-nio-8080-exec-7] c.a.r.p.filter.RequestLoggingFilter      :
         🟢 SUCCESS | Request: [POST] /api/v1/auth/login - Status: 200 - Time: 307 ms
+2026-07-20 11:11:15.471  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (1 addition, 0 deletions, 0 modifications)
+2026-07-20 11:11:15.474  INFO --- [Thread-9] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:11:15.477  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:11:15.482  INFO --- [Thread-9] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:11:15.484  INFO --- [Thread-9] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-3 - Shutdown initiated...
+2026-07-20 11:11:16.422  INFO --- [Thread-9] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-3 - Shutdown completed.
+2026-07-20 11:11:16.505  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:11:16.506  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:11:17.114  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:11:17.114  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:11:17.165  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 49 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:11:17.169  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:11:17.169  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:11:17.172  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:17.172  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:17.172  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:17.172  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:17.172  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:17.173  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:17.173  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:11:17.243  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:11:17.244  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:11:17.244  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:11:17.260  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 753 ms
+2026-07-20 11:11:17.287  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-4 - Starting...
+2026-07-20 11:11:18.412  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@29637166
+2026-07-20 11:11:18.414  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-4 - Start completed.
+2026-07-20 11:11:18.484  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:11:19.451  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.313s)
+2026-07-20 11:11:20.123  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:11:20.167  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:11:20.484  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:11:20.505  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:11:21.230  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:11:21.297  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:11:21.298  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:11:21.328  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:11:21.328  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:11:21.407 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:11:21.504  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:11:21.516  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:11:21.521  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 5.038 seconds (process running for 1822.741)
+2026-07-20 11:11:21.521  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:11:21.641  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:11:21.737  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:11:21.826  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:11:21.921  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:11:21.921  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:11:21.922  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:11:24.916  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-20 11:11:24.918  INFO --- [Thread-13] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:11:24.920  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:11:24.928  INFO --- [Thread-13] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:11:24.928  INFO --- [Thread-13] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-4 - Shutdown initiated...
+2026-07-20 11:11:25.673  INFO --- [Thread-13] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-4 - Shutdown completed.
+2026-07-20 11:11:25.732  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:11:25.732  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:11:25.867  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:11:25.867  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:11:25.879  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 10 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:11:25.882  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:11:25.882  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:11:25.884  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:25.885  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:25.885  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:25.885  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:25.885  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:25.885  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:25.885  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:11:25.959  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:11:25.960  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:11:25.961  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:11:25.982  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 249 ms
+2026-07-20 11:11:26.019  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-5 - Starting...
+2026-07-20 11:11:26.606  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-5 - Added connection org.postgresql.jdbc.PgConnection@40f5ad37
+2026-07-20 11:11:26.606  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-5 - Start completed.
+2026-07-20 11:11:26.642  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:11:27.480  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.261s)
+2026-07-20 11:11:28.128  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:11:28.167  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:11:28.608  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:11:28.623  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:11:28.962  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:11:29.027  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:11:29.028  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:11:29.056  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:11:29.056  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:11:29.134 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:11:29.226  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:11:29.237  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:11:29.241  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 3.523 seconds (process running for 1830.461)
+2026-07-20 11:11:29.242  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:11:29.338  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:11:29.429  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:11:29.533  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:11:29.627  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:11:29.628  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:11:29.629  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:11:30.625  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 2 class path changes (1 addition, 1 deletion, 0 modifications)
+2026-07-20 11:11:30.626  INFO --- [Thread-17] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:11:30.628  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:11:30.632  INFO --- [Thread-17] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:11:30.633  INFO --- [Thread-17] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-5 - Shutdown initiated...
+2026-07-20 11:11:31.637  INFO --- [Thread-17] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-5 - Shutdown completed.
+2026-07-20 11:11:31.698  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:11:31.698  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:11:31.792  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:11:31.792  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:11:31.805  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 11 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:11:31.808  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:11:31.808  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:11:31.810  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:31.811  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:31.811  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:31.811  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:31.811  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:31.811  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:31.811  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:11:31.872  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:11:31.873  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:11:31.873  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:11:31.887  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 188 ms
+2026-07-20 11:11:31.914  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-6 - Starting...
+2026-07-20 11:11:32.766  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-6 - Added connection org.postgresql.jdbc.PgConnection@1cea077a
+2026-07-20 11:11:32.766  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-6 - Start completed.
+2026-07-20 11:11:32.871  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:11:33.736  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.247s)
+2026-07-20 11:11:34.362  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:11:34.412  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:11:34.701  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:11:34.712  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:11:34.995  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:11:35.062  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:11:35.062  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:11:35.093  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:11:35.094  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:11:35.172 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:11:35.260  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:11:35.273  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:11:35.278  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 3.594 seconds (process running for 1836.499)
+2026-07-20 11:11:35.280  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:11:35.553  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:11:35.759  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:11:35.962  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:11:36.128  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:11:36.129  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:11:36.129  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:11:46.716  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (1 addition, 0 deletions, 0 modifications)
+2026-07-20 11:11:46.717  INFO --- [Thread-21] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:11:46.720  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:11:46.724  INFO --- [Thread-21] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:11:46.725  INFO --- [Thread-21] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-6 - Shutdown initiated...
+2026-07-20 11:11:47.774  INFO --- [Thread-21] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-6 - Shutdown completed.
+2026-07-20 11:11:47.837  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:11:47.837  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:11:47.939  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:11:47.939  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:11:47.951  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 10 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:11:47.954  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:11:47.954  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:11:47.956  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:47.956  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:47.957  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:47.957  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:47.957  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:47.957  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:47.957  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:11:48.011  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:11:48.012  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:11:48.012  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:11:48.028  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 190 ms
+2026-07-20 11:11:48.064  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-7 - Starting...
+2026-07-20 11:11:48.736  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-7 - Added connection org.postgresql.jdbc.PgConnection@70f999a1
+2026-07-20 11:11:48.737  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-7 - Start completed.
+2026-07-20 11:11:48.804  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:11:49.523  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.204s)
+2026-07-20 11:11:50.139  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:11:50.172  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:11:50.475  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:11:50.491  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:11:50.693  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:11:50.755  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:11:50.756  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:11:50.785  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:11:50.786  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:11:50.865 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:11:50.945  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:11:50.957  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:11:50.960  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 3.137 seconds (process running for 1852.181)
+2026-07-20 11:11:50.960  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:11:51.075  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:11:51.175  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:11:51.283  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:11:51.376  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:11:51.376  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:11:51.377  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:11:55.363  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-20 11:11:55.363  INFO --- [Thread-25] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:11:55.366  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:11:55.369  INFO --- [Thread-25] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:11:55.371  INFO --- [Thread-25] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-7 - Shutdown initiated...
+2026-07-20 11:11:55.899  INFO --- [Thread-25] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-7 - Shutdown completed.
+2026-07-20 11:11:55.964  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:11:55.964  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:11:56.052  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:11:56.052  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:11:56.062  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 9 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:11:56.065  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:11:56.065  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:11:56.067  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:56.067  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:56.067  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:56.067  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:56.067  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:56.067  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:11:56.067  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:11:56.123  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:11:56.124  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:11:56.124  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:11:56.139  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 174 ms
+2026-07-20 11:11:56.168  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-8 - Starting...
+2026-07-20 11:11:56.669  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-8 - Added connection org.postgresql.jdbc.PgConnection@63914967
+2026-07-20 11:11:56.669  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-8 - Start completed.
+2026-07-20 11:11:56.717  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:11:57.645  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.406s)
+2026-07-20 11:11:58.877  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:11:58.979  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:11:59.608  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:11:59.621  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:12:00.147  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:12:00.213  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:12:00.213  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:12:00.247  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:12:00.248  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:12:00.340 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:12:00.434  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:12:00.452  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:12:00.454  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 4.503 seconds (process running for 1861.675)
+2026-07-20 11:12:00.455  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:12:00.560  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:12:00.728  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:12:00.867  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:12:00.978  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:12:00.978  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:12:00.979  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:12:32.130  INFO --- [http-nio-8080-exec-2] o.a.c.c.C.[.[localhost].[/api/v1]        :
+        Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-20 11:12:32.130  INFO --- [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        :
+        Initializing Servlet 'dispatcherServlet'
+2026-07-20 11:12:32.131  INFO --- [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        :
+        Completed initialization in 1 ms
+2026-07-20 11:12:32.132 DEBUG --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        :
+        Securing GET /projects
+2026-07-20 11:12:32.232 DEBUG --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        :
+        Secured GET /projects
+2026-07-20 11:12:32.543  INFO --- [http-nio-8080-exec-2] c.a.r.p.filter.RequestLoggingFilter      :
+        🟢 SUCCESS | Request: [GET] /api/v1/projects - Status: 200 - Time: 310 ms
+2026-07-20 11:13:36.362  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (1 addition, 0 deletions, 0 modifications)
+2026-07-20 11:13:36.364  INFO --- [Thread-29] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:13:36.366  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:13:36.371  INFO --- [Thread-29] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:13:36.371  INFO --- [Thread-29] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-8 - Shutdown initiated...
+2026-07-20 11:13:37.244  INFO --- [Thread-29] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-8 - Shutdown completed.
+2026-07-20 11:13:37.314  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:13:37.314  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:13:37.428  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:13:37.428  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:13:37.437  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 9 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:13:37.441  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:13:37.441  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:13:37.443  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:13:37.444  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:13:37.444  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:13:37.444  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:13:37.444  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:13:37.444  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:13:37.444  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:13:37.495  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:13:37.495  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:13:37.495  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:13:37.515  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 200 ms
+2026-07-20 11:13:37.543  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-9 - Starting...
+2026-07-20 11:13:38.107  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-9 - Added connection org.postgresql.jdbc.PgConnection@209b0394
+2026-07-20 11:13:38.107  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-9 - Start completed.
+2026-07-20 11:13:38.166  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:13:38.924  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.247s)
+2026-07-20 11:13:39.605  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:13:39.645  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:13:39.924  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:13:39.940  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:13:40.236  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:13:40.307  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:13:40.307  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:13:40.340  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:13:40.340  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:13:40.433 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:13:40.513  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:13:40.524  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:13:40.526  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 3.225 seconds (process running for 1961.747)
+2026-07-20 11:13:40.527  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:13:40.618  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:13:40.786  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:13:41.041  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:13:41.249  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:13:41.250  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:13:41.250  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:14:07.184  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (1 addition, 0 deletions, 0 modifications)
+2026-07-20 11:14:07.185  INFO --- [Thread-33] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:14:07.187  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:14:07.190  INFO --- [Thread-33] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:14:07.190  INFO --- [Thread-33] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-9 - Shutdown initiated...
+2026-07-20 11:14:07.870  INFO --- [Thread-33] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-9 - Shutdown completed.
+2026-07-20 11:14:07.939  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:14:07.939  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:14:08.044  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:14:08.044  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:14:08.054  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 8 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:14:08.057  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:14:08.057  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:14:08.059  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:08.059  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:08.060  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:08.060  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:08.060  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:08.060  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:08.060  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:14:08.108  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:14:08.109  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:14:08.109  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:14:08.123  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 182 ms
+2026-07-20 11:14:08.154  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-10 - Starting...
+2026-07-20 11:14:08.693  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-10 - Added connection org.postgresql.jdbc.PgConnection@679ad038
+2026-07-20 11:14:08.694  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-10 - Start completed.
+2026-07-20 11:14:08.733  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:14:09.621  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.492s)
+2026-07-20 11:14:10.954  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:14:11.055  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:14:11.478  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:14:11.490  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:14:12.026  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:14:12.082  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:14:12.083  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:14:12.114  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:14:12.114  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:14:12.186 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:14:12.253  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:14:12.265  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:14:12.268  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 4.34 seconds (process running for 1993.488)
+2026-07-20 11:14:12.268  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:14:12.452  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:14:12.544  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:14:12.635  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:14:12.741  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:14:12.742  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:14:12.742  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:14:13.658  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-20 11:14:13.659  INFO --- [Thread-37] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:14:13.661  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:14:13.665  INFO --- [Thread-37] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:14:13.666  INFO --- [Thread-37] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-10 - Shutdown initiated...
+2026-07-20 11:14:14.756  INFO --- [Thread-37] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-10 - Shutdown completed.
+2026-07-20 11:14:14.822  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:14:14.822  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:14:14.909  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:14:14.910  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:14:14.918  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 8 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:14:14.922  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:14:14.922  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:14:14.925  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:14.925  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:14.925  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:14.925  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:14.925  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:14.926  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:14.926  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:14:14.978  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:14:14.979  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:14:14.979  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:14:14.994  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 171 ms
+2026-07-20 11:14:15.029  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-11 - Starting...
+2026-07-20 11:14:15.993  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-11 - Added connection org.postgresql.jdbc.PgConnection@18024345
+2026-07-20 11:14:15.994  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-11 - Start completed.
+2026-07-20 11:14:16.095  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:14:17.878  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.384s)
+2026-07-20 11:14:18.563  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:14:18.596  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:14:18.845  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:14:18.857  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:14:19.487  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:14:19.549  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:14:19.550  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:14:19.584  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:14:19.585  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:14:19.687 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:14:19.778  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:14:19.799  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:14:19.800  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 4.99 seconds (process running for 2001.021)
+2026-07-20 11:14:19.801  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:14:20.001  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:14:20.216  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:14:20.347  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:14:20.448  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:14:20.448  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:14:20.448  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:14:21.207  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-20 11:14:21.208  INFO --- [Thread-41] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:14:21.210  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:14:21.214  INFO --- [Thread-41] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:14:21.214  INFO --- [Thread-41] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-11 - Shutdown initiated...
+2026-07-20 11:14:21.891  INFO --- [Thread-41] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-11 - Shutdown completed.
+2026-07-20 11:14:21.993  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:14:21.993  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:14:22.093  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:14:22.093  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:14:22.104  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 9 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:14:22.107  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:14:22.107  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:14:22.110  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:22.110  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:22.110  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:22.111  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:22.111  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:22.111  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:14:22.111  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:14:22.158  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:14:22.160  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:14:22.160  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:14:22.175  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 179 ms
+2026-07-20 11:14:22.199  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-12 - Starting...
+2026-07-20 11:14:22.711  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-12 - Added connection org.postgresql.jdbc.PgConnection@2c89a61b
+2026-07-20 11:14:22.711  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-12 - Start completed.
+2026-07-20 11:14:22.777  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:14:23.531  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.195s)
+2026-07-20 11:14:24.217  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:14:24.256  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:14:24.507  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:14:24.520  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:14:24.811  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:14:24.862  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:14:24.863  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:14:24.889  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:14:24.890  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:14:24.961 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:14:25.022  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:14:25.035  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:14:25.036  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 3.063 seconds (process running for 2006.257)
+2026-07-20 11:14:25.037  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:14:25.121  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:14:25.204  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:14:25.291  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:14:25.455  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:14:25.455  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:14:25.456  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:15:13.752  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (1 addition, 0 deletions, 0 modifications)
+2026-07-20 11:15:13.753  INFO --- [Thread-45] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:15:13.756  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:15:13.761  INFO --- [Thread-45] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:15:13.761  INFO --- [Thread-45] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-12 - Shutdown initiated...
+2026-07-20 11:15:14.578  INFO --- [Thread-45] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-12 - Shutdown completed.
+2026-07-20 11:15:14.666  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:15:14.668  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:15:14.792  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:15:14.793  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:15:14.803  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 9 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:15:14.804  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:15:14.804  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:15:14.807  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:14.807  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:14.807  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:14.807  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:14.807  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:14.809  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:14.809  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:15:14.856  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:15:14.856  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:15:14.856  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:15:14.871  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 200 ms
+2026-07-20 11:15:14.894  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-13 - Starting...
+2026-07-20 11:15:15.709  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-13 - Added connection org.postgresql.jdbc.PgConnection@71e82dc2
+2026-07-20 11:15:15.709  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-13 - Start completed.
+2026-07-20 11:15:15.811  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:15:17.169  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.432s)
+2026-07-20 11:15:18.382  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:15:18.490  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:15:18.934  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:15:18.946  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:15:19.285  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:15:19.338  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:15:19.339  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:15:19.368  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:15:19.368  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:15:19.443 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:15:19.507  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:15:19.517  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:15:19.518  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 4.883 seconds (process running for 2060.739)
+2026-07-20 11:15:19.519  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:15:19.615  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:15:19.730  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:15:19.859  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:15:19.957  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:15:19.957  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:15:19.959  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:15:20.910  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-20 11:15:20.912  INFO --- [Thread-49] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:15:20.914  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:15:20.918  INFO --- [Thread-49] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:15:20.919  INFO --- [Thread-49] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-13 - Shutdown initiated...
+2026-07-20 11:15:21.369  INFO --- [Thread-49] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-13 - Shutdown completed.
+2026-07-20 11:15:21.441  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:15:21.441  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:15:21.525  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:15:21.525  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:15:21.536  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 9 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:15:21.539  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:15:21.539  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:15:21.541  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:21.541  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:21.541  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:21.541  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:21.541  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:21.541  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:21.541  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:15:21.583  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:15:21.584  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:15:21.584  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:15:21.603  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 161 ms
+2026-07-20 11:15:21.638  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-14 - Starting...
+2026-07-20 11:15:22.533  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-14 - Added connection org.postgresql.jdbc.PgConnection@195e9d55
+2026-07-20 11:15:22.533  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-14 - Start completed.
+2026-07-20 11:15:22.573  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:15:23.662  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.204s)
+2026-07-20 11:15:24.451  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:15:24.494  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:15:24.802  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:15:24.818  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:15:25.168  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:15:25.221  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:15:25.221  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:15:25.249  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:15:25.249  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:15:25.314 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:15:25.379  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:15:25.389  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:15:25.390  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 3.96 seconds (process running for 2066.611)
+2026-07-20 11:15:25.391  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:15:25.482  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:15:25.557  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:15:25.633  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:15:25.721  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:15:25.721  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:15:25.721  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
+2026-07-20 11:15:58.266  INFO --- [File Watcher] rtingClassPathChangeChangedEventListener :
+        Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-20 11:15:58.268  INFO --- [Thread-53] o.s.boot.tomcat.GracefulShutdown         :
+        Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-20 11:15:58.271  INFO --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         :
+        Graceful shutdown complete
+2026-07-20 11:15:58.275  INFO --- [Thread-53] j.LocalContainerEntityManagerFactoryBean :
+        Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:15:58.275  INFO --- [Thread-53] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-14 - Shutdown initiated...
+2026-07-20 11:15:59.191  INFO --- [Thread-53] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-14 - Shutdown completed.
+2026-07-20 11:15:59.290  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Starting PortfolioApiApplication using Java 25.0.3 with PID 27716 (D:\kodingan\personal\portfolio-api\target\classes started by fujiy in D:\kodingan\personal\portfolio-api)
+2026-07-20 11:15:59.290  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        The following 1 profile is active: "dev"
+2026-07-20 11:15:59.376  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:15:59.376  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-20 11:15:59.386  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 8 ms. Found 6 JPA repository interfaces.
+2026-07-20 11:15:59.388  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-20 11:15:59.389  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-07-20 11:15:59.391  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogAttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:59.391  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.BlogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:59.391  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ExperienceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:59.391  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.ProjectRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:59.391  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UseRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:59.391  INFO --- [restartedMain] .RepositoryConfigurationExtensionSupport :
+        Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.api.rizz.portfolio_api.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-07-20 11:15:59.391  INFO --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate :
+        Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2026-07-20 11:15:59.435  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat initialized with port 8080 (http)
+2026-07-20 11:15:59.435  INFO --- [restartedMain] o.apache.catalina.core.StandardService   :
+        Starting service [Tomcat]
+2026-07-20 11:15:59.435  INFO --- [restartedMain] o.apache.catalina.core.StandardEngine    :
+        Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-20 11:15:59.450  INFO --- [restartedMain] b.w.c.s.WebApplicationContextInitializer :
+        Root WebApplicationContext: initialization completed in 159 ms
+2026-07-20 11:15:59.471  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-15 - Starting...
+2026-07-20 11:16:00.012  INFO --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        :
+        HikariPool-15 - Added connection org.postgresql.jdbc.PgConnection@124e529e
+2026-07-20 11:16:00.013  INFO --- [restartedMain] com.zaxxer.hikari.HikariDataSource       :
+        HikariPool-15 - Start completed.
+2026-07-20 11:16:00.049  INFO --- [restartedMain] org.flywaydb.core.FlywayExecutor         :
+        Database: jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=********&sslmode=require&channelBinding=require (PostgreSQL 18.4)
+2026-07-20 11:16:00.841  INFO --- [restartedMain] o.f.core.internal.command.DbValidate     :
+        Successfully validated 6 migrations (execution time 00:00.212s)
+2026-07-20 11:16:01.497  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Current version of schema "public": 6
+2026-07-20 11:16:01.558  INFO --- [restartedMain] o.f.core.internal.command.DbMigrate      :
+        Schema "public" is up to date. No migration necessary.
+2026-07-20 11:16:01.875  INFO --- [restartedMain] org.hibernate.orm.jpa                    :
+        HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-20 11:16:01.891  INFO --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      :
+        No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-20 11:16:02.172  INFO --- [restartedMain] org.hibernate.orm.connections.pooling    :
+        HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://ep-divine-meadow-ao56u82a-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_JNezHr24wRvm&sslmode=require&channelBinding=require]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: neondb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-20 11:16:02.222  INFO --- [restartedMain] org.hibernate.orm.core                   :
+        HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-20 11:16:02.222  INFO --- [restartedMain] j.LocalContainerEntityManagerFactoryBean :
+        Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-20 11:16:02.252  INFO --- [restartedMain] eAuthenticationProviderManagerConfigurer :
+        Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-20 11:16:02.252  WARN --- [restartedMain] r$InitializeUserDetailsManagerConfigurer :
+        Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-07-20 11:16:02.320 DEBUG --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     :
+        Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-07-20 11:16:02.384  INFO --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      :
+        Exposing 1 endpoint beneath base path '/actuator'
+2026-07-20 11:16:02.394  INFO --- [restartedMain] o.s.boot.tomcat.TomcatWebServer          :
+        Tomcat started on port 8080 (http) with context path '/api/v1'
+2026-07-20 11:16:02.396  INFO --- [restartedMain] c.a.r.p.PortfolioApiApplication          :
+        Started PortfolioApiApplication in 3.142 seconds (process running for 2103.616)
+2026-07-20 11:16:02.396  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Mengeksekusi isolasi seeder untuk environment development...
+2026-07-20 11:16:02.496  INFO --- [restartedMain] c.a.r.p.seeder.ProjectSeeder             :
+        Projects table has already have a data. Skipping seeding for project entity.
+2026-07-20 11:16:02.605  INFO --- [restartedMain] c.a.r.p.seeder.ExperienceSeeder          :
+        Experiences table has already have a data. Skipping seeding for experience entity.
+2026-07-20 11:16:02.759  INFO --- [restartedMain] c.a.r.portfolio_api.seeder.BlogSeeder    :
+        Blogs table has already have a data. Skipping seeding for blog entity.
+2026-07-20 11:16:02.853  INFO --- [restartedMain] c.a.rizz.portfolio_api.seeder.UseSeeder  :
+        Uses table has already have a data. Skipping seeding for use entity.
+2026-07-20 11:16:02.854  INFO --- [restartedMain] c.a.r.p.seeder.DatabaseSeeder            :
+        Seluruh mock data berhasil diinjeksi.
+2026-07-20 11:16:02.854  INFO --- [restartedMain] .ConditionEvaluationDeltaLoggingListener :
+        Condition evaluation unchanged
