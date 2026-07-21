@@ -10,3 +10,4 @@
 6. otomatis redirect kehalaman login kalo cuma install dependency security tanpa buat config
 7. @PreAuthorize("isAuthenticated()") bukan  @PreAuthorize("") kalo mau auth tanpa peduli role
 8. jwt token jangan ada - (strip)
+9. java 21 bukan 25 yang standar sekarang, jangan maksain

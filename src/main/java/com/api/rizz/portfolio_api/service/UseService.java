@@ -31,8 +31,8 @@ public class UseService {
   private final FileUploadService fileUploadService;
 
   @Transactional
-  public UseResponse createUse(UseRequest useRequest, MultipartFile logoFile,
-      List<MultipartFile> pictureFiles) {
+  public UseResponse createUse(
+      UseRequest useRequest, MultipartFile logoFile, List<MultipartFile> pictureFiles) {
     try {
       long newId = snowflakeGenerator.nextId();
       Use use = useMapper.toEntity(useRequest);
@@ -79,28 +79,36 @@ public class UseService {
     }
   }
 
-  public Object findAllUses(String search, String category, Long cursor, int page, int size,
-      List<String> sortBy, List<String> sortDir) {
-    Specification<Use> spec = (root, query, cb) -> {
-      // * 1. Siapkan Filter (Where Clause Dinamis)
-      List<Predicate> predicates = new ArrayList<>();
+  public Object findAllUses(
+      String search,
+      String category,
+      Long cursor,
+      int page,
+      int size,
+      List<String> sortBy,
+      List<String> sortDir) {
+    Specification<Use> spec =
+        (root, query, cb) -> {
+          // * 1. Siapkan Filter (Where Clause Dinamis)
+          List<Predicate> predicates = new ArrayList<>();
 
-      // * Kalau ada keyword pencarian di title dan content
-      if (search != null && !search.isBlank()) {
-        predicates.add(cb.like(cb.lower(root.get("itemName")), "%" + search.toLowerCase() + "%"));
-      }
+          // * Kalau ada keyword pencarian di title dan content
+          if (search != null && !search.isBlank()) {
+            predicates.add(
+                cb.like(cb.lower(root.get("itemName")), "%" + search.toLowerCase() + "%"));
+          }
 
-      // * Kalau mau filter berdasarkan category
-      if (category != null && !category.isBlank()) {
-        predicates.add(cb.equal(root.get("category"), category));
-      }
+          // * Kalau mau filter berdasarkan category
+          if (category != null && !category.isBlank()) {
+            predicates.add(cb.equal(root.get("category"), category));
+          }
 
-      // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
-      if (cursor != null) {
-        predicates.add(cb.lessThan(root.get("id"), cursor));
-      }
-      return cb.and(predicates.toArray(Predicate[]::new));
-    };
+          // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
+          if (cursor != null) {
+            predicates.add(cb.lessThan(root.get("id"), cursor));
+          }
+          return cb.and(predicates.toArray(Predicate[]::new));
+        };
 
     // * 2. Siapkan Sorting (Ascending / Descending)
     Sort finalSort = Sort.unsorted();
@@ -113,8 +121,10 @@ public class UseService {
       String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
 
       // Bikin gerbong saat ini
-      Sort currentSort = direction.equalsIgnoreCase("desc") ? Sort.by(field).descending()
-          : Sort.by(field).ascending();
+      Sort currentSort =
+          direction.equalsIgnoreCase("desc")
+              ? Sort.by(field).descending()
+              : Sort.by(field).ascending();
 
       // Sambungin ke kereta utama pakai .and() !
       finalSort = finalSort.and(currentSort);
@@ -136,18 +146,24 @@ public class UseService {
   }
 
   public UseResponse findUseById(Long id) {
-    Use use = useRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("Use with ID: %d not found".formatted(id)));
+    Use use =
+        useRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new NoSuchElementException("Use with ID: %d not found".formatted(id)));
 
     return useMapper.toResponse(use);
   }
 
   @Transactional
-  public UseResponse updateUse(Long id, UseRequest useRequest, MultipartFile logoFile,
-      List<MultipartFile> pictures) {
+  public UseResponse updateUse(
+      Long id, UseRequest useRequest, MultipartFile logoFile, List<MultipartFile> pictures) {
     try {
-      Use use = useRepository.findById(id)
-          .orElseThrow(() -> new NoSuchElementException("Use with ID: %d not found".formatted(id)));
+      Use use =
+          useRepository
+              .findById(id)
+              .orElseThrow(
+                  () -> new NoSuchElementException("Use with ID: %d not found".formatted(id)));
 
       // * Update data entity lama pakai data request baru
       useMapper.updateEntityFromRequest(useRequest, use);
@@ -164,8 +180,7 @@ public class UseService {
         // Hapus file lama di Cloudinary jika ada
         if (use.getLogoUrl() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(use.getLogoUrl());
-          if (oldPublicId != null)
-            fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
         }
         String uploadedUrl = fileUploadService.uploadFile(logoFile, "portfolio/uses/logo");
         use.setLogoUrl(uploadedUrl);
@@ -182,8 +197,7 @@ public class UseService {
 
       if (pictures != null && !pictures.isEmpty()) {
         List<String> newUrls = fileUploadService.uploadFiles(pictures, "portfolio/uses/picture");
-        if (use.getPictures() == null)
-          use.setPictures(new ArrayList<>());
+        if (use.getPictures() == null) use.setPictures(new ArrayList<>());
         use.getPictures().addAll(newUrls);
       }
 
@@ -196,8 +210,11 @@ public class UseService {
 
   @Transactional
   public void deleteUse(Long id) {
-    Use use = useRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+    Use use =
+        useRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
 
     if (!useRepository.existsById(id)) {
       throw new NoSuchElementException("Use with ID: %d not found".formatted(id));

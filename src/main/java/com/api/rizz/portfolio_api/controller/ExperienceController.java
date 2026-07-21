@@ -42,26 +42,35 @@ public class ExperienceController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> findAllExperiences(@RequestParam(required = false) String search,
+  public ResponseEntity<?> findAllExperiences(
+      @RequestParam(required = false) String search,
       // * Cuma jadiin string default valuenya untuk bolean jadi bisa di convert ke
       // * string
       @RequestParam(defaultValue = "false") Boolean isCurrent,
       @RequestParam(required = false) LocalDate startDate,
       @RequestParam(required = false) LocalDate endDate,
-      @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "0") int page,
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
-    Object response = experienceService.findAllExperiences(search, isCurrent, startDate, endDate,
-        cursor, page, size, sortBy, sortDir);
+    Object response =
+        experienceService.findAllExperiences(
+            search, isCurrent, startDate, endDate, cursor, page, size, sortBy, sortDir);
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
-      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
-          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
-          pageResult.hasPrevious(), pageResult.hasNext());
+      PagingInfo pagingInfo =
+          new PagingInfo(
+              (int) pageResult.getTotalElements(),
+              pageResult.getSize(),
+              pageResult.getNumber() + 1,
+              pageResult.getTotalPages(),
+              pageResult.hasPrevious(),
+              pageResult.hasNext());
 
-      PagedResponse<?> pagedResponse = new PagedResponse<>("Berhasil mengambil daftar experience",
-          pageResult.getContent(), pagingInfo);
+      PagedResponse<?> pagedResponse =
+          new PagedResponse<>(
+              "Berhasil mengambil daftar experience", pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -77,8 +86,9 @@ public class ExperienceController {
       }
 
       CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
-      CursorResponse<List<ExperienceResponse>> cursorResponse = new CursorResponse<>(
-          "Berhasil mengambil daftar experience dengan cursor", data, cursorInfo);
+      CursorResponse<List<ExperienceResponse>> cursorResponse =
+          new CursorResponse<>(
+              "Berhasil mengambil daftar experience dengan cursor", data, cursorInfo);
 
       return ResponseEntity.ok(cursorResponse);
     }

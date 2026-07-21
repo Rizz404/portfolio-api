@@ -59,22 +59,33 @@ public class UserController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> findAllUsers(@RequestParam(required = false) String search,
-      @RequestParam(required = false) String role, @RequestParam(required = false) String provider,
-      @RequestParam(required = false) String gender, @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+  public ResponseEntity<?> findAllUsers(
+      @RequestParam(required = false) String search,
+      @RequestParam(required = false) String role,
+      @RequestParam(required = false) String provider,
+      @RequestParam(required = false) String gender,
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
-    Object response = userService.findAllUsers(search, role, provider, gender, cursor, page, size,
-        sortBy, sortDir);
+    Object response =
+        userService.findAllUsers(
+            search, role, provider, gender, cursor, page, size, sortBy, sortDir);
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
-      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
-          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
-          pageResult.hasPrevious(), pageResult.hasNext());
+      PagingInfo pagingInfo =
+          new PagingInfo(
+              (int) pageResult.getTotalElements(),
+              pageResult.getSize(),
+              pageResult.getNumber() + 1,
+              pageResult.getTotalPages(),
+              pageResult.hasPrevious(),
+              pageResult.hasNext());
 
-      PagedResponse<?> pagedResponse = new PagedResponse<>("Berhasil mengambil daftar user",
-          pageResult.getContent(), pagingInfo);
+      PagedResponse<?> pagedResponse =
+          new PagedResponse<>(
+              "Berhasil mengambil daftar user", pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -110,8 +121,8 @@ public class UserController {
 
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SuccessResponse<UserResponse>> updateUserJson(@PathVariable("id") Long id,
-      @RequestBody UserRequest request) {
+  public ResponseEntity<SuccessResponse<UserResponse>> updateUserJson(
+      @PathVariable("id") Long id, @RequestBody UserRequest request) {
 
     UserResponse userResponse = userService.updateUser(id, request, null);
 
@@ -124,7 +135,8 @@ public class UserController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<SuccessResponse<UserResponse>> updateUserMultipart(
-      @PathVariable("id") Long id, @RequestPart("data") UserRequest request,
+      @PathVariable("id") Long id,
+      @RequestPart("data") UserRequest request,
       @RequestPart(value = "profilePictFile", required = false) MultipartFile profilePictFile) {
 
     UserResponse userResponse = userService.updateUser(id, request, profilePictFile);
