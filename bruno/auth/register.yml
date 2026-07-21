@@ -10,21 +10,21 @@ http:
     type: json
     data: |-
       {
-        "email": "rizky.tester@example.com",
-        "password": "SuperSecret123!",
-        "confirmPassword": "SuperSecret123!",
-        "nickname": "Rizky"
+        "email": "rinnthenotable@gmail.com",
+        "password": "177013",
+        "confirmPassword": "177013",
+        "nickname": "Rizz"
       }
   auth: inherit
 
 runtime:
   scripts:
-    - type: before-request
+    - type: after-response
       code: |-
         const data = res.getBody()
 
-        if (data && data.token){
-          bru.setEnvVar("TOKEN", data.token)
+        if (data && data.data.token){
+          bru.setEnvVar("TOKEN", data.data.token)
           console.log("Get token success")
         } else{
           console.log("Get token failed")

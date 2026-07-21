@@ -11,6 +11,7 @@ import com.api.rizz.portfolio_api.repository.UserRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import java.time.OffsetDateTime;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,6 +46,11 @@ public class AuthService {
     user.setRole(Role.USER);
     user.setProvider(User.AuthProvider.LOCAL);
 
+    // * Set timestamp manual karena pakai snowflakes jadi ada write behind pada hibernate
+    OffsetDateTime now = OffsetDateTime.now();
+    user.setCreatedAt(now);
+    user.setUpdatedAt(now);
+
     User savedUser = userRepository.save(user);
 
     var token = jwtService.generateToken(user);
@@ -54,13 +60,11 @@ public class AuthService {
 
   @Transactional
   public AuthResponse login(LoginRequest request) {
-    authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+    authenticationManager
+        .authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-    User user =
-        userRepository
-            .findByEmail(request.email())
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    User user = userRepository.findByEmail(request.email())
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
     String token = jwtService.generateToken(user);
 
     return new AuthResponse(token, userMapper.toResponse(user));

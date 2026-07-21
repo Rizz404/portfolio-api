@@ -8,6 +8,7 @@ import com.api.rizz.portfolio_api.repository.UserRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -54,6 +55,11 @@ public class UserService {
       } else if (hasStringUrl) {
         user.setProfilePict(userRequest.profilePictUrl());
       }
+
+      // * Set timestamp manual karena pakai snowflakes jadi ada write behind pada hibernate
+      OffsetDateTime now = OffsetDateTime.now();
+      user.setCreatedAt(now);
+      user.setUpdatedAt(now);
 
       User savedUser = userRepository.save(user);
 
