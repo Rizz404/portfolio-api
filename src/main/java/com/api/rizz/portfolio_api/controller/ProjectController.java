@@ -62,12 +62,9 @@ public class ProjectController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> findAllProjects(
-      @RequestParam(required = false) String search,
-      @RequestParam(required = false) String status,
-      @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
+  public ResponseEntity<?> findAllProjects(@RequestParam(required = false) String search,
+      @RequestParam(required = false) String status, @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
     Object response =
@@ -75,18 +72,12 @@ public class ProjectController {
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
       // * Spring Data Page dimulai dari 0, kita +1 agar lebih lazim untuk Frontend
-      PagingInfo pagingInfo =
-          new PagingInfo(
-              (int) pageResult.getTotalElements(),
-              pageResult.getSize(),
-              pageResult.getNumber() + 1,
-              pageResult.getTotalPages(),
-              pageResult.hasPrevious(),
-              pageResult.hasNext());
+      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
+          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
+          pageResult.hasPrevious(), pageResult.hasNext());
 
-      PagedResponse<?> pagedResponse =
-          new PagedResponse<>(
-              "Berhasil mengambil daftar project", pageResult.getContent(), pagingInfo);
+      PagedResponse<?> pagedResponse = new PagedResponse<>("Berhasil mengambil daftar project",
+          pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -94,12 +85,12 @@ public class ProjectController {
       @SuppressWarnings("unchecked")
       List<ProjectResponse> data = (List<ProjectResponse>) listResult;
 
-      Long nextCursor = null;
+      String nextCursor = null;
       boolean hasNextPage = false;
 
       if (!data.isEmpty()) {
         // Ambil ID dari elemen paling terakhir sebagai nextCursor (di-parse ke Long)
-        nextCursor = Long.valueOf(data.get(data.size() - 1).id());
+        nextCursor = data.get(data.size() - 1).id();
         // kemungkinan masih ada sisa data di database
         hasNextPage = data.size() == size;
       }
@@ -140,8 +131,7 @@ public class ProjectController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<SuccessResponse<ProjectResponse>> updateProjectMultipart(
-      @PathVariable("id") Long id,
-      @RequestPart("data") ProjectRequest request,
+      @PathVariable("id") Long id, @RequestPart("data") ProjectRequest request,
       @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
       @RequestPart(value = "newImageFiles", required = false) List<MultipartFile> newImageFiles) {
 
