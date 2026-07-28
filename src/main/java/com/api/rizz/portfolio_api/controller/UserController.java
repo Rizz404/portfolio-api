@@ -86,7 +86,7 @@ public class UserController {
 
       PagedResponse<?> pagedResponse =
           new PagedResponse<>(
-              "Berhasil mengambil daftar user", pageResult.getContent(), pagingInfo);
+              "Successfully retrieved user list", pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -103,7 +103,7 @@ public class UserController {
 
       CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
       CursorResponse<List<UserResponse>> cursorResponse =
-          new CursorResponse<>("Berhasil mengambil daftar user dengan cursor", data, cursorInfo);
+          new CursorResponse<>("Successfully retrieved user list with cursor", data, cursorInfo);
 
       return ResponseEntity.ok(cursorResponse);
     }

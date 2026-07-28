@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorResponse<Map<String, String>>> handleValidationException(
       MethodArgumentNotValidException ex, HttpServletRequest request) {
-    log.warn("Validasi request gagal - Path: {}", request.getRequestURI());
+    log.warn("Request validation failed - Path: {}", request.getRequestURI());
 
     Map<String, String> fieldErrors = new LinkedHashMap<>();
     for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(NoSuchElementException.class)
   public ResponseEntity<ErrorResponse<String>> handleNotFoundException(
       NoSuchElementException ex, HttpServletRequest request) {
-    log.warn("Data tidak ditemukan: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+    log.warn("Data not found: {} - Path: {}", ex.getMessage(), request.getRequestURI());
 
     ErrorResponse<String> response =
         new ErrorResponse<>("error", ex.getMessage(), "Path: " + request.getRequestURI());
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<ErrorResponse<String>> handleIllegalArgumentException(
       IllegalArgumentException ex, HttpServletRequest request) {
-    log.warn("Validasi gagal: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+    log.warn("Validation failed: {} - Path: {}", ex.getMessage(), request.getRequestURI());
 
     ErrorResponse<String> response = new ErrorResponse<>("error", ex.getMessage(), null);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
@@ -54,11 +54,11 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse<String>> handleGlobalException(
       Exception ex, HttpServletRequest request) {
-    log.error("Terjadi kesalahan sistem di path: {}", request.getRequestURI(), ex);
+    log.error("A system error occurred at path: {}", request.getRequestURI(), ex);
 
     ErrorResponse<String> response =
         new ErrorResponse<>(
-            "error", "Terjadi kesalahan pada server. Silakan coba beberapa saat lagi.", null);
+            "error", "An error occurred on the server. Please try again later.", null);
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
   }
 }

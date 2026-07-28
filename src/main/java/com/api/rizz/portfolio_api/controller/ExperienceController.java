@@ -71,7 +71,7 @@ public class ExperienceController {
 
       PagedResponse<?> pagedResponse =
           new PagedResponse<>(
-              "Berhasil mengambil daftar experience", pageResult.getContent(), pagingInfo);
+              "Successfully retrieved experience list", pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -89,7 +89,7 @@ public class ExperienceController {
       CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
       CursorResponse<List<ExperienceResponse>> cursorResponse =
           new CursorResponse<>(
-              "Berhasil mengambil daftar experience dengan cursor", data, cursorInfo);
+              "Successfully retrieved experience list with cursor", data, cursorInfo);
 
       return ResponseEntity.ok(cursorResponse);
     }

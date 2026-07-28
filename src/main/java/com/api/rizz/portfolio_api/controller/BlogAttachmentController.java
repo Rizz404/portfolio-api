@@ -64,7 +64,7 @@ public class BlogAttachmentController {
 
       PagedResponse<?> pagedResponse =
           new PagedResponse<>(
-              "Berhasil mengambil daftar blog attachment", pageResult.getContent(), pagingInfo);
+              "Successfully retrieved blog attachment list", pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -82,7 +82,7 @@ public class BlogAttachmentController {
       CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
       CursorResponse<List<BlogAttachmentResponse>> cursorResponse =
           new CursorResponse<>(
-              "Berhasil mengambil daftar blog attachment dengan cursor", data, cursorInfo);
+              "Successfully retrieved blog attachment list with cursor", data, cursorInfo);
 
       return ResponseEntity.ok(cursorResponse);
     }

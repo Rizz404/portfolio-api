@@ -18,11 +18,11 @@ public class DatabaseSeeder implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    log.info("Mengeksekusi isolasi seeder untuk environment development...");
+    log.info("Running seeder isolation for the development environment...");
     projectSeeder.seed();
     experienceSeeder.seed();
     blogSeeder.seed();
     useSeeder.seed();
-    log.info("Seluruh mock data berhasil diinjeksi.");
+    log.info("All mock data was successfully injected.");
   }
 }

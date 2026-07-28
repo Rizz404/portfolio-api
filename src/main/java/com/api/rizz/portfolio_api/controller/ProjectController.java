@@ -87,7 +87,7 @@ public class ProjectController {
 
       PagedResponse<?> pagedResponse =
           new PagedResponse<>(
-              "Berhasil mengambil daftar project", pageResult.getContent(), pagingInfo);
+              "Successfully retrieved project list", pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -107,7 +107,7 @@ public class ProjectController {
 
       CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
       CursorResponse<List<ProjectResponse>> cursorResponse =
-          new CursorResponse<>("Berhasil mengambil daftar project dengan cursor", data, cursorInfo);
+          new CursorResponse<>("Successfully retrieved project list with cursor", data, cursorInfo);
 
       return ResponseEntity.ok(cursorResponse);
     }

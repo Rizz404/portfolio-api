@@ -81,7 +81,7 @@ public class BlogController {
 
       PagedResponse<?> pagedResponse =
           new PagedResponse<>(
-              "Berhasil mengambil daftar blog", pageResult.getContent(), pagingInfo);
+              "Successfully retrieved blog list", pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -98,7 +98,7 @@ public class BlogController {
 
       CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
       CursorResponse<List<BlogResponse>> cursorResponse =
-          new CursorResponse<>("Berhasil mengambil daftar blog dengan cursor", data, cursorInfo);
+          new CursorResponse<>("Successfully retrieved blog list with cursor", data, cursorInfo);
 
       return ResponseEntity.ok(cursorResponse);
     }
