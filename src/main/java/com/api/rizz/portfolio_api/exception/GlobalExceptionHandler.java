@@ -2,16 +2,35 @@ package com.api.rizz.portfolio_api.exception;
 
 import com.api.rizz.portfolio_api.dto.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ErrorResponse<Map<String, String>>> handleValidationException(
+      MethodArgumentNotValidException ex, HttpServletRequest request) {
+    log.warn("Validasi request gagal - Path: {}", request.getRequestURI());
+
+    Map<String, String> fieldErrors = new LinkedHashMap<>();
+    for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+      fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+    }
+
+    ErrorResponse<Map<String, String>> response =
+        new ErrorResponse<>("error", "Validation failed", fieldErrors);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+  }
 
   @ExceptionHandler(NoSuchElementException.class)
   public ResponseEntity<ErrorResponse<String>> handleNotFoundException(
