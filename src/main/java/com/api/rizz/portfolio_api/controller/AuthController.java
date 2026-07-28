@@ -5,6 +5,7 @@ import com.api.rizz.portfolio_api.dto.request.RegisterRequest;
 import com.api.rizz.portfolio_api.dto.response.AuthResponse;
 import com.api.rizz.portfolio_api.dto.response.SuccessResponse;
 import com.api.rizz.portfolio_api.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class AuthController {
   // * Jangan dihiraukan dulu soal role soalnya ini kan web portfolio
   @PostMapping("/register")
   public ResponseEntity<SuccessResponse<AuthResponse>> register(
-      @RequestBody RegisterRequest request) {
+      @Valid @RequestBody RegisterRequest request) {
     AuthResponse authResponse = authService.register(request);
 
     SuccessResponse<AuthResponse> successResponse =
@@ -32,7 +33,8 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<SuccessResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
+  public ResponseEntity<SuccessResponse<AuthResponse>> login(
+      @Valid @RequestBody LoginRequest request) {
     AuthResponse authResponse = authService.login(request);
 
     SuccessResponse<AuthResponse> successResponse =

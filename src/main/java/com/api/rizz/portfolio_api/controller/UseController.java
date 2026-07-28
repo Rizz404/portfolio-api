@@ -8,6 +8,7 @@ import com.api.rizz.portfolio_api.dto.response.PagingInfo;
 import com.api.rizz.portfolio_api.dto.response.SuccessResponse;
 import com.api.rizz.portfolio_api.dto.response.UseResponse;
 import com.api.rizz.portfolio_api.service.UseService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class UseController {
   @PreAuthorize("isAuthenticated()")
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SuccessResponse<UseResponse>> createUseJson(
-      @RequestBody UseRequest request) {
+      @Valid @RequestBody UseRequest request) {
     // Kita kirim null untuk parameter file
     UseResponse useResponse = useService.createUse(request, null, null);
 
@@ -47,7 +48,7 @@ public class UseController {
   @PreAuthorize("isAuthenticated()")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<SuccessResponse<UseResponse>> createUseMultipart(
-      @RequestPart("data") UseRequest request,
+      @Valid @RequestPart("data") UseRequest request,
       @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
       @RequestPart(value = "pictureFiles", required = false) List<MultipartFile> pictureFiles) {
 
@@ -59,17 +60,25 @@ public class UseController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> findAllUses(@RequestParam(required = false) String search,
-      @RequestParam(required = false) String category, @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+  public ResponseEntity<?> findAllUses(
+      @RequestParam(required = false) String search,
+      @RequestParam(required = false) String category,
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
     Object response = useService.findAllUses(search, category, cursor, page, size, sortBy, sortDir);
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
-      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
-          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
-          pageResult.hasPrevious(), pageResult.hasNext());
+      PagingInfo pagingInfo =
+          new PagingInfo(
+              (int) pageResult.getTotalElements(),
+              pageResult.getSize(),
+              pageResult.getNumber() + 1,
+              pageResult.getTotalPages(),
+              pageResult.hasPrevious(),
+              pageResult.hasNext());
 
       PagedResponse<?> pagedResponse =
           new PagedResponse<>("Berhasil mengambil daftar use", pageResult.getContent(), pagingInfo);
@@ -108,8 +117,8 @@ public class UseController {
 
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SuccessResponse<UseResponse>> updateUseJson(@PathVariable("id") Long id,
-      @RequestBody UseRequest request) {
+  public ResponseEntity<SuccessResponse<UseResponse>> updateUseJson(
+      @PathVariable("id") Long id, @Valid @RequestBody UseRequest request) {
 
     UseResponse useResponse = useService.updateUse(id, request, null, null);
 
@@ -122,10 +131,11 @@ public class UseController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<SuccessResponse<UseResponse>> updateUseMultipart(
-      @PathVariable("id") Long id, @RequestPart("data") UseRequest request,
+      @PathVariable("id") Long id,
+      @Valid @RequestPart("data") UseRequest request,
       @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
-      @RequestPart(value = "newPictureFiles",
-          required = false) List<MultipartFile> newPictureFiles) {
+      @RequestPart(value = "newPictureFiles", required = false)
+          List<MultipartFile> newPictureFiles) {
 
     UseResponse useResponse = useService.updateUse(id, request, logoFile, newPictureFiles);
 

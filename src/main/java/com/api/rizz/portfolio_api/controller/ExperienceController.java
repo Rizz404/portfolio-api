@@ -8,6 +8,7 @@ import com.api.rizz.portfolio_api.dto.response.PagedResponse;
 import com.api.rizz.portfolio_api.dto.response.PagingInfo;
 import com.api.rizz.portfolio_api.dto.response.SuccessResponse;
 import com.api.rizz.portfolio_api.service.ExperienceService;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class ExperienceController {
   @PreAuthorize("isAuthenticated()")
   @PostMapping("")
   public ResponseEntity<SuccessResponse<ExperienceResponse>> createExperience(
-      @RequestBody ExperienceRequest request) {
+      @Valid @RequestBody ExperienceRequest request) {
     ExperienceResponse experienceResponse = experienceService.createExperience(request);
 
     SuccessResponse<ExperienceResponse> successResponse =
@@ -42,26 +43,35 @@ public class ExperienceController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> findAllExperiences(@RequestParam(required = false) String search,
+  public ResponseEntity<?> findAllExperiences(
+      @RequestParam(required = false) String search,
       // * Cuma jadiin string default valuenya untuk bolean jadi bisa di convert ke
       // * string
       @RequestParam(defaultValue = "false") Boolean isCurrent,
       @RequestParam(required = false) LocalDate startDate,
       @RequestParam(required = false) LocalDate endDate,
-      @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "0") int page,
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
-    Object response = experienceService.findAllExperiences(search, isCurrent, startDate, endDate,
-        cursor, page, size, sortBy, sortDir);
+    Object response =
+        experienceService.findAllExperiences(
+            search, isCurrent, startDate, endDate, cursor, page, size, sortBy, sortDir);
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
-      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
-          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
-          pageResult.hasPrevious(), pageResult.hasNext());
+      PagingInfo pagingInfo =
+          new PagingInfo(
+              (int) pageResult.getTotalElements(),
+              pageResult.getSize(),
+              pageResult.getNumber() + 1,
+              pageResult.getTotalPages(),
+              pageResult.hasPrevious(),
+              pageResult.hasNext());
 
-      PagedResponse<?> pagedResponse = new PagedResponse<>("Berhasil mengambil daftar experience",
-          pageResult.getContent(), pagingInfo);
+      PagedResponse<?> pagedResponse =
+          new PagedResponse<>(
+              "Berhasil mengambil daftar experience", pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -77,8 +87,9 @@ public class ExperienceController {
       }
 
       CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
-      CursorResponse<List<ExperienceResponse>> cursorResponse = new CursorResponse<>(
-          "Berhasil mengambil daftar experience dengan cursor", data, cursorInfo);
+      CursorResponse<List<ExperienceResponse>> cursorResponse =
+          new CursorResponse<>(
+              "Berhasil mengambil daftar experience dengan cursor", data, cursorInfo);
 
       return ResponseEntity.ok(cursorResponse);
     }
@@ -99,7 +110,7 @@ public class ExperienceController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping("/{id}")
   public ResponseEntity<SuccessResponse<ExperienceResponse>> updateExperience(
-      @PathVariable("id") Long id, @RequestBody ExperienceRequest request) {
+      @PathVariable("id") Long id, @Valid @RequestBody ExperienceRequest request) {
     ExperienceResponse experienceResponse = experienceService.updateExperience(id, request);
 
     SuccessResponse<ExperienceResponse> successResponse =

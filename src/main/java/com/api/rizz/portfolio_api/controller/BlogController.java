@@ -8,6 +8,7 @@ import com.api.rizz.portfolio_api.dto.response.PagedResponse;
 import com.api.rizz.portfolio_api.dto.response.PagingInfo;
 import com.api.rizz.portfolio_api.dto.response.SuccessResponse;
 import com.api.rizz.portfolio_api.service.BlogService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class BlogController {
   @PreAuthorize("isAuthenticated()")
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SuccessResponse<BlogResponse>> createBlogJson(
-      @RequestBody BlogRequest request) {
+      @Valid @RequestBody BlogRequest request) {
     // Kita kirim null untuk parameter file
     BlogResponse blogResponse = blogService.createBlog(request, null, null);
 
@@ -47,7 +48,7 @@ public class BlogController {
   @PreAuthorize("isAuthenticated()")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<SuccessResponse<BlogResponse>> createBlogMultipart(
-      @RequestPart("data") BlogRequest request,
+      @Valid @RequestPart("data") BlogRequest request,
       @RequestPart(value = "featuredImageFile", required = false) MultipartFile featuredImageFile,
       @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments) {
 
@@ -59,20 +60,28 @@ public class BlogController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> findAllBlogs(@RequestParam(required = false) String search,
-      @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "0") int page,
+  public ResponseEntity<?> findAllBlogs(
+      @RequestParam(required = false) String search,
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
     Object response = blogService.findAllBlogs(search, cursor, page, size, sortBy, sortDir);
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
-      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
-          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
-          pageResult.hasPrevious(), pageResult.hasNext());
+      PagingInfo pagingInfo =
+          new PagingInfo(
+              (int) pageResult.getTotalElements(),
+              pageResult.getSize(),
+              pageResult.getNumber() + 1,
+              pageResult.getTotalPages(),
+              pageResult.hasPrevious(),
+              pageResult.hasNext());
 
-      PagedResponse<?> pagedResponse = new PagedResponse<>("Berhasil mengambil daftar blog",
-          pageResult.getContent(), pagingInfo);
+      PagedResponse<?> pagedResponse =
+          new PagedResponse<>(
+              "Berhasil mengambil daftar blog", pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -108,8 +117,8 @@ public class BlogController {
 
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SuccessResponse<BlogResponse>> updateBlogJson(@PathVariable("id") Long id,
-      @RequestBody BlogRequest request) {
+  public ResponseEntity<SuccessResponse<BlogResponse>> updateBlogJson(
+      @PathVariable("id") Long id, @Valid @RequestBody BlogRequest request) {
 
     BlogResponse blogResponse = blogService.updateBlog(id, request, null, null);
 
@@ -122,7 +131,8 @@ public class BlogController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<SuccessResponse<BlogResponse>> updateBlogMultipart(
-      @PathVariable("id") Long id, @RequestPart("data") BlogRequest request,
+      @PathVariable("id") Long id,
+      @Valid @RequestPart("data") BlogRequest request,
       @RequestPart(value = "featuredImageFile", required = false) MultipartFile featuredImageFile,
       @RequestPart(value = "newAttachments", required = false) List<MultipartFile> newAttachments) {
 
