@@ -86,7 +86,9 @@ public class BlogAttachmentService {
       return result.getContent().stream().map(blogAttachmentMapper::toResponse).toList();
     } else {
       // * LOGIKA OFFSET (Default): Butuh info total halaman dan total data
-      Pageable pageable = PageRequest.of(page, size, finalSort);
+      // * Kurangi 1 biar gak minus page nya
+      int actualPage = page > 0 ? page - 1 : 0;
+      Pageable pageable = PageRequest.of(actualPage, size, finalSort);
       Page<BlogAttachment> result = blogAttachmentRepository.findAll(spec, pageable);
       return result.map(blogAttachmentMapper::toResponse);
     }

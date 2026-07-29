@@ -111,7 +111,9 @@ public class ExperienceService {
       return result.getContent().stream().map(experienceMapper::toResponse).toList();
     } else {
       // * LOGIKA OFFSET (Default): Butuh info total halaman dan total data
-      Pageable pageable = PageRequest.of(page, size, finalSort);
+      // * Kurangi 1 biar gak minus page nya
+      int actualPage = page > 0 ? page - 1 : 0;
+      Pageable pageable = PageRequest.of(actualPage, size, finalSort);
       Page<Experience> result = experienceRepository.findAll(spec, pageable);
       return result.map(experienceMapper::toResponse);
     }

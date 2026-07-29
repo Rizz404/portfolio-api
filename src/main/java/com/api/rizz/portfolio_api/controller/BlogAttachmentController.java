@@ -43,28 +43,20 @@ public class BlogAttachmentController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> findAllBlogAttachments(
-      @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
+  public ResponseEntity<?> findAllBlogAttachments(@RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
     Object response =
         blogAttachmentService.findAllBlogAttachments(cursor, page, size, sortBy, sortDir);
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
-      PagingInfo pagingInfo =
-          new PagingInfo(
-              (int) pageResult.getTotalElements(),
-              pageResult.getSize(),
-              pageResult.getNumber() + 1,
-              pageResult.getTotalPages(),
-              pageResult.hasPrevious(),
-              pageResult.hasNext());
+      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
+          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
+          pageResult.hasPrevious(), pageResult.hasNext());
 
-      PagedResponse<?> pagedResponse =
-          new PagedResponse<>(
-              "Successfully retrieved blog attachment list", pageResult.getContent(), pagingInfo);
+      PagedResponse<?> pagedResponse = new PagedResponse<>(
+          "Successfully retrieved blog attachment list", pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -80,9 +72,8 @@ public class BlogAttachmentController {
       }
 
       CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
-      CursorResponse<List<BlogAttachmentResponse>> cursorResponse =
-          new CursorResponse<>(
-              "Successfully retrieved blog attachment list with cursor", data, cursorInfo);
+      CursorResponse<List<BlogAttachmentResponse>> cursorResponse = new CursorResponse<>(
+          "Successfully retrieved blog attachment list with cursor", data, cursorInfo);
 
       return ResponseEntity.ok(cursorResponse);
     }
@@ -118,9 +109,8 @@ public class BlogAttachmentController {
   public ResponseEntity<SuccessResponse<String>> deleteBlogAttachment(@PathVariable("id") Long id) {
     blogAttachmentService.deleteBlogAttachment(id);
 
-    SuccessResponse<String> successResponse =
-        new SuccessResponse<>(
-            "BlogAttachment deleted", "BlogAttachment with ID: %d deleted".formatted(id));
+    SuccessResponse<String> successResponse = new SuccessResponse<>("BlogAttachment deleted",
+        "BlogAttachment with ID: %d deleted".formatted(id));
     return ResponseEntity.ok(successResponse);
   }
 }

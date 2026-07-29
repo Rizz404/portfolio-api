@@ -31,6 +31,7 @@ public class BlogService {
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
 
+  // * Dari springframework bukan jakarta Transactional nya
   @Transactional
   public BlogResponse createBlog(BlogRequest blogRequest, MultipartFile featuredImage,
       List<MultipartFile> attachments) {
@@ -141,7 +142,9 @@ public class BlogService {
       return result.getContent().stream().map(blogMapper::toResponse).toList();
     } else {
       // * LOGIKA OFFSET (Default): Butuh info total halaman dan total data
-      Pageable pageable = PageRequest.of(page, size, finalSort);
+      // * Kurangi 1 biar gak minus page nya
+      int actualPage = page > 0 ? page - 1 : 0;
+      Pageable pageable = PageRequest.of(actualPage, size, finalSort);
       Page<Blog> result = blogRepository.findAll(spec, pageable);
       return result.map(blogMapper::toResponse);
     }
