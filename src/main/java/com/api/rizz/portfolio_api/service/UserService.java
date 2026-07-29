@@ -7,7 +7,7 @@ import com.api.rizz.portfolio_api.mapper.UserMapper;
 import com.api.rizz.portfolio_api.repository.UserRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,53 +69,44 @@ public class UserService {
     }
   }
 
-  public Object findAllUsers(
-      String search,
-      String role,
-      String provider,
-      String gender,
-      Long cursor,
-      int page,
-      int size,
-      List<String> sortBy,
-      List<String> sortDir) {
-    Specification<User> spec =
-        (root, query, cb) -> {
-          // * 1. Siapkan Filter (Where Clauser Dinamis)
-          List<Predicate> predicates = new ArrayList<>();
+  public Object findAllUsers(String search, String role, String provider, String gender,
+      Long cursor, int page, int size, List<String> sortBy, List<String> sortDir) {
+    Specification<User> spec = (root, query, cb) -> {
+      // * 1. Siapkan Filter (Where Clauser Dinamis)
+      List<Predicate> predicates = new ArrayList<>();
 
-          if (search != null && !search.isBlank()) {
-            String searchKeyword = "%" + search.toLowerCase() + "%";
+      if (search != null && !search.isBlank()) {
+        String searchKeyword = "%" + search.toLowerCase() + "%";
 
-            // * cb.or() = Pilih salah satu yang cocok (OR)
-            Predicate searchEmail = cb.like(cb.lower(root.get("email")), searchKeyword);
-            Predicate searchNickname = cb.like(cb.lower(root.get("nickname")), searchKeyword);
-            Predicate searchFullname = cb.like(cb.lower(root.get("fullName")), searchKeyword);
+        // * cb.or() = Pilih salah satu yang cocok (OR)
+        Predicate searchEmail = cb.like(cb.lower(root.get("email")), searchKeyword);
+        Predicate searchNickname = cb.like(cb.lower(root.get("nickname")), searchKeyword);
+        Predicate searchFullname = cb.like(cb.lower(root.get("fullName")), searchKeyword);
 
-            predicates.add(cb.or(searchEmail, searchNickname, searchFullname));
-          }
+        predicates.add(cb.or(searchEmail, searchNickname, searchFullname));
+      }
 
-          // * Kalau mau filter berdasarkan role
-          if (role != null && !role.isBlank()) {
-            predicates.add(cb.equal(root.get("role"), role));
-          }
+      // * Kalau mau filter berdasarkan role
+      if (role != null && !role.isBlank()) {
+        predicates.add(cb.equal(root.get("role"), role));
+      }
 
-          // * Kalau mau filter berdasarkan provider
-          if (provider != null && !provider.isBlank()) {
-            predicates.add(cb.equal(root.get("provider"), provider));
-          }
+      // * Kalau mau filter berdasarkan provider
+      if (provider != null && !provider.isBlank()) {
+        predicates.add(cb.equal(root.get("provider"), provider));
+      }
 
-          // * Kalau mau filter berdasarkan gender
-          if (gender != null && !gender.isBlank()) {
-            predicates.add(cb.equal(root.get("gender"), gender));
-          }
+      // * Kalau mau filter berdasarkan gender
+      if (gender != null && !gender.isBlank()) {
+        predicates.add(cb.equal(root.get("gender"), gender));
+      }
 
-          // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
-          if (cursor != null) {
-            predicates.add(cb.lessThan(root.get("id"), cursor));
-          }
-          return cb.and(predicates.toArray(Predicate[]::new));
-        };
+      // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
+      if (cursor != null) {
+        predicates.add(cb.lessThan(root.get("id"), cursor));
+      }
+      return cb.and(predicates.toArray(Predicate[]::new));
+    };
 
     // * 2. Siapkan Sorting (Ascending / Descending)
     Sort finalSort = Sort.unsorted();
@@ -128,10 +119,8 @@ public class UserService {
       String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
 
       // Bikin gerbong saat ini
-      Sort currentSort =
-          direction.equalsIgnoreCase("desc")
-              ? Sort.by(field).descending()
-              : Sort.by(field).ascending();
+      Sort currentSort = direction.equalsIgnoreCase("desc") ? Sort.by(field).descending()
+          : Sort.by(field).ascending();
 
       // Sambungin ke kereta utama pakai .and() !
       finalSort = finalSort.and(currentSort);
@@ -153,11 +142,8 @@ public class UserService {
   }
 
   public UserResponse findUserById(Long id) {
-    User user =
-        userRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
 
     return userMapper.toResponse(user);
   }
@@ -165,11 +151,8 @@ public class UserService {
   @Transactional
   public UserResponse updateUser(Long id, UserRequest userRequest, MultipartFile profilePictFile) {
     try {
-      User user =
-          userRepository
-              .findById(id)
-              .orElseThrow(
-                  () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
+      User user = userRepository.findById(id).orElseThrow(
+          () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
 
       // * Update data entity lama pakai data request baru
       userMapper.updateEntityFromRequest(userRequest, user);
@@ -187,7 +170,8 @@ public class UserService {
         // Hapus file lama di Cloudinary jika ada
         if (user.getProfilePict() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(user.getProfilePict());
-          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null)
+            fileUploadService.deleteFile(oldPublicId);
         }
         String uploadedUrl =
             fileUploadService.uploadFile(profilePictFile, "portfolio/users/profilePict");
@@ -205,11 +189,8 @@ public class UserService {
 
   @Transactional
   public void deleteUser(Long id) {
-    User user =
-        userRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
 
     if (!userRepository.existsById(id)) {
       throw new NoSuchElementException("User with ID: %d not found".formatted(id));

@@ -7,7 +7,7 @@ import com.api.rizz.portfolio_api.mapper.ProjectMapper;
 import com.api.rizz.portfolio_api.repository.ProjectRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +31,8 @@ public class ProjectService {
   private final FileUploadService fileUploadService;
 
   @Transactional
-  public ProjectResponse createProject(
-      ProjectRequest projectRequest, MultipartFile logoFile, List<MultipartFile> imageFiles) {
+  public ProjectResponse createProject(ProjectRequest projectRequest, MultipartFile logoFile,
+      List<MultipartFile> imageFiles) {
     try {
       long newId = snowflakeGenerator.nextId();
       String generatedSlug = projectRequest.name().toLowerCase().replaceAll("[^a-z0-9]+", "-");
@@ -83,35 +83,28 @@ public class ProjectService {
     }
   }
 
-  public Object findAllProjects(
-      String search,
-      String status,
-      Long cursor,
-      int page,
-      int size,
-      List<String> sortBy,
-      List<String> sortDir) {
-    Specification<Project> spec =
-        (root, query, cb) -> {
-          // * 1. Siapkan Filter (Where Clause Dinamis)
-          List<Predicate> predicates = new ArrayList<>();
+  public Object findAllProjects(String search, String status, Long cursor, int page, int size,
+      List<String> sortBy, List<String> sortDir) {
+    Specification<Project> spec = (root, query, cb) -> {
+      // * 1. Siapkan Filter (Where Clause Dinamis)
+      List<Predicate> predicates = new ArrayList<>();
 
-          // * Kalau ada keyword pencarian di nama project
-          if (search != null && !search.isBlank()) {
-            predicates.add(cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"));
-          }
+      // * Kalau ada keyword pencarian di nama project
+      if (search != null && !search.isBlank()) {
+        predicates.add(cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"));
+      }
 
-          // * Kalau mau filter berdasarkan status (active/development)
-          if (status != null && !status.isBlank()) {
-            predicates.add(cb.equal(root.get("status"), status));
-          }
+      // * Kalau mau filter berdasarkan status (active/development)
+      if (status != null && !status.isBlank()) {
+        predicates.add(cb.equal(root.get("status"), status));
+      }
 
-          // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
-          if (cursor != null) {
-            predicates.add(cb.lessThan(root.get("id"), cursor));
-          }
-          return cb.and(predicates.toArray(Predicate[]::new));
-        };
+      // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
+      if (cursor != null) {
+        predicates.add(cb.lessThan(root.get("id"), cursor));
+      }
+      return cb.and(predicates.toArray(Predicate[]::new));
+    };
 
     // * 2. Siapkan Sorting (Ascending / Descending)
     Sort finalSort = Sort.unsorted();
@@ -125,10 +118,8 @@ public class ProjectService {
       String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
 
       // Bikin gerbong saat ini
-      Sort currentSort =
-          direction.equalsIgnoreCase("desc")
-              ? Sort.by(field).descending()
-              : Sort.by(field).ascending();
+      Sort currentSort = direction.equalsIgnoreCase("desc") ? Sort.by(field).descending()
+          : Sort.by(field).ascending();
 
       // Sambungin ke kereta utama pakai .and() !
       finalSort = finalSort.and(currentSort);
@@ -150,27 +141,18 @@ public class ProjectService {
   }
 
   public ProjectResponse findProjectById(Long id) {
-    Project project =
-        projectRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new NoSuchElementException("Project with ID: %d not found".formatted(id)));
+    Project project = projectRepository.findById(id).orElseThrow(
+        () -> new NoSuchElementException("Project with ID: %d not found".formatted(id)));
 
     return projectMapper.toResponse(project);
   }
 
   @Transactional
-  public ProjectResponse updateProject(
-      Long id,
-      ProjectRequest projectRequest,
-      MultipartFile logoFile,
-      List<MultipartFile> projectImageFiles) {
+  public ProjectResponse updateProject(Long id, ProjectRequest projectRequest,
+      MultipartFile logoFile, List<MultipartFile> projectImageFiles) {
     try {
-      Project project =
-          projectRepository
-              .findById(id)
-              .orElseThrow(
-                  () -> new NoSuchElementException("Project with ID: %d not found".formatted(id)));
+      Project project = projectRepository.findById(id).orElseThrow(
+          () -> new NoSuchElementException("Project with ID: %d not found".formatted(id)));
 
       // * Update data entity lama pakai data request baru
       projectMapper.updateEntityFromRequest(projectRequest, project);
@@ -188,7 +170,8 @@ public class ProjectService {
         // Hapus file lama di Cloudinary jika ada
         if (project.getLogoUrl() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(project.getLogoUrl());
-          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null)
+            fileUploadService.deleteFile(oldPublicId);
         }
         String uploadedUrl = fileUploadService.uploadFile(logoFile, "portfolio/projects/logo");
         project.setLogoUrl(uploadedUrl);
@@ -227,11 +210,8 @@ public class ProjectService {
 
   @Transactional
   public void deleteProject(Long id) {
-    Project project =
-        projectRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+    Project project = projectRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
 
     if (!projectRepository.existsById(id)) {
       throw new NoSuchElementException("Project with ID: %d not found".formatted(id));

@@ -9,7 +9,7 @@ import com.api.rizz.portfolio_api.mapper.AuthMapper;
 import com.api.rizz.portfolio_api.mapper.UserMapper;
 import com.api.rizz.portfolio_api.repository.UserRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -60,13 +60,11 @@ public class AuthService {
 
   @Transactional
   public AuthResponse login(LoginRequest request) {
-    authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+    authenticationManager
+        .authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-    User user =
-        userRepository
-            .findByEmail(request.email())
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    User user = userRepository.findByEmail(request.email())
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
     String token = jwtService.generateToken(user);
 
     return new AuthResponse(token, userMapper.toResponse(user));
