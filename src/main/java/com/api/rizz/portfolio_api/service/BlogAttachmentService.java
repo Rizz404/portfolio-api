@@ -79,9 +79,8 @@ public class BlogAttachmentService {
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {
-      // * LOGIKA CURSOR: Biasanya gak butuh info total halaman, cukup ambil 'size'
-      // * datanya aja
-      Pageable limitOnly = PageRequest.of(0, size, finalSort);
+      // * LOGIKA CURSOR: Ambil 'size + 1' untuk mengecek apakah masih ada sisa data untuk next page
+      Pageable limitOnly = PageRequest.of(0, size + 1, finalSort);
       Page<BlogAttachment> result = blogAttachmentRepository.findAll(spec, limitOnly);
       return result.getContent().stream().map(blogAttachmentMapper::toResponse).toList();
     } else {

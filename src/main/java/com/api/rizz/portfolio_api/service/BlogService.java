@@ -33,8 +33,8 @@ public class BlogService {
 
   // * Dari springframework bukan jakarta Transactional nya
   @Transactional
-  public BlogResponse createBlog(
-      BlogRequest blogRequest, MultipartFile featuredImage, List<MultipartFile> attachments) {
+  public BlogResponse createBlog(BlogRequest blogRequest, MultipartFile featuredImage,
+      List<MultipartFile> attachments) {
     try {
       long newId = snowflakeGenerator.nextId();
       String generatedSlug = blogRequest.title().toLowerCase().replaceAll("[^a-z0-9]+", "-");
@@ -68,14 +68,9 @@ public class BlogService {
           if (!file.isEmpty()) {
             String fileUrl = fileUploadService.uploadFile(file, "portfolio/blogs/attachments");
 
-            BlogAttachment attachment =
-                BlogAttachment.builder()
-                    .id(snowflakeGenerator.nextId())
-                    .blog(blog)
-                    .fileName(file.getOriginalFilename())
-                    .fileUrl(fileUrl)
-                    .fileType(file.getContentType())
-                    .build();
+            BlogAttachment attachment = BlogAttachment.builder().id(snowflakeGenerator.nextId())
+                .blog(blog).fileName(file.getOriginalFilename()).fileUrl(fileUrl)
+                .fileType(file.getContentType()).build();
 
             attachmentEntities.add(attachment);
           }
@@ -96,30 +91,29 @@ public class BlogService {
   }
 
   @Transactional(readOnly = true)
-  public Object findAllBlogs(
-      String search, Long cursor, int page, int size, List<String> sortBy, List<String> sortDir) {
-    Specification<Blog> spec =
-        (root, query, cb) -> {
-          // * 1. Siapkan Filter (Where Clause Dinamis)
-          List<Predicate> predicates = new ArrayList<>();
+  public Object findAllBlogs(String search, Long cursor, int page, int size, List<String> sortBy,
+      List<String> sortDir) {
+    Specification<Blog> spec = (root, query, cb) -> {
+      // * 1. Siapkan Filter (Where Clause Dinamis)
+      List<Predicate> predicates = new ArrayList<>();
 
-          // * Kalau ada keyword pencarian di title dan content
-          if (search != null && !search.isBlank()) {
-            String searchKeyword = "%" + search.toLowerCase() + "%";
+      // * Kalau ada keyword pencarian di title dan content
+      if (search != null && !search.isBlank()) {
+        String searchKeyword = "%" + search.toLowerCase() + "%";
 
-            // * cb.or() = Pilih salah satu yang cocok (OR)
-            Predicate searchTitle = cb.like(cb.lower(root.get("title")), searchKeyword);
-            Predicate searchContent = cb.like(cb.lower(root.get("content")), searchKeyword);
+        // * cb.or() = Pilih salah satu yang cocok (OR)
+        Predicate searchTitle = cb.like(cb.lower(root.get("title")), searchKeyword);
+        Predicate searchContent = cb.like(cb.lower(root.get("content")), searchKeyword);
 
-            predicates.add(cb.or(searchTitle, searchContent));
-          }
+        predicates.add(cb.or(searchTitle, searchContent));
+      }
 
-          // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
-          if (cursor != null) {
-            predicates.add(cb.lessThan(root.get("id"), cursor));
-          }
-          return cb.and(predicates.toArray(Predicate[]::new));
-        };
+      // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
+      if (cursor != null) {
+        predicates.add(cb.lessThan(root.get("id"), cursor));
+      }
+      return cb.and(predicates.toArray(Predicate[]::new));
+    };
 
     // * 2. Siapkan Sorting (Ascending / Descending)
     Sort finalSort = Sort.unsorted();
@@ -132,10 +126,8 @@ public class BlogService {
       String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
 
       // Bikin gerbong saat ini
-      Sort currentSort =
-          direction.equalsIgnoreCase("desc")
-              ? Sort.by(field).descending()
-              : Sort.by(field).ascending();
+      Sort currentSort = direction.equalsIgnoreCase("desc") ? Sort.by(field).descending()
+          : Sort.by(field).ascending();
 
       // Sambungin ke kereta utama pakai .and() !
       finalSort = finalSort.and(currentSort);
@@ -143,9 +135,8 @@ public class BlogService {
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {
-      // * LOGIKA CURSOR: Biasanya gak butuh info total halaman, cukup ambil 'size'
-      // * datanya aja
-      Pageable limitOnly = PageRequest.of(0, size, finalSort);
+      // * LOGIKA CURSOR: Ambil 'size + 1' untuk mengecek apakah masih ada sisa data untuk next page
+      Pageable limitOnly = PageRequest.of(0, size + 1, finalSort);
       Page<Blog> result = blogRepository.findAll(spec, limitOnly);
       return result.getContent().stream().map(blogMapper::toResponse).toList();
     } else {
@@ -160,27 +151,18 @@ public class BlogService {
 
   @Transactional(readOnly = true)
   public BlogResponse findBlogById(Long id) {
-    Blog blog =
-        blogRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+    Blog blog = blogRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
 
     return blogMapper.toResponse(blog);
   }
 
   @Transactional
-  public BlogResponse updateBlog(
-      Long id,
-      BlogRequest blogRequest,
-      MultipartFile featuredImageFile,
+  public BlogResponse updateBlog(Long id, BlogRequest blogRequest, MultipartFile featuredImageFile,
       List<MultipartFile> newAttachments) {
     try {
-      Blog blog =
-          blogRepository
-              .findById(id)
-              .orElseThrow(
-                  () -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+      Blog blog = blogRepository.findById(id).orElseThrow(
+          () -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
 
       // * Update data entity lama pakai data request baru
       blogMapper.updateEntityFromRequest(blogRequest, blog);
@@ -199,7 +181,8 @@ public class BlogService {
         // Hapus file lama di Cloudinary jika ada
         if (blog.getFeaturedImage() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(blog.getFeaturedImage());
-          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null)
+            fileUploadService.deleteFile(oldPublicId);
         }
         String uploadedUrl =
             fileUploadService.uploadFile(featuredImageFile, "portfolio/blogs/featured");
@@ -212,14 +195,9 @@ public class BlogService {
         for (MultipartFile file : newAttachments) {
           if (!file.isEmpty()) {
             String fileUrl = fileUploadService.uploadFile(file, "portfolio/blogs/attachments");
-            BlogAttachment attachment =
-                BlogAttachment.builder()
-                    .id(snowflakeGenerator.nextId())
-                    .blog(blog)
-                    .fileName(file.getOriginalFilename())
-                    .fileUrl(fileUrl)
-                    .fileType(file.getContentType())
-                    .build();
+            BlogAttachment attachment = BlogAttachment.builder().id(snowflakeGenerator.nextId())
+                .blog(blog).fileName(file.getOriginalFilename()).fileUrl(fileUrl)
+                .fileType(file.getContentType()).build();
             blog.getBlogAttachments().add(attachment); // Tambahkan ke relasi yang sudah ada
           }
         }
@@ -234,11 +212,8 @@ public class BlogService {
 
   @Transactional
   public void deleteBlog(Long id) {
-    Blog blog =
-        blogRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
+    Blog blog = blogRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Blog with ID: %d not found".formatted(id)));
 
     if (!blogRepository.existsById(id)) {
       throw new NoSuchElementException("Blog with ID: %d not found".formatted(id));
