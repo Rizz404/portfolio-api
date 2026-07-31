@@ -60,28 +60,20 @@ public class BlogController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> findAllBlogs(
-      @RequestParam(required = false) String search,
-      @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "1") int page,
+  public ResponseEntity<?> findAllBlogs(@RequestParam(required = false) String search,
+      @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
     Object response = blogService.findAllBlogs(search, cursor, page, size, sortBy, sortDir);
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
-      PagingInfo pagingInfo =
-          new PagingInfo(
-              (int) pageResult.getTotalElements(),
-              pageResult.getSize(),
-              pageResult.getNumber() + 1,
-              pageResult.getTotalPages(),
-              pageResult.hasPrevious(),
-              pageResult.hasNext());
+      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
+          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
+          pageResult.hasPrevious(), pageResult.hasNext());
 
-      PagedResponse<?> pagedResponse =
-          new PagedResponse<>(
-              "Successfully retrieved blog list", pageResult.getContent(), pagingInfo);
+      PagedResponse<?> pagedResponse = new PagedResponse<>("Successfully retrieved blog list",
+          pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -91,12 +83,19 @@ public class BlogController {
       String nextCursor = null;
       boolean hasNextPage = false;
 
-      if (!data.isEmpty()) {
-        nextCursor = data.get(data.size() - 1).id();
-        hasNextPage = data.size() == size;
+      // * Cek apakah data yang didapat lebih dari size yang diminta (artinya masih ada next page)
+      if (data.size() > size) {
+        hasNextPage = true;
+        // Hapus elemen terakhir (elemen ekstra) agar tidak ikut ke-return ke Frontend
+        data.remove(data.size() - 1);
       }
 
-      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
+      if (!data.isEmpty()) {
+        // Ambil ID dari elemen paling terakhir di list (setelah dipotong) sebagai nextCursor
+        nextCursor = String.valueOf(data.get(data.size() - 1).id());
+      }
+
+      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, data.size());
       CursorResponse<List<BlogResponse>> cursorResponse =
           new CursorResponse<>("Successfully retrieved blog list with cursor", data, cursorInfo);
 
@@ -117,8 +116,8 @@ public class BlogController {
 
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SuccessResponse<BlogResponse>> updateBlogJson(
-      @PathVariable("id") Long id, @Valid @RequestBody BlogRequest request) {
+  public ResponseEntity<SuccessResponse<BlogResponse>> updateBlogJson(@PathVariable("id") Long id,
+      @Valid @RequestBody BlogRequest request) {
 
     BlogResponse blogResponse = blogService.updateBlog(id, request, null, null);
 
@@ -131,8 +130,7 @@ public class BlogController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<SuccessResponse<BlogResponse>> updateBlogMultipart(
-      @PathVariable("id") Long id,
-      @Valid @RequestPart("data") BlogRequest request,
+      @PathVariable("id") Long id, @Valid @RequestPart("data") BlogRequest request,
       @RequestPart(value = "featuredImageFile", required = false) MultipartFile featuredImageFile,
       @RequestPart(value = "newAttachments", required = false) List<MultipartFile> newAttachments) {
 

@@ -63,12 +63,9 @@ public class ProjectController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> findAllProjects(
-      @RequestParam(required = false) String search,
-      @RequestParam(required = false) String status,
-      @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "1") int page,
-      @RequestParam(defaultValue = "10") int size,
+  public ResponseEntity<?> findAllProjects(@RequestParam(required = false) String search,
+      @RequestParam(required = false) String status, @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
     Object response =
@@ -76,36 +73,36 @@ public class ProjectController {
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
       // * Spring Data Page dimulai dari 0, kita +1 agar lebih lazim untuk Frontend
-      PagingInfo pagingInfo =
-          new PagingInfo(
-              (int) pageResult.getTotalElements(),
-              pageResult.getSize(),
-              pageResult.getNumber() + 1,
-              pageResult.getTotalPages(),
-              pageResult.hasPrevious(),
-              pageResult.hasNext());
+      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
+          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
+          pageResult.hasPrevious(), pageResult.hasNext());
 
-      PagedResponse<?> pagedResponse =
-          new PagedResponse<>(
-              "Successfully retrieved project list", pageResult.getContent(), pagingInfo);
+      PagedResponse<?> pagedResponse = new PagedResponse<>("Successfully retrieved project list",
+          pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
-
       @SuppressWarnings("unchecked")
-      List<ProjectResponse> data = (List<ProjectResponse>) listResult;
+      // * Bungkus dengan ArrayList baru agar datanya bisa dimodifikasi (mutable)
+      List<ProjectResponse> data = new java.util.ArrayList<>((List<ProjectResponse>) listResult);
 
       String nextCursor = null;
       boolean hasNextPage = false;
 
-      if (!data.isEmpty()) {
-        // Ambil ID dari elemen paling terakhir sebagai nextCursor (di-parse ke Long)
-        nextCursor = data.get(data.size() - 1).id();
-        // kemungkinan masih ada sisa data di database
-        hasNextPage = data.size() == size;
+      // * Cek apakah data yang didapat lebih dari size yang diminta (artinya masih ada next page)
+      if (data.size() > size) {
+        hasNextPage = true;
+        // * Hapus elemen terakhir (elemen ekstra) agar tidak ikut ke-return ke Frontend
+        data.remove(data.size() - 1);
       }
 
-      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
+      if (!data.isEmpty()) {
+        // * Ambil ID dari elemen paling terakhir di list (setelah dipotong) sebagai nextCursor
+        nextCursor = String.valueOf(data.get(data.size() - 1).id());
+      }
+
+      // * Ubah 'size' jadi data.size() untuk tahu jumlah aslinya
+      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, data.size());
       CursorResponse<List<ProjectResponse>> cursorResponse =
           new CursorResponse<>("Successfully retrieved project list with cursor", data, cursorInfo);
 
@@ -141,8 +138,7 @@ public class ProjectController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<SuccessResponse<ProjectResponse>> updateProjectMultipart(
-      @PathVariable("id") Long id,
-      @Valid @RequestPart("data") ProjectRequest request,
+      @PathVariable("id") Long id, @Valid @RequestPart("data") ProjectRequest request,
       @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
       @RequestPart(value = "newImageFiles", required = false) List<MultipartFile> newImageFiles) {
 

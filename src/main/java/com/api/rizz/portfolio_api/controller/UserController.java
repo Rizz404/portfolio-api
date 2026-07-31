@@ -60,33 +60,22 @@ public class UserController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> findAllUsers(
-      @RequestParam(required = false) String search,
-      @RequestParam(required = false) String role,
-      @RequestParam(required = false) String provider,
-      @RequestParam(required = false) String gender,
-      @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "1") int page,
-      @RequestParam(defaultValue = "10") int size,
+  public ResponseEntity<?> findAllUsers(@RequestParam(required = false) String search,
+      @RequestParam(required = false) String role, @RequestParam(required = false) String provider,
+      @RequestParam(required = false) String gender, @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
       @RequestParam(defaultValue = "desc") List<String> sortDir) {
-    Object response =
-        userService.findAllUsers(
-            search, role, provider, gender, cursor, page, size, sortBy, sortDir);
+    Object response = userService.findAllUsers(search, role, provider, gender, cursor, page, size,
+        sortBy, sortDir);
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
-      PagingInfo pagingInfo =
-          new PagingInfo(
-              (int) pageResult.getTotalElements(),
-              pageResult.getSize(),
-              pageResult.getNumber() + 1,
-              pageResult.getTotalPages(),
-              pageResult.hasPrevious(),
-              pageResult.hasNext());
+      PagingInfo pagingInfo = new PagingInfo((int) pageResult.getTotalElements(),
+          pageResult.getSize(), pageResult.getNumber() + 1, pageResult.getTotalPages(),
+          pageResult.hasPrevious(), pageResult.hasNext());
 
-      PagedResponse<?> pagedResponse =
-          new PagedResponse<>(
-              "Successfully retrieved user list", pageResult.getContent(), pagingInfo);
+      PagedResponse<?> pagedResponse = new PagedResponse<>("Successfully retrieved user list",
+          pageResult.getContent(), pagingInfo);
 
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
@@ -96,12 +85,19 @@ public class UserController {
       String nextCursor = null;
       boolean hasNextPage = false;
 
-      if (!data.isEmpty()) {
-        nextCursor = data.get(data.size() - 1).id();
-        hasNextPage = data.size() == size;
+      // * Cek apakah data yang didapat lebih dari size yang diminta (artinya masih ada next page)
+      if (data.size() > size) {
+        hasNextPage = true;
+        // Hapus elemen terakhir (elemen ekstra) agar tidak ikut ke-return ke Frontend
+        data.remove(data.size() - 1);
       }
 
-      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, size);
+      if (!data.isEmpty()) {
+        // Ambil ID dari elemen paling terakhir di list (setelah dipotong) sebagai nextCursor
+        nextCursor = String.valueOf(data.get(data.size() - 1).id());
+      }
+
+      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, data.size());
       CursorResponse<List<UserResponse>> cursorResponse =
           new CursorResponse<>("Successfully retrieved user list with cursor", data, cursorInfo);
 
@@ -122,8 +118,8 @@ public class UserController {
 
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SuccessResponse<UserResponse>> updateUserJson(
-      @PathVariable("id") Long id, @Valid @RequestBody UserRequest request) {
+  public ResponseEntity<SuccessResponse<UserResponse>> updateUserJson(@PathVariable("id") Long id,
+      @Valid @RequestBody UserRequest request) {
 
     UserResponse userResponse = userService.updateUser(id, request, null);
 
@@ -136,8 +132,7 @@ public class UserController {
   @PreAuthorize("isAuthenticated()")
   @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<SuccessResponse<UserResponse>> updateUserMultipart(
-      @PathVariable("id") Long id,
-      @Valid @RequestPart("data") UserRequest request,
+      @PathVariable("id") Long id, @Valid @RequestPart("data") UserRequest request,
       @RequestPart(value = "profilePictFile", required = false) MultipartFile profilePictFile) {
 
     UserResponse userResponse = userService.updateUser(id, request, profilePictFile);
