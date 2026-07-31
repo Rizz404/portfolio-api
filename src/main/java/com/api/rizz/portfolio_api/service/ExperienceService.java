@@ -7,7 +7,6 @@ import com.api.rizz.portfolio_api.mapper.ExperienceMapper;
 import com.api.rizz.portfolio_api.repository.ExperienceRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
-import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor // * Otomatis buatin Dependency Injection buat variabel "final"
@@ -46,43 +46,51 @@ public class ExperienceService {
     return experienceMapper.toResponse(savedExperience);
   }
 
-  public Object findAllExperiences(String search, Boolean isCurrent, LocalDate startDate,
-      LocalDate endDate, Long cursor, int page, int size, List<String> sortBy,
+  public Object findAllExperiences(
+      String search,
+      Boolean isCurrent,
+      LocalDate startDate,
+      LocalDate endDate,
+      Long cursor,
+      int page,
+      int size,
+      List<String> sortBy,
       List<String> sortDir) {
-    Specification<Experience> spec = (root, query, cb) -> {
-      // * 1. Siapkan Filter (Where Clause Dinamis)
-      List<Predicate> predicates = new ArrayList<>();
+    Specification<Experience> spec =
+        (root, query, cb) -> {
+          // * 1. Siapkan Filter (Where Clause Dinamis)
+          List<Predicate> predicates = new ArrayList<>();
 
-      // * Kalau ada keyword pencarian di company name dan position
-      if (search != null && !search.isBlank()) {
-        String searchKeyword = "%" + search.toLowerCase() + "%";
+          // * Kalau ada keyword pencarian di company name dan position
+          if (search != null && !search.isBlank()) {
+            String searchKeyword = "%" + search.toLowerCase() + "%";
 
-        // * cb.or() = Pilih salah satu yang cocok (OR)
-        Predicate searchCompanyName = cb.like(cb.lower(root.get("companyName")), searchKeyword);
-        Predicate searchPosition = cb.like(cb.lower(root.get("position")), searchKeyword);
+            // * cb.or() = Pilih salah satu yang cocok (OR)
+            Predicate searchCompanyName = cb.like(cb.lower(root.get("companyName")), searchKeyword);
+            Predicate searchPosition = cb.like(cb.lower(root.get("position")), searchKeyword);
 
-        predicates.add(cb.or(searchCompanyName, searchPosition));
-      }
+            predicates.add(cb.or(searchCompanyName, searchPosition));
+          }
 
-      // * Harus kek gini kalo bool
-      if (Boolean.TRUE.equals(isCurrent)) {
-        predicates.add(cb.equal(root.get("isCurrent"), isCurrent));
-      }
+          // * Harus kek gini kalo bool
+          if (Boolean.TRUE.equals(isCurrent)) {
+            predicates.add(cb.equal(root.get("isCurrent"), isCurrent));
+          }
 
-      // * Start date end date logic yang sering dipake
-      if (startDate != null) {
-        predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), startDate));
-      }
-      if (endDate != null) {
-        predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), endDate));
-      }
+          // * Start date end date logic yang sering dipake
+          if (startDate != null) {
+            predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), startDate));
+          }
+          if (endDate != null) {
+            predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), endDate));
+          }
 
-      // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
-      if (cursor != null) {
-        predicates.add(cb.lessThan(root.get("id"), cursor));
-      }
-      return cb.and(predicates.toArray(Predicate[]::new));
-    };
+          // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
+          if (cursor != null) {
+            predicates.add(cb.lessThan(root.get("id"), cursor));
+          }
+          return cb.and(predicates.toArray(Predicate[]::new));
+        };
 
     // * 2. Siapkan Sorting (Ascending / Descending)
     Sort finalSort = Sort.unsorted();
@@ -95,8 +103,10 @@ public class ExperienceService {
       String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
 
       // Bikin gerbong saat ini
-      Sort currentSort = direction.equalsIgnoreCase("desc") ? Sort.by(field).descending()
-          : Sort.by(field).ascending();
+      Sort currentSort =
+          direction.equalsIgnoreCase("desc")
+              ? Sort.by(field).descending()
+              : Sort.by(field).ascending();
 
       // Sambungin ke kereta utama pakai .and() !
       finalSort = finalSort.and(currentSort);
@@ -120,16 +130,22 @@ public class ExperienceService {
   }
 
   public ExperienceResponse findExperienceById(Long id) {
-    Experience experience = experienceRepository.findById(id).orElseThrow(
-        () -> new NoSuchElementException("Experience with ID: %d not found".formatted(id)));
+    Experience experience =
+        experienceRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new NoSuchElementException("Experience with ID: %d not found".formatted(id)));
 
     return experienceMapper.toResponse(experience);
   }
 
   @Transactional
   public ExperienceResponse updateExperience(Long id, ExperienceRequest experienceRequest) {
-    Experience experience = experienceRepository.findById(id).orElseThrow(
-        () -> new NoSuchElementException("Experience with ID: %d not found".formatted(id)));
+    Experience experience =
+        experienceRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new NoSuchElementException("Experience with ID: %d not found".formatted(id)));
 
     // * Update data entity lama pakai data request baru
     experienceMapper.updateEntityFromRequest(experienceRequest, experience);
