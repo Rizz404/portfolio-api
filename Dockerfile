@@ -12,7 +12,7 @@ RUN chmod +x mvnw && \
 
 COPY src/ src/
 RUN ./mvnw clean package -DskipTests -B && \
-    java -Djarmode=tools -jar target/*.jar extract --layers --destination target/extracted
+    java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
 
 # ---------- Runtime stage ----------
 FROM eclipse-temurin:25-jre-alpine AS runtime
@@ -37,4 +37,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
     CMD curl -f http://localhost:8080/api/v1/actuator/health || exit 1
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar application.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]
