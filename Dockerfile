@@ -4,15 +4,13 @@
 FROM eclipse-temurin:25-jdk-alpine AS build
 WORKDIR /app
 
-# Cache dependencies separately from source so code changes don't bust the layer
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 RUN chmod +x mvnw && \
     ./mvnw dependency:go-offline -B
 
 COPY src/ src/
-RUN ./mvnw clean package -DskipTests -B && \
-    java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
+RUN ./mvnw clean package -DskipTests -B
 
 # ---------- Runtime stage ----------
 FROM eclipse-temurin:25-jre-alpine AS runtime
@@ -22,11 +20,7 @@ RUN apk add --no-cache curl tzdata && \
     addgroup -S spring && adduser -S spring -G spring && \
     mkdir -p /app/logs && chown -R spring:spring /app/logs
 
-# Layered copy: dependencies change least often, application layer changes most
-COPY --from=build --chown=spring:spring /app/target/extracted/dependencies/ ./
-COPY --from=build --chown=spring:spring /app/target/extracted/spring-boot-loader/ ./
-COPY --from=build --chown=spring:spring /app/target/extracted/snapshot-dependencies/ ./
-COPY --from=build --chown=spring:spring /app/target/extracted/application/ ./
+COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
 
 USER spring:spring
 
@@ -37,4 +31,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
     CMD curl -f http://localhost:8080/api/v1/actuator/health || exit 1
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
