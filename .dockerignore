@@ -1,0 +1,15 @@
+target/
+logs/
+*.log
+.git/
+.gitignore
+.idea/
+.vscode/
+.mvn/wrapper/maven-wrapper.jar
+*.iml
+.env*
+HELP.md
+docs/
+bruno/
+Dockerfile
+.dockerignore
