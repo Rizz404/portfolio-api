@@ -1,6 +1,9 @@
 package com.api.rizz.portfolio_api.seeder;
 
 import com.api.rizz.portfolio_api.entity.Project;
+import com.api.rizz.portfolio_api.entity.Project.LinkType;
+import com.api.rizz.portfolio_api.entity.Project.ProjectStatus;
+import com.api.rizz.portfolio_api.entity.Project.ProjectType;
 import com.api.rizz.portfolio_api.repository.ProjectRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import java.util.List;
@@ -37,10 +40,17 @@ public class ProjectSeeder {
               .name(appName)
               .slug(appName.toLowerCase().replaceAll("[^a-z0-9]+", "-"))
               .description(faker.lorem().paragraph(2))
-              .status("active")
+              .status(ProjectStatus.active)
               .logoUrl(faker.internet().image())
               .imageUrls(List.of(faker.internet().image()))
-              .projectLinks(Map.of("demo", faker.internet().url()))
+              .projectLinks(
+                  Map.of(
+                      LinkType.demo, faker.internet().url(),
+                      LinkType.github, faker.internet().url()))
+              .techStack(Map.of(faker.programmingLanguage().name(), faker.internet().image()))
+              .projectTypes(
+                  List.of(
+                      ProjectType.values()[faker.random().nextInt(ProjectType.values().length)]))
               .build();
 
       projectRepository.save(randomProject);

@@ -2,6 +2,8 @@ package com.api.rizz.portfolio_api.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
@@ -26,6 +28,45 @@ import org.hibernate.type.SqlTypes;
 @Builder
 /** Project */
 public class Project {
+
+  public enum ProjectStatus {
+    active,
+    inactive,
+    development,
+    maintenance,
+    archived
+  }
+
+  public enum ProjectType {
+    frontend,
+    backend,
+    fullstack,
+    mobile,
+    desktop,
+    api,
+    library,
+    other
+  }
+
+  public enum LinkType {
+    github,
+    gitlab,
+    bitbucket,
+    source_code,
+    demo,
+    website,
+    figma,
+    documentation,
+    api_docs,
+    video,
+    playstore,
+    appstore,
+    npm,
+    dockerhub,
+    staging,
+    other
+  }
+
   @Id private Long id;
 
   @Column(nullable = false, unique = true)
@@ -37,8 +78,9 @@ public class Project {
   @Column(columnDefinition = "TEXT")
   private String description;
 
+  @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 50)
-  private String status;
+  private ProjectStatus status;
 
   @Column(name = "logo_url")
   private String logoUrl;
@@ -49,7 +91,15 @@ public class Project {
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "project_links", columnDefinition = "jsonb")
-  Map<String, String> projectLinks; // * Biar key value pair
+  Map<LinkType, String> projectLinks; // * Biar key value pair
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "tech_stack", columnDefinition = "jsonb")
+  private Map<String, String> techStack; // * Key = nama tech, Value = logo URL
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "project_types", columnDefinition = "jsonb")
+  private List<ProjectType> projectTypes; // * Frontend, backend, mobile, dll (bisa lebih dari satu)
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false, nullable = false)

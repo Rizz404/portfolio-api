@@ -1,5 +1,8 @@
 package com.api.rizz.portfolio_api.dto.response;
 
+import com.api.rizz.portfolio_api.entity.Project.LinkType;
+import com.api.rizz.portfolio_api.entity.Project.ProjectStatus;
+import com.api.rizz.portfolio_api.entity.Project.ProjectType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -14,9 +17,11 @@ public record ProjectResponse(
     String slug,
     String name,
     String description,
-    String status,
+    ProjectStatus status,
     String logoUrl,
     List<String> imageUrls,
-    Map<String, String> projectLinks,
+    Map<LinkType, String> projectLinks,
+    Map<String, String> techStack,
+    List<ProjectType> projectTypes,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt) {}

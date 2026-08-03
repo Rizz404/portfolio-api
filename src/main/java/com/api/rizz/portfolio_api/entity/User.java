@@ -63,11 +63,11 @@ public class User implements UserDetails {
   private String password;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column(nullable = false, length = 50)
   private Role role = Role.USER;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column(nullable = false, length = 50)
   private AuthProvider provider = AuthProvider.LOCAL;
 
   @Column(name = "profile_picture")
@@ -80,6 +80,7 @@ public class User implements UserDetails {
   private LocalDate dateOfBirth;
 
   @Enumerated(EnumType.STRING)
+  @Column(length = 50)
   private Gender gender;
 
   @Column(name = "phone_number")

@@ -39,7 +39,7 @@ public class Use {
   private String itemName;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column(nullable = false, length = 50)
   private Category category;
 
   @Column(name = "logo_url")

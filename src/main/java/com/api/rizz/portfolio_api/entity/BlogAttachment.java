@@ -2,6 +2,8 @@ package com.api.rizz.portfolio_api.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -25,6 +27,16 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Builder
 /** BlogAttachment */
 public class BlogAttachment {
+
+  public enum AttachmentType {
+    image,
+    document,
+    video,
+    audio,
+    archive,
+    other
+  }
+
   @Id private Long id;
 
   @ManyToOne(fetch = FetchType.EAGER)
@@ -39,6 +51,10 @@ public class BlogAttachment {
 
   @Column(name = "file_type", nullable = false, length = 100)
   private String fileType;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "attachment_type", nullable = false, length = 50)
+  private AttachmentType attachmentType;
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false, nullable = false)

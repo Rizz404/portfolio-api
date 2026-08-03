@@ -2,6 +2,7 @@ package com.api.rizz.portfolio_api.seeder;
 
 import com.api.rizz.portfolio_api.entity.Blog;
 import com.api.rizz.portfolio_api.entity.BlogAttachment;
+import com.api.rizz.portfolio_api.entity.BlogAttachment.AttachmentType;
 import com.api.rizz.portfolio_api.repository.BlogRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import java.util.ArrayList;
@@ -57,6 +58,8 @@ public class BlogSeeder {
                 .fileName(faker.file().fileName())
                 .fileUrl(faker.internet().url())
                 .fileType(faker.file().extension())
+                .attachmentType(
+                    AttachmentType.values()[faker.random().nextInt(AttachmentType.values().length)])
                 .build();
         attachments.add(attachment);
       }

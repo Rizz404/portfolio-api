@@ -3,6 +3,7 @@ package com.api.rizz.portfolio_api.service;
 import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
 import com.api.rizz.portfolio_api.dto.response.ProjectResponse;
 import com.api.rizz.portfolio_api.entity.Project;
+import com.api.rizz.portfolio_api.entity.Project.ProjectStatus;
 import com.api.rizz.portfolio_api.mapper.ProjectMapper;
 import com.api.rizz.portfolio_api.repository.ProjectRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
@@ -103,7 +104,7 @@ public class ProjectService {
 
           // * Kalau mau filter berdasarkan status (active/development)
           if (status != null && !status.isBlank()) {
-            predicates.add(cb.equal(root.get("status"), status));
+            predicates.add(cb.equal(root.get("status"), ProjectStatus.valueOf(status)));
           }
 
           // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
