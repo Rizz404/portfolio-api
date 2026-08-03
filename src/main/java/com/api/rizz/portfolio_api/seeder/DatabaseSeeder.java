@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Profile("dev") // * [ ! ] Eksekusi ini HANYA berjalan jika spring.profiles.active=dev
 @RequiredArgsConstructor
 public class DatabaseSeeder implements CommandLineRunner {
+  private final UserSeeder userSeeder;
   private final ProjectSeeder projectSeeder;
   private final ExperienceSeeder experienceSeeder;
   private final BlogSeeder blogSeeder;
@@ -19,6 +20,7 @@ public class DatabaseSeeder implements CommandLineRunner {
   @Override
   public void run(String... args) throws Exception {
     log.info("Running seeder isolation for the development environment...");
+    userSeeder.seed();
     projectSeeder.seed();
     experienceSeeder.seed();
     blogSeeder.seed();
