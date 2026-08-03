@@ -13,6 +13,8 @@ CREATE TABLE projects (
       'archived'
     )
   ),
+  tech_stack JSONB,
+  project_types JSONB,
   logo_url VARCHAR(255),
   -- Menggunakan JSONB untuk performa query array gambar yang lebih cepat
   image_urls JSONB,
