@@ -1,6 +1,6 @@
 package com.api.rizz.portfolio_api.dto.response;
 
-import com.api.rizz.portfolio_api.entity.BlogAttachment.AttachmentType;
+import com.api.rizz.portfolio_api.entity.BlogAttachment.FileType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.OffsetDateTime;
 
@@ -9,7 +9,6 @@ public record BlogAttachmentResponse(
     String blogId, // Mengembalikan String ID, bukan objek Blog
     String fileName,
     String fileUrl,
-    String fileType,
-    AttachmentType attachmentType,
+    FileType fileType,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt) {}

@@ -28,7 +28,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 /** BlogAttachment */
 public class BlogAttachment {
 
-  public enum AttachmentType {
+  public enum FileType {
     image,
     document,
     video,
@@ -49,12 +49,9 @@ public class BlogAttachment {
   @Column(name = "file_url", nullable = false)
   private String fileUrl;
 
-  @Column(name = "file_type", nullable = false, length = 100)
-  private String fileType;
-
   @Enumerated(EnumType.STRING)
-  @Column(name = "attachment_type", nullable = false, length = 50)
-  private AttachmentType attachmentType;
+  @Column(name = "file_type", nullable = false, length = 50)
+  private FileType fileType;
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false, nullable = false)

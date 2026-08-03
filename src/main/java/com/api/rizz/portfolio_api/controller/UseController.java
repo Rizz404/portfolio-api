@@ -104,7 +104,7 @@ public class UseController {
         nextCursor = String.valueOf(data.get(data.size() - 1).id());
       }
 
-      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, data.size());
+      CursorInfo cursorInfo = new CursorInfo(nextCursor, data.size(), hasNextPage);
       CursorResponse<List<UseResponse>> cursorResponse =
           new CursorResponse<>("Successfully retrieved use list with cursor", data, cursorInfo);
 

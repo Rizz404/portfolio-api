@@ -108,7 +108,7 @@ public class UserController {
         nextCursor = String.valueOf(data.get(data.size() - 1).id());
       }
 
-      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, data.size());
+      CursorInfo cursorInfo = new CursorInfo(nextCursor, data.size(), hasNextPage);
       CursorResponse<List<UserResponse>> cursorResponse =
           new CursorResponse<>("Successfully retrieved user list with cursor", data, cursorInfo);
 

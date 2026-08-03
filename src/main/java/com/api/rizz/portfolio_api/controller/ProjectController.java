@@ -111,7 +111,7 @@ public class ProjectController {
       }
 
       // * Ubah 'size' jadi data.size() untuk tahu jumlah aslinya
-      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, data.size());
+      CursorInfo cursorInfo = new CursorInfo(nextCursor, data.size(), hasNextPage);
       CursorResponse<List<ProjectResponse>> cursorResponse =
           new CursorResponse<>("Successfully retrieved project list with cursor", data, cursorInfo);
 

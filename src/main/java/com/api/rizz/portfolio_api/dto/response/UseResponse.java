@@ -8,10 +8,10 @@ import java.util.List;
 public record UseResponse(
     @JsonFormat(shape = JsonFormat.Shape.STRING) String id,
     String itemName,
+    String reasons,
     Category category,
     String logoUrl,
     List<String> pictures,
-    String reasons,
     List<String> links,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt) {}

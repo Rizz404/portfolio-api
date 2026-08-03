@@ -4,6 +4,7 @@ import com.api.rizz.portfolio_api.dto.request.BlogRequest;
 import com.api.rizz.portfolio_api.dto.response.BlogResponse;
 import com.api.rizz.portfolio_api.entity.Blog;
 import com.api.rizz.portfolio_api.entity.BlogAttachment;
+import com.api.rizz.portfolio_api.entity.BlogAttachment.FileType;
 import com.api.rizz.portfolio_api.mapper.BlogMapper;
 import com.api.rizz.portfolio_api.repository.BlogRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
@@ -74,7 +75,7 @@ public class BlogService {
                     .blog(blog)
                     .fileName(file.getOriginalFilename())
                     .fileUrl(fileUrl)
-                    .fileType(file.getContentType())
+                    .fileType(resolveFileType(file.getContentType()))
                     .build();
 
             attachmentEntities.add(attachment);
@@ -217,7 +218,7 @@ public class BlogService {
                     .blog(blog)
                     .fileName(file.getOriginalFilename())
                     .fileUrl(fileUrl)
-                    .fileType(file.getContentType())
+                    .fileType(resolveFileType(file.getContentType()))
                     .build();
             blog.getBlogAttachments().add(attachment); // Tambahkan ke relasi yang sudah ada
           }
@@ -267,5 +268,35 @@ public class BlogService {
     }
 
     blogRepository.deleteById(id);
+  }
+
+  // * Kategorikan MIME type upload jadi salah satu dari FileType, biar tidak perlu simpan
+  // MIME type mentah
+  private FileType resolveFileType(String contentType) {
+    if (contentType == null) return FileType.other;
+
+    if (contentType.startsWith("image/")) return FileType.image;
+    if (contentType.startsWith("video/")) return FileType.video;
+    if (contentType.startsWith("audio/")) return FileType.audio;
+
+    if (contentType.equals("application/zip")
+        || contentType.equals("application/x-rar-compressed")
+        || contentType.equals("application/x-7z-compressed")
+        || contentType.equals("application/gzip")
+        || contentType.equals("application/x-tar")) {
+      return FileType.archive;
+    }
+
+    if (contentType.equals("application/pdf")
+        || contentType.equals("application/msword")
+        || contentType.startsWith("application/vnd.openxmlformats-officedocument")
+        || contentType.startsWith("application/vnd.ms-")
+        || contentType.equals("text/plain")
+        || contentType.equals("text/markdown")
+        || contentType.equals("application/rtf")) {
+      return FileType.document;
+    }
+
+    return FileType.other;
   }
 }

@@ -3,8 +3,8 @@ CREATE TABLE blog_attachments (
   blog_id BIGINT NOT NULL,
   file_name VARCHAR(255) NOT NULL,
   file_url VARCHAR(255) NOT NULL,
-  attachment_type VARCHAR(50) NOT NULL DEFAULT 'other' CHECK (
-    attachment_type IN (
+  file_type VARCHAR(50) NOT NULL DEFAULT 'other' CHECK (
+    file_type IN (
       'image',
       'document',
       'video',

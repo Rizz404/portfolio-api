@@ -90,16 +90,16 @@ public class Project {
   private List<String> imageUrls;
 
   @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "project_links", columnDefinition = "jsonb")
-  Map<LinkType, String> projectLinks; // * Biar key value pair
-
-  @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "tech_stack", columnDefinition = "jsonb")
   private Map<String, String> techStack; // * Key = nama tech, Value = logo URL
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "project_types", columnDefinition = "jsonb")
   private List<ProjectType> projectTypes; // * Frontend, backend, mobile, dll (bisa lebih dari satu)
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "project_links", columnDefinition = "jsonb")
+  Map<LinkType, String> projectLinks; // * Biar key value pair
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false, nullable = false)

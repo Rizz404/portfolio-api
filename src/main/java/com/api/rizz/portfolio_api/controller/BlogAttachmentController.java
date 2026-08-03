@@ -86,7 +86,7 @@ public class BlogAttachmentController {
         nextCursor = String.valueOf(data.get(data.size() - 1).id());
       }
 
-      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, data.size());
+      CursorInfo cursorInfo = new CursorInfo(nextCursor, data.size(), hasNextPage);
       CursorResponse<List<BlogAttachmentResponse>> cursorResponse =
           new CursorResponse<>(
               "Successfully retrieved blog attachment list with cursor", data, cursorInfo);

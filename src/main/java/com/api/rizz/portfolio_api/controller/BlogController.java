@@ -103,7 +103,7 @@ public class BlogController {
         nextCursor = String.valueOf(data.get(data.size() - 1).id());
       }
 
-      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, data.size());
+      CursorInfo cursorInfo = new CursorInfo(nextCursor, data.size(), hasNextPage);
       CursorResponse<List<BlogResponse>> cursorResponse =
           new CursorResponse<>("Successfully retrieved blog list with cursor", data, cursorInfo);
 

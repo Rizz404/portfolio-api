@@ -37,6 +37,9 @@ public class Blog {
   @Column(nullable = false, columnDefinition = "TEXT")
   private String content;
 
+  @Column(name = "is_published")
+  private Boolean isPublished;
+
   @Column(name = "featured_image")
   private String featuredImage;
 
@@ -49,8 +52,12 @@ public class Blog {
   @Column(name = "dislikes_count")
   private int dislikesCount;
 
-  @Column(name = "is_published")
-  private Boolean isPublished;
+  @OneToMany(
+      mappedBy = "blog",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private List<BlogAttachment> blogAttachments;
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false, nullable = false)
@@ -59,11 +66,4 @@ public class Blog {
   @UpdateTimestamp
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
-
-  @OneToMany(
-      mappedBy = "blog",
-      cascade = CascadeType.ALL,
-      orphanRemoval = true,
-      fetch = FetchType.LAZY)
-  private List<BlogAttachment> blogAttachments;
 }

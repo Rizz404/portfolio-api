@@ -9,8 +9,8 @@ import org.hibernate.validator.constraints.URL;
 public record BlogRequest(
     @NotBlank(message = "Blog title cannot be empty") @Size(max = 255, message = "Blog title must not exceed 255 characters") String title,
     @NotBlank(message = "Blog content cannot be empty") String content,
-    @URL(message = "Featured image URL must be a valid URL") String featuredImageUrl,
     Boolean isPublished,
+    @URL(message = "Featured image URL must be a valid URL") String featuredImageUrl,
     @PositiveOrZero(message = "Views count cannot be negative") int viewsCount,
     @PositiveOrZero(message = "Likes count cannot be negative") int likesCount,
     @PositiveOrZero(message = "Dislikes count cannot be negative") int dislikesCount,

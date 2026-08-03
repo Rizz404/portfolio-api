@@ -20,8 +20,8 @@ public record ProjectResponse(
     ProjectStatus status,
     String logoUrl,
     List<String> imageUrls,
-    Map<LinkType, String> projectLinks,
     Map<String, String> techStack,
     List<ProjectType> projectTypes,
+    Map<LinkType, String> projectLinks,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt) {}

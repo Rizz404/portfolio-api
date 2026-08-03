@@ -13,11 +13,11 @@ CREATE TABLE projects (
       'archived'
     )
   ),
-  tech_stack JSONB,
-  project_types JSONB,
   logo_url VARCHAR(255),
   -- Menggunakan JSONB untuk performa query array gambar yang lebih cepat
   image_urls JSONB,
+  tech_stack JSONB,
+  project_types JSONB,
   -- Menyimpan multi-link (repo, demo, figma) dalam format key-value
   project_links JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

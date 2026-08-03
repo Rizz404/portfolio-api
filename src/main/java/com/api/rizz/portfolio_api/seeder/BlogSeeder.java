@@ -2,7 +2,7 @@ package com.api.rizz.portfolio_api.seeder;
 
 import com.api.rizz.portfolio_api.entity.Blog;
 import com.api.rizz.portfolio_api.entity.BlogAttachment;
-import com.api.rizz.portfolio_api.entity.BlogAttachment.AttachmentType;
+import com.api.rizz.portfolio_api.entity.BlogAttachment.FileType;
 import com.api.rizz.portfolio_api.repository.BlogRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import java.util.ArrayList;
@@ -20,15 +20,15 @@ import org.springframework.stereotype.Component;
 public class BlogSeeder {
   private static final int SEED_COUNT = 30;
 
-  // * Ekstensi disamakan dengan attachmentType biar fileType-nya akurat, bukan acak sembarangan
-  private static final Map<AttachmentType, List<String>> EXTENSIONS_BY_TYPE =
+  // * Ekstensi disamakan dengan fileType biar nama filenya masuk akal, bukan acak sembarangan
+  private static final Map<FileType, List<String>> EXTENSIONS_BY_TYPE =
       Map.of(
-          AttachmentType.image, List.of("jpg", "png", "webp"),
-          AttachmentType.document, List.of("pdf", "docx", "md"),
-          AttachmentType.video, List.of("mp4", "webm"),
-          AttachmentType.audio, List.of("mp3", "wav"),
-          AttachmentType.archive, List.of("zip", "tar.gz"),
-          AttachmentType.other, List.of("bin", "dat"));
+          FileType.image, List.of("jpg", "png", "webp"),
+          FileType.document, List.of("pdf", "docx", "md"),
+          FileType.video, List.of("mp4", "webm"),
+          FileType.audio, List.of("mp3", "wav"),
+          FileType.archive, List.of("zip", "tar.gz"),
+          FileType.other, List.of("bin", "dat"));
 
   private final BlogRepository blogRepository;
   private final SnowflakeGenerator snowflakeGenerator;
@@ -96,8 +96,7 @@ public class BlogSeeder {
         faker.number().numberBetween(0, 5); // * Ada blog tanpa attachment sama sekali
 
     for (int j = 0; j < attachmentCount; j++) {
-      AttachmentType type =
-          AttachmentType.values()[faker.random().nextInt(AttachmentType.values().length)];
+      FileType type = FileType.values()[faker.random().nextInt(FileType.values().length)];
       List<String> extensions = EXTENSIONS_BY_TYPE.get(type);
       String extension = extensions.get(faker.random().nextInt(extensions.size()));
 
@@ -105,10 +104,9 @@ public class BlogSeeder {
           BlogAttachment.builder()
               .id(snowflakeGenerator.nextId())
               .blog(blog) // Penetapan referensi absolut ke induk
-              .fileName(faker.file().fileName())
+              .fileName(faker.lorem().word() + "." + extension)
               .fileUrl(faker.internet().url())
-              .fileType(extension)
-              .attachmentType(type)
+              .fileType(type)
               .build());
     }
 

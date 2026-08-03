@@ -9,11 +9,11 @@ public record BlogResponse(
     String slug,
     String title,
     String content,
+    Boolean isPublished,
     String featuredImage,
     int viewsCount,
     int likesCount,
     int dislikesCount,
-    Boolean isPublished,
+    List<BlogAttachmentResponse> blogAttachments,
     OffsetDateTime createdAt,
-    OffsetDateTime updatedAt,
-    List<BlogAttachmentResponse> blogAttachments) {}
+    OffsetDateTime updatedAt) {}

@@ -16,7 +16,7 @@ public record ProjectRequest(
     @NotNull(message = "Status must be provided") ProjectStatus status,
     @URL(message = "Logo URL must be a valid URL") String logoUrl,
     List<String> imageUrls,
-    Map<LinkType, String> projectLinks,
     Map<String, String> techStack,
     List<ProjectType> projectTypes,
+    Map<LinkType, String> projectLinks,
     List<String> deletedImageUrls) {}

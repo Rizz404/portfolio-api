@@ -93,7 +93,7 @@ public class ExperienceController {
         nextCursor = String.valueOf(data.get(data.size() - 1).id());
       }
 
-      CursorInfo cursorInfo = new CursorInfo(nextCursor, hasNextPage, data.size());
+      CursorInfo cursorInfo = new CursorInfo(nextCursor, data.size(), hasNextPage);
       CursorResponse<List<ExperienceResponse>> cursorResponse =
           new CursorResponse<>(
               "Successfully retrieved experience list with cursor", data, cursorInfo);

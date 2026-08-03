@@ -42,15 +42,15 @@ public class Use {
   @Column(nullable = false, length = 50)
   private Category category;
 
+  @Column(columnDefinition = "TEXT")
+  private String reasons;
+
   @Column(name = "logo_url")
   private String logoUrl;
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
   private List<String> pictures;
-
-  @Column(columnDefinition = "TEXT")
-  private String reasons;
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
