@@ -17,5 +17,8 @@ public interface AuthMapper {
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "fullName", ignore = true)
+  // * translations dibangun manual di AuthService.register() (RegisterRequest gak punya field
+  // * bio, cuma butuh 1 row locale 'en' kosong biar TranslationResolver gak throw)
+  @Mapping(target = "translations", ignore = true)
   User toEntity(RegisterRequest request);
 }
