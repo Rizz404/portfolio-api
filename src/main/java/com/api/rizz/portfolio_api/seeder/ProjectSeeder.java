@@ -61,8 +61,7 @@ public class ProjectSeeder {
               .projectTypes(randomProjectTypes())
               .build();
 
-      // * 'en' wajib ada di semua row. 'id' cuma di sebagian data biar fallback path
-      // * (Accept-Language: id -> gak ada translation id -> fallback ke en) kepakai pas testing.
+      // * 'en' dan 'id' dibuat untuk SEMUA row biar perubahan i18n langsung kelihatan di frontend
       List<ProjectTranslation> translations = new ArrayList<>();
       translations.add(
           ProjectTranslation.builder()
@@ -72,17 +71,15 @@ public class ProjectSeeder {
               .description(description)
               .build());
 
-      if (i % 2 == 0) {
-        String descriptionId =
-            String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 4)));
-        translations.add(
-            ProjectTranslation.builder()
-                .project(randomProject)
-                .locale(LanguageCode.id)
-                .name(appName)
-                .description(descriptionId)
-                .build());
-      }
+      String descriptionId =
+          String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 4)));
+      translations.add(
+          ProjectTranslation.builder()
+              .project(randomProject)
+              .locale(LanguageCode.id)
+              .name(appName)
+              .description(descriptionId)
+              .build());
       randomProject.setTranslations(translations);
 
       projectRepository.save(randomProject);

@@ -55,7 +55,7 @@ public class ExperienceSeeder {
               .isCurrent(isCurrent)
               .build();
 
-      // * 'en' wajib ada di semua row. 'id' cuma di sebagian data biar fallback path ke-cover
+      // * 'en' dan 'id' dibuat untuk SEMUA row biar perubahan i18n langsung kelihatan di frontend
       List<ExperienceTranslation> translations = new ArrayList<>();
       translations.add(
           ExperienceTranslation.builder()
@@ -67,18 +67,15 @@ public class ExperienceSeeder {
               .jobdesks(randomJobdesks())
               .build());
 
-      if (i % 2 == 0) {
-        translations.add(
-            ExperienceTranslation.builder()
-                .experience(randomExperience)
-                .locale(LanguageCode.id)
-                .position(faker.job().position())
-                .description(
-                    String.join(
-                        "\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3))))
-                .jobdesks(randomJobdesks())
-                .build());
-      }
+      translations.add(
+          ExperienceTranslation.builder()
+              .experience(randomExperience)
+              .locale(LanguageCode.id)
+              .position(faker.job().position())
+              .description(
+                  String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3))))
+              .jobdesks(randomJobdesks())
+              .build());
       randomExperience.setTranslations(translations);
 
       experienceRepository.save(randomExperience);

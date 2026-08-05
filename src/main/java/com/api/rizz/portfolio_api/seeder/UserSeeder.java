@@ -63,6 +63,11 @@ public class UserSeeder {
                 .user(admin)
                 .locale(LanguageCode.en)
                 .bio(faker.lorem().paragraph(2))
+                .build(),
+            UserTranslation.builder()
+                .user(admin)
+                .locale(LanguageCode.id)
+                .bio(faker.lorem().paragraph(2))
                 .build()));
     userRepository.save(admin);
 
@@ -100,17 +105,15 @@ public class UserSeeder {
               .address(faker.address().fullAddress())
               .build();
 
-      // * 'en' wajib ada di semua row. 'id' cuma di sebagian data biar fallback path ke-cover
+      // * 'en' dan 'id' dibuat untuk SEMUA row biar perubahan i18n langsung kelihatan di frontend
       List<UserTranslation> translations = new ArrayList<>();
       translations.add(
           UserTranslation.builder().user(randomUser).locale(LanguageCode.en).bio(bio).build());
 
-      if (i % 2 == 0) {
-        String bioId =
-            String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3)));
-        translations.add(
-            UserTranslation.builder().user(randomUser).locale(LanguageCode.id).bio(bioId).build());
-      }
+      String bioId =
+          String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3)));
+      translations.add(
+          UserTranslation.builder().user(randomUser).locale(LanguageCode.id).bio(bioId).build());
       randomUser.setTranslations(translations);
 
       userRepository.save(randomUser);

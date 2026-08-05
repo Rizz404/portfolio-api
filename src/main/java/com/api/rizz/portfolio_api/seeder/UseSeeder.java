@@ -51,21 +51,19 @@ public class UseSeeder {
               .links(randomList(faker.number().numberBetween(1, 3), faker.internet()::url))
               .build();
 
+      // * 'en' dan 'id' dibuat untuk SEMUA row biar perubahan i18n langsung kelihatan di frontend
       List<UseTranslation> translations = new ArrayList<>();
       translations.add(
           UseTranslation.builder().use(randomUse).locale(LanguageCode.en).reasons(reasons).build());
 
-      // * 'id' cuma di sebagian data biar fallback path ke-cover pas testing manual
-      if (i % 2 == 0) {
-        String reasonsId =
-            String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3)));
-        translations.add(
-            UseTranslation.builder()
-                .use(randomUse)
-                .locale(LanguageCode.id)
-                .reasons(reasonsId)
-                .build());
-      }
+      String reasonsId =
+          String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3)));
+      translations.add(
+          UseTranslation.builder()
+              .use(randomUse)
+              .locale(LanguageCode.id)
+              .reasons(reasonsId)
+              .build());
       randomUse.setTranslations(translations);
 
       useRepository.save(randomUse);

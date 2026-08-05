@@ -89,6 +89,8 @@ public class SkillSeeder {
                     .logoUrl(faker.internet().image())
                     .build();
 
+            // * 'en' dan 'id' dibuat untuk SEMUA row biar perubahan i18n langsung kelihatan
+            // * di frontend
             List<SkillTranslation> translations = new ArrayList<>();
             translations.add(
                 SkillTranslation.builder()
@@ -97,15 +99,12 @@ public class SkillSeeder {
                     .description(hasDescription ? faker.lorem().sentence(15) : null)
                     .build());
 
-            // * 'id' cuma di sebagian data biar fallback path ke-cover pas testing manual
-            if (index % 2 == 0) {
-              translations.add(
-                  SkillTranslation.builder()
-                      .skill(randomSkill)
-                      .locale(LanguageCode.id)
-                      .description(hasDescription ? faker.lorem().sentence(15) : null)
-                      .build());
-            }
+            translations.add(
+                SkillTranslation.builder()
+                    .skill(randomSkill)
+                    .locale(LanguageCode.id)
+                    .description(hasDescription ? faker.lorem().sentence(15) : null)
+                    .build());
             randomSkill.setTranslations(translations);
 
             skillRepository.save(randomSkill);

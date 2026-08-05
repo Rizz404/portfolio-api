@@ -67,7 +67,7 @@ public class BlogSeeder {
               .isPublished(faker.random().nextInt(100) < 80) // * Mayoritas blog berstatus published
               .build();
 
-      // * 'en' wajib ada di semua row. 'id' cuma di sebagian data biar fallback path ke-cover
+      // * 'en' dan 'id' dibuat untuk SEMUA row biar perubahan i18n langsung kelihatan di frontend
       List<BlogTranslation> translations = new ArrayList<>();
       translations.add(
           BlogTranslation.builder()
@@ -77,17 +77,16 @@ public class BlogSeeder {
               .content(content)
               .build());
 
-      if (i % 2 == 0) {
-        String contentId =
-            String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(6, 14)));
-        translations.add(
-            BlogTranslation.builder()
-                .blog(randomBlog)
-                .locale(LanguageCode.id)
-                .title(title)
-                .content(contentId)
-                .build());
-      }
+      String titleId = randomTitle();
+      String contentId =
+          String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(6, 14)));
+      translations.add(
+          BlogTranslation.builder()
+              .blog(randomBlog)
+              .locale(LanguageCode.id)
+              .title(titleId)
+              .content(contentId)
+              .build());
       randomBlog.setTranslations(translations);
 
       randomBlog.setBlogAttachments(randomAttachments(randomBlog));
