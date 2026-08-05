@@ -16,6 +16,7 @@ public class DatabaseSeeder implements CommandLineRunner {
   private final ExperienceSeeder experienceSeeder;
   private final BlogSeeder blogSeeder;
   private final UseSeeder useSeeder;
+  private final SkillSeeder skillSeeder;
 
   @Override
   public void run(String... args) throws Exception {
@@ -25,6 +26,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     experienceSeeder.seed();
     blogSeeder.seed();
     useSeeder.seed();
+    skillSeeder.seed();
     log.info("All mock data was successfully injected.");
   }
 }
