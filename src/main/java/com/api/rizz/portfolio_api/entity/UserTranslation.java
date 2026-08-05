@@ -1,16 +1,16 @@
 package com.api.rizz.portfolio_api.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,42 +20,29 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name = "skills")
+@Table(name = "user_translations")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-/** Skill */
-public class Skill {
+/** UserTranslation */
+public class UserTranslation implements HasLocale {
 
-  // * Programming Languages, Frameworks, Databases, Tools, Additions (dll)
-  public enum SkillCategory {
-    programming_language,
-    framework,
-    database,
-    tool,
-    other
-  }
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-  @Id private Long id;
-
-  @Column(nullable = false)
-  private String name;
+  @ManyToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 50)
-  private SkillCategory category;
+  @Column(nullable = false, length = 10)
+  private LanguageCode locale;
 
-  @Column(name = "logo_url")
-  private String logoUrl;
-
-  @OneToMany(
-      mappedBy = "skill",
-      cascade = CascadeType.ALL,
-      orphanRemoval = true,
-      fetch = FetchType.LAZY)
-  private List<SkillTranslation> translations;
+  @Column(columnDefinition = "TEXT")
+  private String bio;
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false, nullable = false)

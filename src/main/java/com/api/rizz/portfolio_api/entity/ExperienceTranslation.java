@@ -1,13 +1,14 @@
 package com.api.rizz.portfolio_api.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -22,46 +23,36 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
 @Entity
-@Table(name = "uses")
+@Table(name = "experience_translations")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-/** Use */
-public class Use {
+/** ExperienceTranslation */
+public class ExperienceTranslation implements HasLocale {
 
-  public enum Category {
-    software,
-    hardware
-  }
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-  @Id private Long id;
-
-  @Column(name = "item_name", nullable = false)
-  private String itemName;
+  @ManyToOne
+  @JoinColumn(name = "experience_id", nullable = false)
+  private Experience experience;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 50)
-  private Category category;
+  @Column(nullable = false, length = 10)
+  private LanguageCode locale;
 
-  @OneToMany(
-      mappedBy = "use",
-      cascade = CascadeType.ALL,
-      orphanRemoval = true,
-      fetch = FetchType.LAZY)
-  private List<UseTranslation> translations;
+  @Column(nullable = false)
+  private String position;
 
-  @Column(name = "logo_url")
-  private String logoUrl;
+  @Column(columnDefinition = "TEXT")
+  private String description;
 
   @JdbcTypeCode(SqlTypes.JSON)
-  @Column(columnDefinition = "jsonb")
-  private List<String> pictures;
-
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(columnDefinition = "jsonb")
-  private List<String> links;
+  @Column(name = "jobdesk", columnDefinition = "jsonb")
+  private List<String> jobdesks;
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false, nullable = false)

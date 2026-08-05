@@ -31,11 +31,12 @@ public class Blog {
   @Column(nullable = false, unique = true)
   private String slug;
 
-  @Column(nullable = false)
-  private String title;
-
-  @Column(nullable = false, columnDefinition = "TEXT")
-  private String content;
+  @OneToMany(
+      mappedBy = "blog",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private List<BlogTranslation> translations;
 
   @Column(name = "is_published")
   private Boolean isPublished;

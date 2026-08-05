@@ -1,8 +1,11 @@
 package com.api.rizz.portfolio_api.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -13,9 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "experiences")
@@ -32,15 +33,12 @@ public class Experience {
   @Column(name = "company_name", nullable = false)
   private String companyName;
 
-  @Column(nullable = false)
-  private String position;
-
-  @Column(columnDefinition = "TEXT")
-  private String description;
-
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "jobdesk", columnDefinition = "jsonb")
-  private List<String> jobdesks;
+  @OneToMany(
+      mappedBy = "experience",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private List<ExperienceTranslation> translations;
 
   @Column(name = "start_date", nullable = false)
   private LocalDate startDate;

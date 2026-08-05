@@ -1,10 +1,13 @@
 package com.api.rizz.portfolio_api.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -86,8 +89,12 @@ public class User implements UserDetails {
   @Column(name = "phone_number")
   private String phoneNumber;
 
-  @Column(columnDefinition = "TEXT")
-  private String bio;
+  @OneToMany(
+      mappedBy = "user",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private List<UserTranslation> translations;
 
   @Column(columnDefinition = "TEXT")
   private String address;

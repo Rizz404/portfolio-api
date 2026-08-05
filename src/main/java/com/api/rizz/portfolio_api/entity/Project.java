@@ -1,10 +1,13 @@
 package com.api.rizz.portfolio_api.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -72,11 +75,12 @@ public class Project {
   @Column(nullable = false, unique = true)
   private String slug;
 
-  @Column(nullable = false)
-  private String name;
-
-  @Column(columnDefinition = "TEXT")
-  private String description;
+  @OneToMany(
+      mappedBy = "project",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private List<ProjectTranslation> translations;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 50)

@@ -1,16 +1,16 @@
 package com.api.rizz.portfolio_api.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,42 +20,34 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name = "skills")
+@Table(name = "project_translations")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-/** Skill */
-public class Skill {
+/** ProjectTranslation */
+public class ProjectTranslation implements HasLocale {
 
-  // * Programming Languages, Frameworks, Databases, Tools, Additions (dll)
-  public enum SkillCategory {
-    programming_language,
-    framework,
-    database,
-    tool,
-    other
-  }
+  // * Bukan Snowflake seperti entity lain: baris translation bukan resource API standalone,
+  // * tidak di-paginate/cursor sendiri, dan selalu dibuat satu transaksi dengan parent-nya.
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-  @Id private Long id;
+  @ManyToOne
+  @JoinColumn(name = "project_id", nullable = false)
+  private Project project;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 10)
+  private LanguageCode locale;
 
   @Column(nullable = false)
   private String name;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 50)
-  private SkillCategory category;
-
-  @Column(name = "logo_url")
-  private String logoUrl;
-
-  @OneToMany(
-      mappedBy = "skill",
-      cascade = CascadeType.ALL,
-      orphanRemoval = true,
-      fetch = FetchType.LAZY)
-  private List<SkillTranslation> translations;
+  @Column(columnDefinition = "TEXT")
+  private String description;
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false, nullable = false)
