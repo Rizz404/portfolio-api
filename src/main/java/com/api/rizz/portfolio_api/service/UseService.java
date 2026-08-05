@@ -1,8 +1,11 @@
 package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.UseRequest;
+import com.api.rizz.portfolio_api.dto.request.UseTranslationRequest;
 import com.api.rizz.portfolio_api.dto.response.UseResponse;
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.Use;
+import com.api.rizz.portfolio_api.entity.UseTranslation;
 import com.api.rizz.portfolio_api.mapper.UseMapper;
 import com.api.rizz.portfolio_api.repository.UseRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
@@ -11,6 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +34,44 @@ public class UseService {
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
 
+  private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("reasons");
+
+  private List<UseTranslation> buildTranslations(List<UseTranslationRequest> requests, Use use) {
+    List<UseTranslation> translations = new ArrayList<>();
+    for (UseTranslationRequest t : requests) {
+      translations.add(
+          UseTranslation.builder().use(use).locale(t.locale()).reasons(t.reasons()).build());
+    }
+    return translations;
+  }
+
+  // * Update translations locale yang sama in-place (bukan clear()+addAll()) - clear+addAll bikin
+  // * Hibernate insert baris baru SEBELUM delete baris lama di flush yang sama, jadi tabrakan
+  // * UNIQUE(use_id, locale) kalau locale-nya gak berubah (kasus paling umum saat update).
+  private void reconcileTranslations(Use use, List<UseTranslationRequest> requests) {
+    List<UseTranslation> existing = use.getTranslations();
+    java.util.Map<LanguageCode, UseTranslation> byLocale = new java.util.HashMap<>();
+    for (UseTranslation t : existing) {
+      byLocale.put(t.getLocale(), t);
+    }
+
+    java.util.Set<LanguageCode> requestedLocales = new java.util.HashSet<>();
+    for (UseTranslationRequest r : requests) {
+      requestedLocales.add(r.locale());
+    }
+    existing.removeIf(t -> !requestedLocales.contains(t.getLocale()));
+
+    for (UseTranslationRequest r : requests) {
+      UseTranslation match = byLocale.get(r.locale());
+      if (match != null) {
+        match.setReasons(r.reasons());
+      } else {
+        existing.add(
+            UseTranslation.builder().use(use).locale(r.locale()).reasons(r.reasons()).build());
+      }
+    }
+  }
+
   @Transactional
   public UseResponse createUse(
       UseRequest useRequest, MultipartFile logoFile, List<MultipartFile> pictureFiles) {
@@ -38,6 +80,7 @@ public class UseService {
       Use use = useMapper.toEntity(useRequest);
 
       use.setId(newId);
+      use.setTranslations(buildTranslations(useRequest.translations(), use));
 
       boolean hasLogoString = useRequest.logoUrl() != null && !useRequest.logoUrl().isBlank();
       boolean hasLogoFile = logoFile != null && !logoFile.isEmpty();
@@ -79,6 +122,9 @@ public class UseService {
     }
   }
 
+  // * @Transactional wajib: mapper resolve translations (LAZY @OneToMany) di toResponse(),
+  // * butuh session Hibernate masih terbuka; open-in-view=false jadi gak otomatis
+  @Transactional(readOnly = true)
   public Object findAllUses(
       String search,
       String category,
@@ -116,6 +162,11 @@ public class UseService {
     for (int i = 0; i < sortBy.size(); i++) {
       String field = sortBy.get(i);
 
+      // * reasons sekarang ada di tabel terpisah - drop diam-diam alih-alih error
+      if (TRANSLATABLE_SORT_FIELDS.contains(field)) {
+        continue;
+      }
+
       // Jaga-jaga kalau user ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
       // ke 'asc'
       String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
@@ -146,6 +197,7 @@ public class UseService {
     }
   }
 
+  @Transactional(readOnly = true)
   public UseResponse findUseById(Long id) {
     Use use =
         useRepository
@@ -168,6 +220,9 @@ public class UseService {
 
       // * Update data entity lama pakai data request baru
       useMapper.updateEntityFromRequest(useRequest, use);
+
+      // * Mutasi in-place, JANGAN setTranslations(newList) - lihat catatan di ProjectService
+      reconcileTranslations(use, useRequest.translations());
 
       boolean hasStringUrl = useRequest.logoUrl() != null && !useRequest.logoUrl().isBlank();
       boolean hasFile = logoFile != null && !logoFile.isEmpty();

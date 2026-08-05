@@ -3,13 +3,16 @@ package com.api.rizz.portfolio_api.service;
 import com.api.rizz.portfolio_api.dto.request.LoginRequest;
 import com.api.rizz.portfolio_api.dto.request.RegisterRequest;
 import com.api.rizz.portfolio_api.dto.response.AuthResponse;
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.User;
 import com.api.rizz.portfolio_api.entity.User.Role;
+import com.api.rizz.portfolio_api.entity.UserTranslation;
 import com.api.rizz.portfolio_api.mapper.AuthMapper;
 import com.api.rizz.portfolio_api.mapper.UserMapper;
 import com.api.rizz.portfolio_api.repository.UserRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import java.time.OffsetDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,6 +48,10 @@ public class AuthService {
     user.setPassword(passwordEncoder.encode(request.password()));
     user.setRole(Role.USER);
     user.setProvider(User.AuthProvider.LOCAL);
+    // * RegisterRequest gak punya field bio - tetap wajib bikin 1 row locale 'en' (bio null)
+    // * biar TranslationResolver ada yang bisa di-resolve pas toResponse()
+    user.setTranslations(
+        List.of(UserTranslation.builder().user(user).locale(LanguageCode.en).bio(null).build()));
 
     // * Set timestamp manual karena pakai snowflakes jadi ada write behind pada hibernate
     OffsetDateTime now = OffsetDateTime.now();

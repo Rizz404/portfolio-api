@@ -1,18 +1,25 @@
 package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.ExperienceRequest;
+import com.api.rizz.portfolio_api.dto.request.ExperienceTranslationRequest;
 import com.api.rizz.portfolio_api.dto.response.ExperienceResponse;
 import com.api.rizz.portfolio_api.entity.Experience;
+import com.api.rizz.portfolio_api.entity.ExperienceTranslation;
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.mapper.ExperienceMapper;
 import com.api.rizz.portfolio_api.repository.ExperienceRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,12 +36,77 @@ public class ExperienceService {
   private final ExperienceMapper experienceMapper;
   private final SnowflakeGenerator snowflakeGenerator;
 
+  private static final Set<String> TRANSLATABLE_SORT_FIELDS =
+      Set.of("position", "description", "jobdesks");
+
+  private LanguageCode resolveRequestLocale() {
+    String lang = LocaleContextHolder.getLocale().getLanguage();
+    try {
+      return LanguageCode.valueOf(lang);
+    } catch (IllegalArgumentException e) {
+      return LanguageCode.en;
+    }
+  }
+
+  private List<ExperienceTranslation> buildTranslations(
+      List<ExperienceTranslationRequest> requests, Experience experience) {
+    List<ExperienceTranslation> translations = new ArrayList<>();
+    for (ExperienceTranslationRequest t : requests) {
+      translations.add(
+          ExperienceTranslation.builder()
+              .experience(experience)
+              .locale(t.locale())
+              .position(t.position())
+              .description(t.description())
+              .jobdesks(t.jobdesks())
+              .build());
+    }
+    return translations;
+  }
+
+  // * Update translations locale yang sama in-place (bukan clear()+addAll()) - clear+addAll bikin
+  // * Hibernate insert baris baru SEBELUM delete baris lama di flush yang sama, jadi tabrakan
+  // * UNIQUE(experience_id, locale) kalau locale-nya gak berubah (kasus paling umum saat update).
+  private void reconcileTranslations(
+      Experience experience, List<ExperienceTranslationRequest> requests) {
+    List<ExperienceTranslation> existing = experience.getTranslations();
+    java.util.Map<LanguageCode, ExperienceTranslation> byLocale = new java.util.HashMap<>();
+    for (ExperienceTranslation t : existing) {
+      byLocale.put(t.getLocale(), t);
+    }
+
+    java.util.Set<LanguageCode> requestedLocales = new java.util.HashSet<>();
+    for (ExperienceTranslationRequest r : requests) {
+      requestedLocales.add(r.locale());
+    }
+    existing.removeIf(t -> !requestedLocales.contains(t.getLocale()));
+
+    for (ExperienceTranslationRequest r : requests) {
+      ExperienceTranslation match = byLocale.get(r.locale());
+      if (match != null) {
+        match.setPosition(r.position());
+        match.setDescription(r.description());
+        match.setJobdesks(r.jobdesks());
+      } else {
+        existing.add(
+            ExperienceTranslation.builder()
+                .experience(experience)
+                .locale(r.locale())
+                .position(r.position())
+                .description(r.description())
+                .jobdesks(r.jobdesks())
+                .build());
+      }
+    }
+  }
+
   @Transactional
   public ExperienceResponse createExperience(ExperienceRequest experienceRequest) {
     long newId = snowflakeGenerator.nextId();
     Experience experience = experienceMapper.toEntity(experienceRequest);
 
     experience.setId(newId);
+    experience.setTranslations(buildTranslations(experienceRequest.translations(), experience));
 
     // * Set timestamp manual karena pakai snowflakes jadi ada write behind pada hibernate
     OffsetDateTime now = OffsetDateTime.now();
@@ -46,6 +118,9 @@ public class ExperienceService {
     return experienceMapper.toResponse(savedExperience);
   }
 
+  // * @Transactional wajib: mapper resolve translations (LAZY @OneToMany) di toResponse(),
+  // * butuh session Hibernate masih terbuka; open-in-view=false jadi gak otomatis
+  @Transactional(readOnly = true)
   public Object findAllExperiences(
       String search,
       Boolean isCurrent,
@@ -61,14 +136,17 @@ public class ExperienceService {
           // * 1. Siapkan Filter (Where Clause Dinamis)
           List<Predicate> predicates = new ArrayList<>();
 
-          // * Kalau ada keyword pencarian di company name dan position
+          // * Kalau ada keyword pencarian di company name (tetap di tabel utama) dan position
+          // * (join ke translation sesuai locale request, fallback 'en')
           if (search != null && !search.isBlank()) {
             String searchKeyword = "%" + search.toLowerCase() + "%";
+            Join<Experience, ExperienceTranslation> t = root.join("translations", JoinType.LEFT);
 
             // * cb.or() = Pilih salah satu yang cocok (OR)
             Predicate searchCompanyName = cb.like(cb.lower(root.get("companyName")), searchKeyword);
-            Predicate searchPosition = cb.like(cb.lower(root.get("position")), searchKeyword);
+            Predicate searchPosition = cb.like(cb.lower(t.get("position")), searchKeyword);
 
+            predicates.add(cb.equal(t.get("locale"), resolveRequestLocale()));
             predicates.add(cb.or(searchCompanyName, searchPosition));
           }
 
@@ -97,6 +175,11 @@ public class ExperienceService {
 
     for (int i = 0; i < sortBy.size(); i++) {
       String field = sortBy.get(i);
+
+      // * position/description/jobdesks sekarang ada di tabel terpisah - drop diam-diam
+      if (TRANSLATABLE_SORT_FIELDS.contains(field)) {
+        continue;
+      }
 
       // Jaga-jaga kalau user ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
       // ke 'asc'
@@ -128,6 +211,7 @@ public class ExperienceService {
     }
   }
 
+  @Transactional(readOnly = true)
   public ExperienceResponse findExperienceById(Long id) {
     Experience experience =
         experienceRepository
@@ -148,6 +232,9 @@ public class ExperienceService {
 
     // * Update data entity lama pakai data request baru
     experienceMapper.updateEntityFromRequest(experienceRequest, experience);
+
+    // * Mutasi in-place, JANGAN setTranslations(newList) - lihat catatan di ProjectService
+    reconcileTranslations(experience, experienceRequest.translations());
 
     Experience updatedExperience = experienceRepository.save(experience);
     return experienceMapper.toResponse(updatedExperience);

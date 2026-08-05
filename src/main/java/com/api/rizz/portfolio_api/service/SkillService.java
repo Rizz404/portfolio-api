@@ -1,8 +1,11 @@
 package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.SkillRequest;
+import com.api.rizz.portfolio_api.dto.request.SkillTranslationRequest;
 import com.api.rizz.portfolio_api.dto.response.SkillResponse;
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.Skill;
+import com.api.rizz.portfolio_api.entity.SkillTranslation;
 import com.api.rizz.portfolio_api.mapper.SkillMapper;
 import com.api.rizz.portfolio_api.repository.SkillRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
@@ -11,7 +14,9 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +35,62 @@ public class SkillService {
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
 
+  private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("description");
+
+  private LanguageCode resolveRequestLocale() {
+    String lang = LocaleContextHolder.getLocale().getLanguage();
+    try {
+      return LanguageCode.valueOf(lang);
+    } catch (IllegalArgumentException e) {
+      return LanguageCode.en;
+    }
+  }
+
+  private List<SkillTranslation> buildTranslations(
+      List<SkillTranslationRequest> requests, Skill skill) {
+    List<SkillTranslation> translations = new ArrayList<>();
+    for (SkillTranslationRequest t : requests) {
+      translations.add(
+          SkillTranslation.builder()
+              .skill(skill)
+              .locale(t.locale())
+              .description(t.description())
+              .build());
+    }
+    return translations;
+  }
+
+  // * Update translations locale yang sama in-place (bukan clear()+addAll()) - clear+addAll bikin
+  // * Hibernate insert baris baru SEBELUM delete baris lama di flush yang sama, jadi tabrakan
+  // * UNIQUE(skill_id, locale) kalau locale-nya gak berubah (kasus paling umum saat update).
+  private void reconcileTranslations(Skill skill, List<SkillTranslationRequest> requests) {
+    List<SkillTranslation> existing = skill.getTranslations();
+    java.util.Map<LanguageCode, SkillTranslation> byLocale = new java.util.HashMap<>();
+    for (SkillTranslation t : existing) {
+      byLocale.put(t.getLocale(), t);
+    }
+
+    java.util.Set<LanguageCode> requestedLocales = new java.util.HashSet<>();
+    for (SkillTranslationRequest r : requests) {
+      requestedLocales.add(r.locale());
+    }
+    existing.removeIf(t -> !requestedLocales.contains(t.getLocale()));
+
+    for (SkillTranslationRequest r : requests) {
+      SkillTranslation match = byLocale.get(r.locale());
+      if (match != null) {
+        match.setDescription(r.description());
+      } else {
+        existing.add(
+            SkillTranslation.builder()
+                .skill(skill)
+                .locale(r.locale())
+                .description(r.description())
+                .build());
+      }
+    }
+  }
+
   @Transactional
   public SkillResponse createSkill(SkillRequest skillRequest, MultipartFile logoFile) {
     try {
@@ -37,6 +98,7 @@ public class SkillService {
       Skill skill = skillMapper.toEntity(skillRequest);
 
       skill.setId(newId);
+      skill.setTranslations(buildTranslations(skillRequest.translations(), skill));
 
       boolean hasLogoString = skillRequest.logoUrl() != null && !skillRequest.logoUrl().isBlank();
       boolean hasLogoFile = logoFile != null && !logoFile.isEmpty();
@@ -67,6 +129,9 @@ public class SkillService {
     }
   }
 
+  // * @Transactional wajib: mapper resolve translations (LAZY @OneToMany) di toResponse(),
+  // * butuh session Hibernate masih terbuka; open-in-view=false jadi gak otomatis
+  @Transactional(readOnly = true)
   public Object findAllSkills(
       String search,
       String category,
@@ -80,7 +145,7 @@ public class SkillService {
           // * 1. Siapkan Filter (Where Clause Dinamis)
           List<Predicate> predicates = new ArrayList<>();
 
-          // * Kalau ada keyword pencarian di name
+          // * Kalau ada keyword pencarian di name (name tetap di tabel utama, bukan translatable)
           if (search != null && !search.isBlank()) {
             predicates.add(cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"));
           }
@@ -102,6 +167,11 @@ public class SkillService {
 
     for (int i = 0; i < sortBy.size(); i++) {
       String field = sortBy.get(i);
+
+      // * description sekarang ada di tabel terpisah - drop diam-diam alih-alih error
+      if (TRANSLATABLE_SORT_FIELDS.contains(field)) {
+        continue;
+      }
 
       // Jaga-jaga kalau user ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
       // ke 'asc'
@@ -133,6 +203,7 @@ public class SkillService {
     }
   }
 
+  @Transactional(readOnly = true)
   public SkillResponse findSkillById(Long id) {
     Skill skill =
         skillRepository
@@ -154,6 +225,9 @@ public class SkillService {
 
       // * Update data entity lama pakai data request baru
       skillMapper.updateEntityFromRequest(skillRequest, skill);
+
+      // * Mutasi in-place, JANGAN setTranslations(newList) - lihat catatan di ProjectService
+      reconcileTranslations(skill, skillRequest.translations());
 
       boolean hasStringUrl = skillRequest.logoUrl() != null && !skillRequest.logoUrl().isBlank();
       boolean hasFile = logoFile != null && !logoFile.isEmpty();

@@ -1,19 +1,26 @@
 package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.BlogRequest;
+import com.api.rizz.portfolio_api.dto.request.BlogTranslationRequest;
 import com.api.rizz.portfolio_api.dto.response.BlogResponse;
 import com.api.rizz.portfolio_api.entity.Blog;
 import com.api.rizz.portfolio_api.entity.BlogAttachment;
 import com.api.rizz.portfolio_api.entity.BlogAttachment.FileType;
+import com.api.rizz.portfolio_api.entity.BlogTranslation;
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.mapper.BlogMapper;
 import com.api.rizz.portfolio_api.repository.BlogRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,17 +39,89 @@ public class BlogService {
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
 
+  private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("title", "content");
+
+  private LanguageCode resolveRequestLocale() {
+    String lang = LocaleContextHolder.getLocale().getLanguage();
+    try {
+      return LanguageCode.valueOf(lang);
+    } catch (IllegalArgumentException e) {
+      return LanguageCode.en;
+    }
+  }
+
+  private String enTitle(List<BlogTranslationRequest> requests) {
+    return requests.stream()
+        .filter(t -> t.locale() == LanguageCode.en)
+        .findFirst()
+        .map(BlogTranslationRequest::title)
+        .orElseThrow(
+            () -> new IllegalArgumentException("Default locale (en) translation is required"));
+  }
+
+  private List<BlogTranslation> buildTranslations(
+      List<BlogTranslationRequest> requests, Blog blog) {
+    List<BlogTranslation> translations = new ArrayList<>();
+    for (BlogTranslationRequest t : requests) {
+      translations.add(
+          BlogTranslation.builder()
+              .blog(blog)
+              .locale(t.locale())
+              .title(t.title())
+              .content(t.content())
+              .build());
+    }
+    return translations;
+  }
+
+  // * Update translations locale yang sama in-place (bukan clear()+addAll()) - clear+addAll bikin
+  // * Hibernate insert baris baru SEBELUM delete baris lama di flush yang sama, jadi tabrakan
+  // * UNIQUE(blog_id, locale) kalau locale-nya gak berubah (kasus paling umum saat update).
+  private void reconcileTranslations(Blog blog, List<BlogTranslationRequest> requests) {
+    List<BlogTranslation> existing = blog.getTranslations();
+    java.util.Map<LanguageCode, BlogTranslation> byLocale = new java.util.HashMap<>();
+    for (BlogTranslation t : existing) {
+      byLocale.put(t.getLocale(), t);
+    }
+
+    java.util.Set<LanguageCode> requestedLocales = new java.util.HashSet<>();
+    for (BlogTranslationRequest r : requests) {
+      requestedLocales.add(r.locale());
+    }
+    existing.removeIf(t -> !requestedLocales.contains(t.getLocale()));
+
+    for (BlogTranslationRequest r : requests) {
+      BlogTranslation match = byLocale.get(r.locale());
+      if (match != null) {
+        match.setTitle(r.title());
+        match.setContent(r.content());
+      } else {
+        existing.add(
+            BlogTranslation.builder()
+                .blog(blog)
+                .locale(r.locale())
+                .title(r.title())
+                .content(r.content())
+                .build());
+      }
+    }
+  }
+
   // * Dari springframework bukan jakarta Transactional nya
   @Transactional
   public BlogResponse createBlog(
       BlogRequest blogRequest, MultipartFile featuredImage, List<MultipartFile> attachments) {
     try {
       long newId = snowflakeGenerator.nextId();
-      String generatedSlug = blogRequest.title().toLowerCase().replaceAll("[^a-z0-9]+", "-");
+      // * Slug selalu dibuat dari title locale 'en' (default/fallback), bukan dari locale
+      // * request-time, biar slug stabil gak berubah tergantung Accept-Language header
+      String generatedSlug =
+          enTitle(blogRequest.translations()).toLowerCase().replaceAll("[^a-z0-9]+", "-");
       Blog blog = blogMapper.toEntity(blogRequest);
 
       blog.setId(newId);
       blog.setSlug(generatedSlug);
+      blog.setTranslations(buildTranslations(blogRequest.translations(), blog));
 
       boolean hasStringUrl =
           blogRequest.featuredImageUrl() != null && !blogRequest.featuredImageUrl().isBlank();
@@ -104,14 +183,17 @@ public class BlogService {
           // * 1. Siapkan Filter (Where Clause Dinamis)
           List<Predicate> predicates = new ArrayList<>();
 
-          // * Kalau ada keyword pencarian di title dan content
+          // * Kalau ada keyword pencarian di title dan content - join ke translation sesuai
+          // * locale request (Accept-Language), fallback 'en'
           if (search != null && !search.isBlank()) {
             String searchKeyword = "%" + search.toLowerCase() + "%";
+            Join<Blog, BlogTranslation> t = root.join("translations", JoinType.LEFT);
 
             // * cb.or() = Pilih salah satu yang cocok (OR)
-            Predicate searchTitle = cb.like(cb.lower(root.get("title")), searchKeyword);
-            Predicate searchContent = cb.like(cb.lower(root.get("content")), searchKeyword);
+            Predicate searchTitle = cb.like(cb.lower(t.get("title")), searchKeyword);
+            Predicate searchContent = cb.like(cb.lower(t.get("content")), searchKeyword);
 
+            predicates.add(cb.equal(t.get("locale"), resolveRequestLocale()));
             predicates.add(cb.or(searchTitle, searchContent));
           }
 
@@ -127,6 +209,11 @@ public class BlogService {
 
     for (int i = 0; i < sortBy.size(); i++) {
       String field = sortBy.get(i);
+
+      // * title/content sekarang ada di tabel terpisah - drop diam-diam alih-alih error
+      if (TRANSLATABLE_SORT_FIELDS.contains(field)) {
+        continue;
+      }
 
       // Jaga-jaga kalau user ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
       // ke 'asc'
@@ -184,7 +271,10 @@ public class BlogService {
 
       // * Update data entity lama pakai data request baru
       blogMapper.updateEntityFromRequest(blogRequest, blog);
-      blog.setSlug(blogRequest.title().toLowerCase().replaceAll("[^a-z0-9]+", "-"));
+      blog.setSlug(enTitle(blogRequest.translations()).toLowerCase().replaceAll("[^a-z0-9]+", "-"));
+
+      // * Mutasi in-place, JANGAN setTranslations(newList) - lihat catatan di ProjectService
+      reconcileTranslations(blog, blogRequest.translations());
 
       boolean hasStringUrl =
           blogRequest.featuredImageUrl() != null && !blogRequest.featuredImageUrl().isBlank();

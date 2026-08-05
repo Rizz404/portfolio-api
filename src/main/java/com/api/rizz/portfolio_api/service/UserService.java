@@ -1,8 +1,11 @@
 package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.UserRequest;
+import com.api.rizz.portfolio_api.dto.request.UserTranslationRequest;
 import com.api.rizz.portfolio_api.dto.response.UserResponse;
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.User;
+import com.api.rizz.portfolio_api.entity.UserTranslation;
 import com.api.rizz.portfolio_api.mapper.UserMapper;
 import com.api.rizz.portfolio_api.repository.UserRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
@@ -11,6 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +34,44 @@ public class UserService {
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
 
+  private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("bio");
+
+  private List<UserTranslation> buildTranslations(
+      List<UserTranslationRequest> requests, User user) {
+    List<UserTranslation> translations = new ArrayList<>();
+    for (UserTranslationRequest t : requests) {
+      translations.add(
+          UserTranslation.builder().user(user).locale(t.locale()).bio(t.bio()).build());
+    }
+    return translations;
+  }
+
+  // * Update translations locale yang sama in-place (bukan clear()+addAll()) - clear+addAll bikin
+  // * Hibernate insert baris baru SEBELUM delete baris lama di flush yang sama, jadi tabrakan
+  // * UNIQUE(user_id, locale) kalau locale-nya gak berubah (kasus paling umum saat update).
+  private void reconcileTranslations(User user, List<UserTranslationRequest> requests) {
+    List<UserTranslation> existing = user.getTranslations();
+    java.util.Map<LanguageCode, UserTranslation> byLocale = new java.util.HashMap<>();
+    for (UserTranslation t : existing) {
+      byLocale.put(t.getLocale(), t);
+    }
+
+    java.util.Set<LanguageCode> requestedLocales = new java.util.HashSet<>();
+    for (UserTranslationRequest r : requests) {
+      requestedLocales.add(r.locale());
+    }
+    existing.removeIf(t -> !requestedLocales.contains(t.getLocale()));
+
+    for (UserTranslationRequest r : requests) {
+      UserTranslation match = byLocale.get(r.locale());
+      if (match != null) {
+        match.setBio(r.bio());
+      } else {
+        existing.add(UserTranslation.builder().user(user).locale(r.locale()).bio(r.bio()).build());
+      }
+    }
+  }
+
   @Transactional
   public UserResponse createUser(UserRequest userRequest, MultipartFile profilePictFile) {
     try {
@@ -37,6 +79,7 @@ public class UserService {
       User user = userMapper.toEntity(userRequest);
 
       user.setId(newId);
+      user.setTranslations(buildTranslations(userRequest.translations(), user));
 
       boolean hasStringUrl =
           userRequest.profilePictUrl() != null && !userRequest.profilePictUrl().isBlank();
@@ -69,6 +112,9 @@ public class UserService {
     }
   }
 
+  // * @Transactional wajib: mapper resolve translations (LAZY @OneToMany) di toResponse(),
+  // * butuh session Hibernate masih terbuka; open-in-view=false jadi gak otomatis
+  @Transactional(readOnly = true)
   public Object findAllUsers(
       String search,
       String role,
@@ -123,6 +169,11 @@ public class UserService {
     for (int i = 0; i < sortBy.size(); i++) {
       String field = sortBy.get(i);
 
+      // * bio sekarang ada di tabel terpisah - drop diam-diam alih-alih error
+      if (TRANSLATABLE_SORT_FIELDS.contains(field)) {
+        continue;
+      }
+
       // Jaga-jaga kalau userr ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
       // ke 'asc'
       String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
@@ -153,6 +204,7 @@ public class UserService {
     }
   }
 
+  @Transactional(readOnly = true)
   public UserResponse findUserById(Long id) {
     User user =
         userRepository
@@ -174,6 +226,9 @@ public class UserService {
 
       // * Update data entity lama pakai data request baru
       userMapper.updateEntityFromRequest(userRequest, user);
+
+      // * Mutasi in-place, JANGAN setTranslations(newList) - lihat catatan di ProjectService
+      reconcileTranslations(user, userRequest.translations());
 
       boolean hasStringUrl =
           userRequest.profilePictUrl() != null && !userRequest.profilePictUrl().isBlank();
