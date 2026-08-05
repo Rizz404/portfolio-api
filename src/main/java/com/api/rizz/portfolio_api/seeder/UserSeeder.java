@@ -1,12 +1,16 @@
 package com.api.rizz.portfolio_api.seeder;
 
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.User;
 import com.api.rizz.portfolio_api.entity.User.AuthProvider;
 import com.api.rizz.portfolio_api.entity.User.Gender;
 import com.api.rizz.portfolio_api.entity.User.Role;
+import com.api.rizz.portfolio_api.entity.UserTranslation;
 import com.api.rizz.portfolio_api.repository.UserRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
@@ -37,7 +41,7 @@ public class UserSeeder {
 
   public void generateData() {
     // * Akun admin dengan kredensial tetap biar bisa dipakai login saat development
-    userRepository.save(
+    User admin =
         User.builder()
             .id(snowflakeGenerator.nextId())
             .nickname("admin")
@@ -51,9 +55,16 @@ public class UserSeeder {
             .dateOfBirth(randomBirthDate())
             .gender(Gender.PREFER_NOT_TO_SAY)
             .phoneNumber(faker.phoneNumber().phoneNumber())
-            .bio(faker.lorem().paragraph(2))
             .address(faker.address().fullAddress())
-            .build());
+            .build();
+    admin.setTranslations(
+        List.of(
+            UserTranslation.builder()
+                .user(admin)
+                .locale(LanguageCode.en)
+                .bio(faker.lorem().paragraph(2))
+                .build()));
+    userRepository.save(admin);
 
     for (int i = 0; i < SEED_COUNT - 1; i++) {
       AuthProvider provider =
@@ -86,9 +97,21 @@ public class UserSeeder {
               .dateOfBirth(randomBirthDate())
               .gender(Gender.values()[faker.random().nextInt(Gender.values().length)])
               .phoneNumber(faker.phoneNumber().phoneNumber())
-              .bio(bio)
               .address(faker.address().fullAddress())
               .build();
+
+      // * 'en' wajib ada di semua row. 'id' cuma di sebagian data biar fallback path ke-cover
+      List<UserTranslation> translations = new ArrayList<>();
+      translations.add(
+          UserTranslation.builder().user(randomUser).locale(LanguageCode.en).bio(bio).build());
+
+      if (i % 2 == 0) {
+        String bioId =
+            String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3)));
+        translations.add(
+            UserTranslation.builder().user(randomUser).locale(LanguageCode.id).bio(bioId).build());
+      }
+      randomUser.setTranslations(translations);
 
       userRepository.save(randomUser);
     }

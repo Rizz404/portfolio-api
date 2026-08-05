@@ -1,6 +1,8 @@
 package com.api.rizz.portfolio_api.seeder;
 
 import com.api.rizz.portfolio_api.entity.Experience;
+import com.api.rizz.portfolio_api.entity.ExperienceTranslation;
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.repository.ExperienceRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import java.time.LocalDate;
@@ -48,14 +50,36 @@ public class ExperienceSeeder {
           Experience.builder()
               .id(snowflakeGenerator.nextId())
               .companyName(faker.company().name())
-              .position(faker.job().position())
-              .description(
-                  String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3))))
-              .jobdesks(randomJobdesks())
               .startDate(startDate)
               .endDate(endDate) // * Jika isCurrent true, endDate mutlak null
               .isCurrent(isCurrent)
               .build();
+
+      // * 'en' wajib ada di semua row. 'id' cuma di sebagian data biar fallback path ke-cover
+      List<ExperienceTranslation> translations = new ArrayList<>();
+      translations.add(
+          ExperienceTranslation.builder()
+              .experience(randomExperience)
+              .locale(LanguageCode.en)
+              .position(faker.job().position())
+              .description(
+                  String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3))))
+              .jobdesks(randomJobdesks())
+              .build());
+
+      if (i % 2 == 0) {
+        translations.add(
+            ExperienceTranslation.builder()
+                .experience(randomExperience)
+                .locale(LanguageCode.id)
+                .position(faker.job().position())
+                .description(
+                    String.join(
+                        "\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3))))
+                .jobdesks(randomJobdesks())
+                .build());
+      }
+      randomExperience.setTranslations(translations);
 
       experienceRepository.save(randomExperience);
 

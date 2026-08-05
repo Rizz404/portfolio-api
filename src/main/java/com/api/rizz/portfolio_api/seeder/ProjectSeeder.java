@@ -1,9 +1,11 @@
 package com.api.rizz.portfolio_api.seeder;
 
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.Project;
 import com.api.rizz.portfolio_api.entity.Project.LinkType;
 import com.api.rizz.portfolio_api.entity.Project.ProjectStatus;
 import com.api.rizz.portfolio_api.entity.Project.ProjectType;
+import com.api.rizz.portfolio_api.entity.ProjectTranslation;
 import com.api.rizz.portfolio_api.repository.ProjectRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import java.util.ArrayList;
@@ -50,9 +52,7 @@ public class ProjectSeeder {
       Project randomProject =
           Project.builder()
               .id(snowflakeGenerator.nextId())
-              .name(appName)
               .slug(uniqueSlug)
-              .description(description)
               .status(ProjectStatus.values()[faker.random().nextInt(ProjectStatus.values().length)])
               .logoUrl(faker.internet().image())
               .imageUrls(randomImageUrls())
@@ -60,6 +60,30 @@ public class ProjectSeeder {
               .techStack(randomTechStack())
               .projectTypes(randomProjectTypes())
               .build();
+
+      // * 'en' wajib ada di semua row. 'id' cuma di sebagian data biar fallback path
+      // * (Accept-Language: id -> gak ada translation id -> fallback ke en) kepakai pas testing.
+      List<ProjectTranslation> translations = new ArrayList<>();
+      translations.add(
+          ProjectTranslation.builder()
+              .project(randomProject)
+              .locale(LanguageCode.en)
+              .name(appName)
+              .description(description)
+              .build());
+
+      if (i % 2 == 0) {
+        String descriptionId =
+            String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 4)));
+        translations.add(
+            ProjectTranslation.builder()
+                .project(randomProject)
+                .locale(LanguageCode.id)
+                .name(appName)
+                .description(descriptionId)
+                .build());
+      }
+      randomProject.setTranslations(translations);
 
       projectRepository.save(randomProject);
     }

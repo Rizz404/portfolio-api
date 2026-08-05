@@ -1,8 +1,11 @@
 package com.api.rizz.portfolio_api.seeder;
 
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.Skill;
+import com.api.rizz.portfolio_api.entity.SkillTranslation;
 import com.api.rizz.portfolio_api.repository.SkillRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +77,7 @@ public class SkillSeeder {
   public void generateData() {
     SKILL_POOL.forEach(
         (category, names) -> {
+          int index = 0;
           for (String name : names) {
             boolean hasDescription = faker.bool().bool();
 
@@ -83,10 +87,29 @@ public class SkillSeeder {
                     .name(name)
                     .category(category)
                     .logoUrl(faker.internet().image())
-                    .description(hasDescription ? faker.lorem().sentence(15) : null)
                     .build();
 
+            List<SkillTranslation> translations = new ArrayList<>();
+            translations.add(
+                SkillTranslation.builder()
+                    .skill(randomSkill)
+                    .locale(LanguageCode.en)
+                    .description(hasDescription ? faker.lorem().sentence(15) : null)
+                    .build());
+
+            // * 'id' cuma di sebagian data biar fallback path ke-cover pas testing manual
+            if (index % 2 == 0) {
+              translations.add(
+                  SkillTranslation.builder()
+                      .skill(randomSkill)
+                      .locale(LanguageCode.id)
+                      .description(hasDescription ? faker.lorem().sentence(15) : null)
+                      .build());
+            }
+            randomSkill.setTranslations(translations);
+
             skillRepository.save(randomSkill);
+            index++;
           }
         });
   }

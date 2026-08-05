@@ -1,6 +1,8 @@
 package com.api.rizz.portfolio_api.seeder;
 
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.Use;
+import com.api.rizz.portfolio_api.entity.UseTranslation;
 import com.api.rizz.portfolio_api.repository.UseRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import java.util.ArrayList;
@@ -46,9 +48,25 @@ public class UseSeeder {
               .category(category)
               .logoUrl(faker.internet().image())
               .pictures(randomList(faker.number().numberBetween(1, 5), faker.internet()::image))
-              .reasons(reasons)
               .links(randomList(faker.number().numberBetween(1, 3), faker.internet()::url))
               .build();
+
+      List<UseTranslation> translations = new ArrayList<>();
+      translations.add(
+          UseTranslation.builder().use(randomUse).locale(LanguageCode.en).reasons(reasons).build());
+
+      // * 'id' cuma di sebagian data biar fallback path ke-cover pas testing manual
+      if (i % 2 == 0) {
+        String reasonsId =
+            String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(1, 3)));
+        translations.add(
+            UseTranslation.builder()
+                .use(randomUse)
+                .locale(LanguageCode.id)
+                .reasons(reasonsId)
+                .build());
+      }
+      randomUse.setTranslations(translations);
 
       useRepository.save(randomUse);
     }

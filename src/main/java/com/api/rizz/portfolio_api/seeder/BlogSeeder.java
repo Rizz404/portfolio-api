@@ -3,6 +3,8 @@ package com.api.rizz.portfolio_api.seeder;
 import com.api.rizz.portfolio_api.entity.Blog;
 import com.api.rizz.portfolio_api.entity.BlogAttachment;
 import com.api.rizz.portfolio_api.entity.BlogAttachment.FileType;
+import com.api.rizz.portfolio_api.entity.BlogTranslation;
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.repository.BlogRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import java.util.ArrayList;
@@ -57,15 +59,36 @@ public class BlogSeeder {
       Blog randomBlog =
           Blog.builder()
               .id(snowflakeGenerator.nextId())
-              .title(title)
               .slug(uniqueSlug)
-              .content(content)
               .featuredImage(faker.internet().image())
               .viewsCount(faker.number().numberBetween(10, 5000))
               .likesCount(faker.number().numberBetween(0, 1000))
               .dislikesCount(faker.number().numberBetween(0, 100))
               .isPublished(faker.random().nextInt(100) < 80) // * Mayoritas blog berstatus published
               .build();
+
+      // * 'en' wajib ada di semua row. 'id' cuma di sebagian data biar fallback path ke-cover
+      List<BlogTranslation> translations = new ArrayList<>();
+      translations.add(
+          BlogTranslation.builder()
+              .blog(randomBlog)
+              .locale(LanguageCode.en)
+              .title(title)
+              .content(content)
+              .build());
+
+      if (i % 2 == 0) {
+        String contentId =
+            String.join("\n\n", faker.lorem().paragraphs(faker.number().numberBetween(6, 14)));
+        translations.add(
+            BlogTranslation.builder()
+                .blog(randomBlog)
+                .locale(LanguageCode.id)
+                .title(title)
+                .content(contentId)
+                .build());
+      }
+      randomBlog.setTranslations(translations);
 
       randomBlog.setBlogAttachments(randomAttachments(randomBlog));
 
