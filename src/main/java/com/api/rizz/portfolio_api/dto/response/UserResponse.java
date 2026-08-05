@@ -21,6 +21,7 @@ public record UserResponse(
     Gender gender,
     String phoneNumber,
     String bio,
+    String resolvedLocale,
     String address,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt) {}

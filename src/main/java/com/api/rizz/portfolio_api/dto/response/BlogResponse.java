@@ -9,6 +9,7 @@ public record BlogResponse(
     String slug,
     String title,
     String content,
+    String resolvedLocale,
     Boolean isPublished,
     String featuredImage,
     int viewsCount,

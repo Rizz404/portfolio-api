@@ -9,6 +9,7 @@ public record UseResponse(
     @JsonFormat(shape = JsonFormat.Shape.STRING) String id,
     String itemName,
     String reasons,
+    String resolvedLocale,
     Category category,
     String logoUrl,
     List<String> pictures,

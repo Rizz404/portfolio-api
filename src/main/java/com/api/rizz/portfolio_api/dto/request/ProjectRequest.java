@@ -1,22 +1,42 @@
 package com.api.rizz.portfolio_api.dto.request;
 
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.Project.LinkType;
 import com.api.rizz.portfolio_api.entity.Project.ProjectStatus;
 import com.api.rizz.portfolio_api.entity.Project.ProjectType;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Map;
 import org.hibernate.validator.constraints.URL;
 
 public record ProjectRequest(
-    @NotBlank(message = "Project name cannot be empty") @Size(max = 255, message = "Project name must not exceed 255 characters") String name,
-    String description,
+    @NotEmpty(message = "At least the default locale (en) translation must be provided")
+        List<@Valid ProjectTranslationRequest> translations,
     @NotNull(message = "Status must be provided") ProjectStatus status,
     @URL(message = "Logo URL must be a valid URL") String logoUrl,
     List<String> imageUrls,
     Map<String, String> techStack,
     List<ProjectType> projectTypes,
     Map<LinkType, String> projectLinks,
-    List<String> deletedImageUrls) {}
+    List<String> deletedImageUrls) {
+
+  @AssertTrue(message = "Default locale (en) translation must be provided")
+  public boolean isDefaultLocalePresent() {
+    return translations == null
+        || translations.stream().anyMatch(t -> t != null && t.locale() == LanguageCode.en);
+  }
+
+  @AssertTrue(message = "Each locale can only appear once in translations") public boolean isLocaleUnique() {
+    if (translations == null) return true;
+    long distinctCount =
+        translations.stream()
+            .filter(t -> t != null && t.locale() != null)
+            .map(ProjectTranslationRequest::locale)
+            .distinct()
+            .count();
+    return distinctCount == translations.size();
+  }
+}

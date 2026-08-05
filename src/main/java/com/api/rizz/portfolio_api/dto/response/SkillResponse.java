@@ -10,5 +10,6 @@ public record SkillResponse(
     SkillCategory category,
     String logoUrl,
     String description,
+    String resolvedLocale,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt) {}

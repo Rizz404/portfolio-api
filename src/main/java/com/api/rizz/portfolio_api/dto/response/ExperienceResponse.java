@@ -11,6 +11,7 @@ public record ExperienceResponse(
     String position,
     String description,
     List<String> jobdesks,
+    String resolvedLocale,
     LocalDate startDate,
     LocalDate endDate,
     Boolean isCurrent,

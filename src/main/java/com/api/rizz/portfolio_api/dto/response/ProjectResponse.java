@@ -17,6 +17,7 @@ public record ProjectResponse(
     String slug,
     String name,
     String description,
+    String resolvedLocale,
     ProjectStatus status,
     String logoUrl,
     List<String> imageUrls,
