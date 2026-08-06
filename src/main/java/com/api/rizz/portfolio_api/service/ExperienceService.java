@@ -248,4 +248,17 @@ public class ExperienceService {
 
     experienceRepository.deleteById(id);
   }
+
+  @Transactional
+  public void deleteExperienceBatch(List<Long> ids) {
+    List<Experience> experiences = experienceRepository.findAllById(ids);
+
+    if (experiences.size() != ids.size()) {
+      List<Long> foundIds = experiences.stream().map(Experience::getId).toList();
+      List<Long> missingIds = ids.stream().filter(id -> !foundIds.contains(id)).toList();
+      throw new NoSuchElementException("Experience(s) with ID: %s not found".formatted(missingIds));
+    }
+
+    experienceRepository.deleteAll(experiences);
+  }
 }

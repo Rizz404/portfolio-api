@@ -265,7 +265,12 @@ public class UserService {
         // Hapus file lama di Cloudinary jika ada
         if (user.getProfilePict() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(user.getProfilePict());
-          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null) {
+            try {
+              fileUploadService.deleteFile(oldPublicId);
+            } catch (Exception ignored) {
+            }
+          }
         }
         String uploadedUrl =
             fileUploadService.uploadFile(profilePictFile, "portfolio/users/profilePict");
@@ -305,5 +310,31 @@ public class UserService {
     }
 
     userRepository.deleteById(id);
+  }
+
+  @Transactional
+  public void deleteUserBatch(List<Long> ids) {
+    List<User> users = userRepository.findAllById(ids);
+
+    if (users.size() != ids.size()) {
+      List<Long> foundIds = users.stream().map(User::getId).toList();
+      List<Long> missingIds = ids.stream().filter(id -> !foundIds.contains(id)).toList();
+      throw new NoSuchElementException("User(s) with ID: %s not found".formatted(missingIds));
+    }
+
+    for (User user : users) {
+      if (user.getProfilePict() != null) {
+        String profilePictPublicId =
+            fileUploadService.extractCloudinaryPublicId(user.getProfilePict());
+        if (profilePictPublicId != null) {
+          try {
+            fileUploadService.deleteFile(profilePictPublicId);
+          } catch (Exception ignored) {
+          }
+        }
+      }
+    }
+
+    userRepository.deleteAll(users);
   }
 }

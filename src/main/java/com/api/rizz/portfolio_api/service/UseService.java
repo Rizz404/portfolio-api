@@ -236,7 +236,12 @@ public class UseService {
         // Hapus file lama di Cloudinary jika ada
         if (use.getLogoUrl() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(use.getLogoUrl());
-          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null) {
+            try {
+              fileUploadService.deleteFile(oldPublicId);
+            } catch (Exception ignored) {
+            }
+          }
         }
         String uploadedUrl = fileUploadService.uploadFile(logoFile, "portfolio/uses/logo");
         use.setLogoUrl(uploadedUrl);
@@ -291,5 +296,34 @@ public class UseService {
     }
 
     useRepository.deleteById(id);
+  }
+
+  @Transactional
+  public void deleteUseBatch(List<Long> ids) {
+    List<Use> uses = useRepository.findAllById(ids);
+
+    if (uses.size() != ids.size()) {
+      List<Long> foundIds = uses.stream().map(Use::getId).toList();
+      List<Long> missingIds = ids.stream().filter(id -> !foundIds.contains(id)).toList();
+      throw new NoSuchElementException("Use(s) with ID: %s not found".formatted(missingIds));
+    }
+
+    for (Use use : uses) {
+      if (use.getLogoUrl() != null) {
+        String logoPublicId = fileUploadService.extractCloudinaryPublicId(use.getLogoUrl());
+        if (logoPublicId != null) {
+          try {
+            fileUploadService.deleteFile(logoPublicId);
+          } catch (Exception ignored) {
+          }
+        }
+      }
+
+      if (use.getPictures() != null && !use.getPictures().isEmpty()) {
+        fileUploadService.deleteFilesByUrls(use.getPictures());
+      }
+    }
+
+    useRepository.deleteAll(uses);
   }
 }

@@ -289,7 +289,12 @@ public class BlogService {
         // Hapus file lama di Cloudinary jika ada
         if (blog.getFeaturedImage() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(blog.getFeaturedImage());
-          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null) {
+            try {
+              fileUploadService.deleteFile(oldPublicId);
+            } catch (Exception ignored) {
+            }
+          }
         }
         String uploadedUrl =
             fileUploadService.uploadFile(featuredImageFile, "portfolio/blogs/featured");
@@ -358,6 +363,44 @@ public class BlogService {
     }
 
     blogRepository.deleteById(id);
+  }
+
+  @Transactional
+  public void deleteBlogBatch(List<Long> ids) {
+    List<Blog> blogs = blogRepository.findAllById(ids);
+
+    if (blogs.size() != ids.size()) {
+      List<Long> foundIds = blogs.stream().map(Blog::getId).toList();
+      List<Long> missingIds = ids.stream().filter(id -> !foundIds.contains(id)).toList();
+      throw new NoSuchElementException("Blog(s) with ID: %s not found".formatted(missingIds));
+    }
+
+    for (Blog blog : blogs) {
+      if (blog.getFeaturedImage() != null) {
+        String featuredPublicId =
+            fileUploadService.extractCloudinaryPublicId(blog.getFeaturedImage());
+        if (featuredPublicId != null) {
+          try {
+            fileUploadService.deleteFile(featuredPublicId);
+          } catch (Exception ignored) {
+          }
+        }
+      }
+
+      if (blog.getBlogAttachments() != null) {
+        for (BlogAttachment attachment : blog.getBlogAttachments()) {
+          String publicId = fileUploadService.extractCloudinaryPublicId(attachment.getFileUrl());
+          if (publicId != null) {
+            try {
+              fileUploadService.deleteFile(publicId);
+            } catch (Exception ignored) {
+            }
+          }
+        }
+      }
+    }
+
+    blogRepository.deleteAll(blogs);
   }
 
   // * Kategorikan MIME type upload jadi salah satu dari FileType, biar tidak perlu simpan

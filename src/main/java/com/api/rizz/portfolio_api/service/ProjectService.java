@@ -294,7 +294,12 @@ public class ProjectService {
         // Hapus file lama di Cloudinary jika ada
         if (project.getLogoUrl() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(project.getLogoUrl());
-          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null) {
+            try {
+              fileUploadService.deleteFile(oldPublicId);
+            } catch (Exception ignored) {
+            }
+          }
         }
         String uploadedUrl = fileUploadService.uploadFile(logoFile, "portfolio/projects/logo");
         project.setLogoUrl(uploadedUrl);
@@ -358,5 +363,36 @@ public class ProjectService {
     }
 
     projectRepository.deleteById(id);
+  }
+
+  @Transactional
+  public void deleteProjectBatch(List<Long> ids) {
+    // * Ambil semua entity sekaligus dalam 1 query, bukan findById satu-satu
+    List<Project> projects = projectRepository.findAllById(ids);
+
+    if (projects.size() != ids.size()) {
+      List<Long> foundIds = projects.stream().map(Project::getId).toList();
+      List<Long> missingIds = ids.stream().filter(id -> !foundIds.contains(id)).toList();
+      throw new NoSuchElementException("Project(s) with ID: %s not found".formatted(missingIds));
+    }
+
+    for (Project project : projects) {
+      if (project.getLogoUrl() != null) {
+        String logoPublicId = fileUploadService.extractCloudinaryPublicId(project.getLogoUrl());
+        if (logoPublicId != null) {
+          try {
+            fileUploadService.deleteFile(logoPublicId);
+          } catch (Exception ignored) {
+          }
+        }
+      }
+
+      if (project.getImageUrls() != null && !project.getImageUrls().isEmpty()) {
+        fileUploadService.deleteFilesByUrls(project.getImageUrls());
+      }
+    }
+
+    // * deleteAll (bukan deleteAllInBatch) supaya cascade/orphanRemoval JPA tetap jalan
+    projectRepository.deleteAll(projects);
   }
 }

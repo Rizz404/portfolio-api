@@ -241,7 +241,12 @@ public class SkillService {
         // Hapus file lama di Cloudinary jika ada
         if (skill.getLogoUrl() != null) {
           String oldPublicId = fileUploadService.extractCloudinaryPublicId(skill.getLogoUrl());
-          if (oldPublicId != null) fileUploadService.deleteFile(oldPublicId);
+          if (oldPublicId != null) {
+            try {
+              fileUploadService.deleteFile(oldPublicId);
+            } catch (Exception ignored) {
+            }
+          }
         }
         String uploadedUrl = fileUploadService.uploadFile(logoFile, "portfolio/skills/logo");
         skill.setLogoUrl(uploadedUrl);
@@ -275,5 +280,30 @@ public class SkillService {
     }
 
     skillRepository.deleteById(id);
+  }
+
+  @Transactional
+  public void deleteSkillBatch(List<Long> ids) {
+    List<Skill> skills = skillRepository.findAllById(ids);
+
+    if (skills.size() != ids.size()) {
+      List<Long> foundIds = skills.stream().map(Skill::getId).toList();
+      List<Long> missingIds = ids.stream().filter(id -> !foundIds.contains(id)).toList();
+      throw new NoSuchElementException("Skill(s) with ID: %s not found".formatted(missingIds));
+    }
+
+    for (Skill skill : skills) {
+      if (skill.getLogoUrl() != null) {
+        String logoPublicId = fileUploadService.extractCloudinaryPublicId(skill.getLogoUrl());
+        if (logoPublicId != null) {
+          try {
+            fileUploadService.deleteFile(logoPublicId);
+          } catch (Exception ignored) {
+          }
+        }
+      }
+    }
+
+    skillRepository.deleteAll(skills);
   }
 }

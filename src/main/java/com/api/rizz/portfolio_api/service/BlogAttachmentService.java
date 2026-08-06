@@ -148,4 +148,28 @@ public class BlogAttachmentService {
     // Hapus dari DB
     blogAttachmentRepository.deleteById(id);
   }
+
+  @Transactional
+  public void deleteBlogAttachmentBatch(List<Long> ids) {
+    List<BlogAttachment> attachments = blogAttachmentRepository.findAllById(ids);
+
+    if (attachments.size() != ids.size()) {
+      List<Long> foundIds = attachments.stream().map(BlogAttachment::getId).toList();
+      List<Long> missingIds = ids.stream().filter(id -> !foundIds.contains(id)).toList();
+      throw new NoSuchElementException(
+          "BlogAttachment(s) with ID: %s not found".formatted(missingIds));
+    }
+
+    for (BlogAttachment attachment : attachments) {
+      String publicId = fileUploadService.extractCloudinaryPublicId(attachment.getFileUrl());
+      if (publicId != null) {
+        try {
+          fileUploadService.deleteFile(publicId);
+        } catch (Exception ignored) {
+        }
+      }
+    }
+
+    blogAttachmentRepository.deleteAll(attachments);
+  }
 }
