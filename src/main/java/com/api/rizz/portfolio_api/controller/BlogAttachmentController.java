@@ -1,6 +1,7 @@
 package com.api.rizz.portfolio_api.controller;
 
 import com.api.rizz.portfolio_api.CursorResponse;
+import com.api.rizz.portfolio_api.dto.request.BatchDeleteRequest;
 import com.api.rizz.portfolio_api.dto.request.BlogAttachmentRequest;
 import com.api.rizz.portfolio_api.dto.response.BlogAttachmentResponse;
 import com.api.rizz.portfolio_api.dto.response.CursorInfo;
@@ -128,6 +129,19 @@ public class BlogAttachmentController {
     SuccessResponse<String> successResponse =
         new SuccessResponse<>(
             "BlogAttachment deleted", "BlogAttachment with ID: %d deleted".formatted(id));
+    return ResponseEntity.ok(successResponse);
+  }
+
+  @PreAuthorize("isAuthenticated()")
+  @DeleteMapping("/batch")
+  public ResponseEntity<SuccessResponse<String>> deleteBlogAttachmentBatch(
+      @Valid @RequestBody BatchDeleteRequest request) {
+    blogAttachmentService.deleteBlogAttachmentBatch(request.ids());
+
+    SuccessResponse<String> successResponse =
+        new SuccessResponse<>(
+            "BlogAttachments deleted",
+            "%d blog attachment(s) deleted".formatted(request.ids().size()));
     return ResponseEntity.ok(successResponse);
   }
 }

@@ -1,6 +1,7 @@
 package com.api.rizz.portfolio_api.controller;
 
 import com.api.rizz.portfolio_api.CursorResponse;
+import com.api.rizz.portfolio_api.dto.request.BatchDeleteRequest;
 import com.api.rizz.portfolio_api.dto.request.ExperienceRequest;
 import com.api.rizz.portfolio_api.dto.response.CursorInfo;
 import com.api.rizz.portfolio_api.dto.response.ExperienceResponse;
@@ -132,6 +133,18 @@ public class ExperienceController {
 
     SuccessResponse<String> successResponse =
         new SuccessResponse<>("Experience deleted", "Experience with ID: %d deleted".formatted(id));
+    return ResponseEntity.ok(successResponse);
+  }
+
+  @PreAuthorize("isAuthenticated()")
+  @DeleteMapping("/batch")
+  public ResponseEntity<SuccessResponse<String>> deleteExperienceBatch(
+      @Valid @RequestBody BatchDeleteRequest request) {
+    experienceService.deleteExperienceBatch(request.ids());
+
+    SuccessResponse<String> successResponse =
+        new SuccessResponse<>(
+            "Experiences deleted", "%d experience(s) deleted".formatted(request.ids().size()));
     return ResponseEntity.ok(successResponse);
   }
 }

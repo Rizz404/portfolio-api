@@ -1,6 +1,7 @@
 package com.api.rizz.portfolio_api.controller;
 
 import com.api.rizz.portfolio_api.CursorResponse;
+import com.api.rizz.portfolio_api.dto.request.BatchDeleteRequest;
 import com.api.rizz.portfolio_api.dto.request.UserRequest;
 import com.api.rizz.portfolio_api.dto.response.CursorInfo;
 import com.api.rizz.portfolio_api.dto.response.PagedResponse;
@@ -202,6 +203,18 @@ public class UserController {
 
     SuccessResponse<String> successResponse =
         new SuccessResponse<>("User deleted", "User with ID: %d deleted".formatted(id));
+    return ResponseEntity.ok(successResponse);
+  }
+
+  @PreAuthorize("isAuthenticated()")
+  @DeleteMapping("/batch")
+  public ResponseEntity<SuccessResponse<String>> deleteUserBatch(
+      @Valid @RequestBody BatchDeleteRequest request) {
+    userService.deleteUserBatch(request.ids());
+
+    SuccessResponse<String> successResponse =
+        new SuccessResponse<>(
+            "Users deleted", "%d user(s) deleted".formatted(request.ids().size()));
     return ResponseEntity.ok(successResponse);
   }
 }
