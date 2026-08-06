@@ -7,6 +7,7 @@ import com.api.rizz.portfolio_api.dto.response.PagedResponse;
 import com.api.rizz.portfolio_api.dto.response.PagingInfo;
 import com.api.rizz.portfolio_api.dto.response.SuccessResponse;
 import com.api.rizz.portfolio_api.dto.response.UserResponse;
+import com.api.rizz.portfolio_api.entity.User;
 import com.api.rizz.portfolio_api.service.UserService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -118,6 +120,17 @@ public class UserController {
     return ResponseEntity.internalServerError().build();
   }
 
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/me")
+  public ResponseEntity<SuccessResponse<UserResponse>> findCurrentUser(
+      @AuthenticationPrincipal User currentUser) {
+    UserResponse userResponse = userService.findUserById(currentUser.getId());
+
+    SuccessResponse<UserResponse> successResponse =
+        new SuccessResponse<>("Current user retrieved", userResponse);
+    return ResponseEntity.ok(successResponse);
+  }
+
   @GetMapping("/{id}")
   public ResponseEntity<SuccessResponse<UserResponse>> findUserById(@PathVariable("id") Long id) {
     UserResponse userResponse = userService.findUserById(id);
@@ -151,6 +164,34 @@ public class UserController {
 
     SuccessResponse<UserResponse> successResponse =
         new SuccessResponse<>("User updated", userResponse);
+    return ResponseEntity.ok(successResponse);
+  }
+
+  @PreAuthorize("isAuthenticated()")
+  @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<SuccessResponse<UserResponse>> updateCurrentUserJson(
+      @AuthenticationPrincipal User currentUser, @Valid @RequestBody UserRequest request) {
+
+    UserResponse userResponse = userService.updateCurrentUser(currentUser.getId(), request, null);
+
+    SuccessResponse<UserResponse> successResponse =
+        new SuccessResponse<>("Current user updated", userResponse);
+    return ResponseEntity.ok(successResponse);
+  }
+
+  // Endpoint update current user berbasis Multipart
+  @PreAuthorize("isAuthenticated()")
+  @PatchMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<SuccessResponse<UserResponse>> updateCurrentUserMultipart(
+      @AuthenticationPrincipal User currentUser,
+      @Valid @RequestPart("data") UserRequest request,
+      @RequestPart(value = "profilePictFile", required = false) MultipartFile profilePictFile) {
+
+    UserResponse userResponse =
+        userService.updateCurrentUser(currentUser.getId(), request, profilePictFile);
+
+    SuccessResponse<UserResponse> successResponse =
+        new SuccessResponse<>("Current user updated", userResponse);
     return ResponseEntity.ok(successResponse);
   }
 

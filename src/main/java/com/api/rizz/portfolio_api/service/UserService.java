@@ -217,6 +217,19 @@ public class UserService {
 
   @Transactional
   public UserResponse updateUser(Long id, UserRequest userRequest, MultipartFile profilePictFile) {
+    return updateUser(id, userRequest, profilePictFile, false);
+  }
+
+  // * Dipakai endpoint self-service (/users/me) - role & provider dikunci ke nilai lama
+  // * supaya user tidak bisa eskalasi role dirinya sendiri jadi ADMIN lewat body request.
+  @Transactional
+  public UserResponse updateCurrentUser(
+      Long id, UserRequest userRequest, MultipartFile profilePictFile) {
+    return updateUser(id, userRequest, profilePictFile, true);
+  }
+
+  private UserResponse updateUser(
+      Long id, UserRequest userRequest, MultipartFile profilePictFile, boolean restrictSelfFields) {
     try {
       User user =
           userRepository
@@ -224,8 +237,17 @@ public class UserService {
               .orElseThrow(
                   () -> new NoSuchElementException("User with ID: %d not found".formatted(id)));
 
+      User.Role previousRole = user.getRole();
+      User.AuthProvider previousProvider = user.getProvider();
+
       // * Update data entity lama pakai data request baru
       userMapper.updateEntityFromRequest(userRequest, user);
+
+      if (restrictSelfFields) {
+        // * Field privileged dikembalikan ke nilai lama, apapun yang dikirim di request
+        user.setRole(previousRole);
+        user.setProvider(previousProvider);
+      }
 
       // * Mutasi in-place, JANGAN setTranslations(newList) - lihat catatan di ProjectService
       reconcileTranslations(user, userRequest.translations());
