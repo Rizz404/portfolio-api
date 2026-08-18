@@ -10,10 +10,10 @@ http:
     type: json
     data: |-
       {
-        "email": "rinnthenotable@gmail.com",
-        "password": "177013",
-        "confirmPassword": "177013",
-        "nickname": "Rizz"
+        "email": "rizky.tester@example.com",
+        "password": "SuperSecret123!",
+        "confirmPassword": "SuperSecret123!",
+        "nickname": "Rizky"
       }
   auth: inherit
 
@@ -37,12 +37,12 @@ runtime:
 
         test("response body should contain a token and the created user", function () {
           const body = res.getBody();
-          expect(body).to.have.property("token");
-          expect(body.user).to.have.property("id");
-          expect(body.user.email).to.equal("rizky.tester@example.com");
+          expect(body.data).to.have.property("token");
+          expect(body.data.user).to.have.property("id");
+          expect(body.data.user.email).to.equal("rizky.tester@example.com");
 
-          bru.setVar("accessToken", body.token);
-          bru.setVar("authUserId", body.user.id);
+          bru.setVar("accessToken", body.data.token);
+          bru.setVar("authUserId", body.data.user.id);
         });
 
 settings:
@@ -52,9 +52,15 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  Stores the JWT in the `accessToken` collection variable, which the collection's
-  root-level bearer auth reads from. Every other request using `auth: inherit`
-  therefore becomes authenticated once this request has run.
+  Controllers wrap every success payload in SuccessResponse ({status, message, data}),
+  so the actual token/user live under `body.data`, not the root - `body.token`/
+  `body.user` would silently be undefined.
+
+  Also sets the `TOKEN` environment variable (read by the collection's root-level
+  bearer auth, see opencollection.yml) via the after-response script, so every other
+  request using `auth: inherit` becomes authenticated once this request has run.
+  `accessToken`/`authUserId` are separate collection variables kept only for reference
+  by other requests in this folder (e.g. `cleanup - delete registered user`).
 
   Re-running this request will fail (see `register - duplicate email`) unless
   `cleanup - delete registered user` removed the user from the previous run first.

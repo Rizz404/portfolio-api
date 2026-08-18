@@ -10,8 +10,8 @@ http:
     type: json
     data: |-
       {
-         "email": "rizzthenotable@gmail.com",
-        "password": "177013"
+        "email": "rizky.tester@example.com",
+        "password": "SuperSecret123!"
       }
   auth: inherit
 
@@ -35,11 +35,11 @@ runtime:
 
         test("response body should contain a fresh token for the registered user", function () {
           const body = res.getBody();
-          expect(body).to.have.property("token");
-          expect(body.user.email).to.equal("rizky.tester@example.com");
+          expect(body.data).to.have.property("token");
+          expect(body.data.user.email).to.equal("rizky.tester@example.com");
 
-          bru.setVar("accessToken", body.token);
-          bru.setVar("authUserId", body.user.id);
+          bru.setVar("accessToken", body.data.token);
+          bru.setVar("authUserId", body.data.user.id);
         });
 
 settings:
@@ -49,5 +49,7 @@ settings:
   maxRedirects: 5
 
 docs: |-
+  The token/user live under `body.data` (SuccessResponse envelope), not the root.
+
   Depends on `register` having run first in this run/session to create the account.
-  Overwrites `accessToken` with a freshly issued token.
+  Overwrites `accessToken`/`TOKEN` with a freshly issued token.

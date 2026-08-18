@@ -21,8 +21,14 @@ runtime:
   scripts:
     - type: tests
       code: |-
-        test("registering an already-used email currently surfaces as 500", function () {
-          expect(res.getStatus()).to.equal(500);
+        test("registering an already-used email is rejected with 400", function () {
+          expect(res.getStatus()).to.equal(400);
+        });
+
+        test("error message should mention the email is already used", function () {
+          const body = res.getBody();
+          expect(body.status).to.equal("error");
+          expect(body.message).to.equal("Email has been used");
         });
 
 settings:
@@ -32,8 +38,8 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  Same root cause as `register - password mismatch`: AuthService's
-  IllegalArgumentException("Email has been used") has no matching
-  @RestControllerAdvice handler, so it surfaces as 500 instead of 409/400.
+  AuthService.register throws IllegalArgumentException("Email has been used"), which
+  GlobalExceptionHandler.handleIllegalArgumentException now maps to 400 (was an
+  unhandled 500 before the handler was added).
 
   Depends on `register` having run first in this run/session so the email exists.
