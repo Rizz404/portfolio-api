@@ -13,6 +13,7 @@ import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -163,7 +164,7 @@ public class ProjectService {
       Project savedProject = projectRepository.save(project);
 
       return projectMapper.toResponse(savedProject);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error when communicate with cloudinary: " + e.getMessage(), e);
     }
   }
@@ -331,7 +332,7 @@ public class ProjectService {
 
       Project updatedProject = projectRepository.save(project);
       return projectMapper.toResponse(updatedProject);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error during update mutation: " + e.getMessage(), e);
     }
   }

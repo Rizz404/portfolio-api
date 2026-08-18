@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -80,6 +81,23 @@ public class GlobalExceptionHandler {
     ErrorResponse<String> response =
         new ErrorResponse<>("error", "You don't have permission to access this resource", null);
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+  }
+
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ResponseEntity<ErrorResponse<String>> handleDataIntegrityViolationException(
+      DataIntegrityViolationException ex, HttpServletRequest request) {
+    // * Meng-cover pelanggaran constraint di level DB (mis. UNIQUE(project_id, locale) pas
+    // * translation locale-nya duplikat, atau NOT NULL yang lolos dari validasi @Valid). Pesan
+    // * detail asli (nama constraint, dsb) sengaja gak dibocorin ke client, cukup di-log di server.
+    log.warn(
+        "Data integrity violation: {} - Path: {}",
+        ex.getMostSpecificCause().getMessage(),
+        request.getRequestURI());
+
+    ErrorResponse<String> response =
+        new ErrorResponse<>(
+            "error", "The request conflicts with existing data (e.g. a duplicate value)", null);
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
   }
 
   @ExceptionHandler(MaxUploadSizeExceededException.class)

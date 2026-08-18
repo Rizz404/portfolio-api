@@ -10,6 +10,7 @@ import com.api.rizz.portfolio_api.mapper.SkillMapper;
 import com.api.rizz.portfolio_api.repository.SkillRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,7 +125,7 @@ public class SkillService {
       Skill savedSkill = skillRepository.save(skill);
 
       return skillMapper.toResponse(savedSkill);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error when communicate with cloudinary: " + e.getMessage(), e);
     }
   }
@@ -256,7 +257,7 @@ public class SkillService {
 
       Skill updatedSkill = skillRepository.save(skill);
       return skillMapper.toResponse(updatedSkill);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error during update mutation: " + e.getMessage(), e);
     }
   }

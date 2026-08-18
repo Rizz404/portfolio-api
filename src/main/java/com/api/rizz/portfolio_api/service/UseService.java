@@ -10,6 +10,7 @@ import com.api.rizz.portfolio_api.mapper.UseMapper;
 import com.api.rizz.portfolio_api.repository.UseRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +118,7 @@ public class UseService {
       Use savedUse = useRepository.save(use);
 
       return useMapper.toResponse(savedUse);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error when communicate with cloudinary: " + e.getMessage(), e);
     }
   }
@@ -264,7 +265,7 @@ public class UseService {
 
       Use updatedUse = useRepository.save(use);
       return useMapper.toResponse(updatedUse);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error during update mutation: " + e.getMessage(), e);
     }
   }

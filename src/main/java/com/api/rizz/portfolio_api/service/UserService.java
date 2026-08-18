@@ -10,6 +10,7 @@ import com.api.rizz.portfolio_api.mapper.UserMapper;
 import com.api.rizz.portfolio_api.repository.UserRepository;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +108,7 @@ public class UserService {
       User savedUser = userRepository.save(user);
 
       return userMapper.toResponse(savedUser);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error during create mutation: " + e.getMessage(), e);
     }
   }
@@ -281,7 +282,7 @@ public class UserService {
 
       User updatedUser = userRepository.save(user);
       return userMapper.toResponse(updatedUser);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error during update mutation: " + e.getMessage(), e);
     }
   }

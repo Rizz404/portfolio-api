@@ -14,6 +14,7 @@ import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -170,7 +171,7 @@ public class BlogService {
       Blog savedBlog = blogRepository.save(blog);
 
       return blogMapper.toResponse(savedBlog);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error when communicate with cloudinary: " + e.getMessage(), e);
     }
   }
@@ -322,7 +323,7 @@ public class BlogService {
 
       Blog updatedBlog = blogRepository.save(blog);
       return blogMapper.toResponse(updatedBlog);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error during update mutation: " + e.getMessage(), e);
     }
   }
