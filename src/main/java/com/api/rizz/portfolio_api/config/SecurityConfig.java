@@ -42,13 +42,16 @@ public class SecurityConfig {
         // Mengubah otorisasi endpoint
         .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
         .authenticationProvider(authenticationProvider())
+        // * JwtAuthFilter didaftarkan lebih dulu (relatif ke UsernamePasswordAuthenticationFilter,
+        // * filter bawaan Spring Security yang order-nya sudah dikenal) supaya posisinya di filter
+        // * chain "terdaftar". Baru setelah itu RateLimitFilter bisa dipasang relatif ke
+        // * JwtAuthFilter.class - kalau dibalik, Spring Security akan melempar
+        // * IllegalArgumentException "does not have a registered order" karena JwtAuthFilter
+        // * belum dikenal saat itu.
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         // * RateLimitFilter dipasang paling depan (sebelum JwtAuthFilter) supaya request yang
         // * kelebihan kuota langsung ditolak 429 tanpa sempat diproses autentikasi.
-        .addFilterBefore(rateLimitFilter, JwtAuthFilter.class)
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Mengizinkan
-    // seluruh
-    // akses tanpa
-    // kredensial login
+        .addFilterBefore(rateLimitFilter, JwtAuthFilter.class);
 
     return http.build();
   }
