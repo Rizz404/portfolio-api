@@ -35,8 +35,8 @@ runtime:
 
         test("results should only contain matching, active projects", function () {
           const body = res.getBody();
-          expect(body.content).to.be.an("array");
-          body.content.forEach((project) => {
+          expect(body.data).to.be.an("array");
+          body.data.forEach((project) => {
             expect(project.status).to.equal("active");
             expect(project.name.toLowerCase()).to.include("vue");
           });
@@ -47,3 +47,6 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  The item list is under `body.data` (see `get all`), not `body.content`.

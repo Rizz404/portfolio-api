@@ -1,0 +1,40 @@
+info:
+  name: delete - batch
+  type: http
+  seq: 15
+
+http:
+  method: DELETE
+  url: "{{BASE_URL}}/projects/batch"
+  body:
+    type: json
+    data: |-
+      {
+        "ids": [{{projectBatchId1}}, {{projectBatchId2}}]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("confirmation message should mention both deleted projects", function () {
+          const body = res.getBody();
+          expect(String(body.data)).to.include("2");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises ProjectController.deleteProjectBatch / ProjectService.deleteProjectBatch
+  (DELETE /projects/batch with a BatchDeleteRequest body). Depends on
+  `setup - create batch fixture 1` and `setup - create batch fixture 2` having run
+  first so `projectBatchId1`/`projectBatchId2` are set.

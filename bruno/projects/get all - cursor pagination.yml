@@ -25,9 +25,12 @@ runtime:
           expect(res.getStatus()).to.equal(200);
         });
 
-        test("cursor pagination should return a plain array, not a Page object", function () {
+        test("cursor pagination should return the item list under data, with cursor metadata (not pagination)", function () {
           const body = res.getBody();
-          expect(body).to.be.an("array");
+          expect(body.data).to.be.an("array");
+          expect(body).to.have.property("cursor");
+          expect(body).to.not.have.property("pagination");
+          expect(body.cursor).to.have.property("hasNextPage");
         });
 
 settings:
@@ -35,3 +38,8 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  Both offset and cursor pagination put the item list under `body.data` - the
+  difference is the sibling metadata key: `pagination` (PagingInfo) for offset,
+  `cursor` (CursorInfo: nextCursor/perPage/hasNextPage) for cursor-based paging.

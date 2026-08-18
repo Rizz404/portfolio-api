@@ -10,8 +10,13 @@ http:
     type: json
     data: |-
       {
-        "name": "Vue 4 Portfolio Dashboard",
-        "description": "Dashboard v4 dengan perbaikan performa dan UI.",
+        "translations": [
+          {
+            "locale": "en",
+            "name": "Vue 4 Portfolio Dashboard",
+            "description": "Dashboard v4 with performance and UI improvements."
+          }
+        ],
         "status": "development",
         "logoUrl": "https://example.com/images/vue-logo-v4.png",
         "imageUrls": [
@@ -33,10 +38,10 @@ runtime:
 
         test("project should reflect the updated fields and regenerated slug", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("projectId"));
-          expect(body.name).to.equal("Vue 4 Portfolio Dashboard");
-          expect(body.status).to.equal("development");
-          expect(body.slug).to.equal("vue-4-portfolio-dashboard");
+          expect(body.data.id).to.equal(bru.getVar("projectId"));
+          expect(body.data.name).to.equal("Vue 4 Portfolio Dashboard");
+          expect(body.data.status).to.equal("development");
+          expect(body.data.slug).to.equal("vue-4-portfolio-dashboard");
         });
 
 settings:
@@ -46,6 +51,8 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  ProjectController does not apply @Valid on update, and the mapper overwrites every
-  field (no null-ignore strategy), so send the full body here rather than a partial
-  patch to avoid silently nulling out fields like status/description.
+  ProjectController does not apply @Valid on update... actually it does now
+  (@Valid @RequestPart/@RequestBody ProjectRequest), but the mapper still
+  overwrites every field with no null-ignore strategy, and reconcileTranslations
+  replaces translations by locale rather than merging, so send the full body here
+  (including every locale you want to keep) rather than a partial patch.

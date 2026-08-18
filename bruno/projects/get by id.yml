@@ -18,8 +18,8 @@ runtime:
 
         test("response body should match the created project", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("projectId"));
-          expect(body.name).to.equal("Vue 3 Portfolio Dashboard");
+          expect(body.data.id).to.equal(bru.getVar("projectId"));
+          expect(body.data.name).to.equal("Vue 3 Portfolio Dashboard");
         });
 
 settings:

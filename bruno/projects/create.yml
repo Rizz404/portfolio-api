@@ -10,8 +10,18 @@ http:
     type: json
     data: |-
       {
-        "name": "Vue 3 Portfolio Dashboard",
-        "description": "Dashboard interaktif untuk mengelola portofolio, dibangun dengan Vue 3 dan Tailwind CSS v4.",
+        "translations": [
+          {
+            "locale": "en",
+            "name": "Vue 3 Portfolio Dashboard",
+            "description": "Interactive dashboard for managing a portfolio, built with Vue 3 and Tailwind CSS v4."
+          },
+          {
+            "locale": "id",
+            "name": "Dashboard Portofolio Vue 3",
+            "description": "Dashboard interaktif untuk mengelola portofolio, dibangun dengan Vue 3 dan Tailwind CSS v4."
+          }
+        ],
         "status": "active",
         "logoUrl": "https://example.com/images/vue-logo.png",
         "imageUrls": [
@@ -36,13 +46,15 @@ runtime:
 
         test("response body should contain the generated id, slug and submitted fields", function () {
           const body = res.getBody();
-          expect(body).to.have.property("id");
-          expect(body).to.have.property("slug");
-          expect(body.name).to.equal("Vue 3 Portfolio Dashboard");
-          expect(body.status).to.equal("active");
-          expect(body.imageUrls).to.have.lengthOf(2);
+          expect(body.data).to.have.property("id");
+          expect(body.data).to.have.property("slug");
+          // No Accept-Language header is sent, so the server's default locale (en) is
+          // resolved and ProjectResponse is flattened from the "en" translation.
+          expect(body.data.name).to.equal("Vue 3 Portfolio Dashboard");
+          expect(body.data.status).to.equal("active");
+          expect(body.data.imageUrls).to.have.lengthOf(2);
 
-          bru.setVar("projectId", body.id);
+          bru.setVar("projectId", body.data.id);
         });
 
 settings:
@@ -50,3 +62,12 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  ProjectRequest no longer has flat name/description fields - it now requires a
+  `translations` array (at least the "en" locale, enforced by a record-level
+  @AssertTrue), and ProjectResponse flattens whichever translation matches the
+  resolved request locale back into top-level name/description/resolvedLocale.
+
+  Controllers wrap success payloads in SuccessResponse, so the created project lives
+  under `body.data`, not the root.

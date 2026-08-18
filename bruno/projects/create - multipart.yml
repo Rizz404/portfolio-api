@@ -14,8 +14,13 @@ http:
         contentType: application/json
         value: |-
           {
-            "name": "Multipart Upload Test Project",
-            "description": "Created via multipart/form-data with a real logo and image files.",
+            "translations": [
+              {
+                "locale": "en",
+                "name": "Multipart Upload Test Project",
+                "description": "Created via multipart/form-data with a real logo and image files."
+              }
+            ],
             "status": "active",
             "projectLinks": {
               "repo": "https://github.com/rizqiansyah/multipart-test"
@@ -24,12 +29,12 @@ http:
       - type: file
         name: logoFile
         value:
-          - fixtures/sample-1.png
+          - fixtures/sample-1.jpg
       - type: file
         name: imageFiles
         value:
-          - fixtures/sample-1.png
-          - fixtures/sample-2.png
+          - fixtures/sample-1.jpg
+          - fixtures/sample-2.jpg
   auth: inherit
 
 runtime:
@@ -42,13 +47,13 @@ runtime:
 
         test("logoFile and imageFiles should be uploaded to Cloudinary and returned as URLs", function () {
           const body = res.getBody();
-          expect(body).to.have.property("id");
-          expect(body.logoUrl).to.be.a("string").and.not.empty;
-          expect(body.imageUrls).to.be.an("array").with.lengthOf(2);
-          body.imageUrls.forEach((url) => expect(url).to.be.a("string").and.not.empty);
+          expect(body.data).to.have.property("id");
+          expect(body.data.logoUrl).to.be.a("string").and.not.empty;
+          expect(body.data.imageUrls).to.be.an("array").with.lengthOf(2);
+          body.data.imageUrls.forEach((url) => expect(url).to.be.a("string").and.not.empty);
 
-          bru.setVar("projectMultipartId", body.id);
-          bru.setVar("projectMultipartImageUrlToDelete", body.imageUrls[0]);
+          bru.setVar("projectMultipartId", body.data.id);
+          bru.setVar("projectMultipartImageUrlToDelete", body.data.imageUrls[0]);
         });
 
 settings:
@@ -61,8 +66,10 @@ docs: |-
   Exercises ProjectController.createProjectMultipart, which is untouched by `create`
   (that one only hits createProjectJson, since a JSON content-type body routes there).
   The "data" text part must be sent with contentType: application/json, otherwise
-  Spring can't deserialize the @RequestPart("data") ProjectRequest.
+  Spring can't deserialize the @RequestPart("data") ProjectRequest - and since it's
+  deserialized separately from the file parts, it still needs the `translations`
+  array like the JSON body does.
 
-  Actually uploads fixtures/sample-1.png and fixtures/sample-2.png to Cloudinary.
+  Actually uploads fixtures/sample-1.jpg and fixtures/sample-2.jpg to Cloudinary.
   Cleaned up (including the Cloudinary files) by
   `cleanup - delete multipart fixture`.

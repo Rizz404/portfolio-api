@@ -14,8 +14,13 @@ http:
         contentType: application/json
         value: |-
           {
-            "name": "Multipart Upload Test Project (Updated)",
-            "description": "Updated via multipart/form-data with a replacement logo and an extra image.",
+            "translations": [
+              {
+                "locale": "en",
+                "name": "Multipart Upload Test Project (Updated)",
+                "description": "Updated via multipart/form-data with a replacement logo and an extra image."
+              }
+            ],
             "status": "active",
             "projectLinks": {
               "repo": "https://github.com/rizqiansyah/multipart-test"
@@ -25,11 +30,11 @@ http:
       - type: file
         name: logoFile
         value:
-          - fixtures/sample-2.png
+          - fixtures/sample-2.jpg
       - type: file
         name: newImageFiles
         value:
-          - fixtures/sample-2.png
+          - fixtures/sample-2.jpg
   auth: inherit
 
 runtime:
@@ -42,12 +47,12 @@ runtime:
 
         test("logo should be replaced and image list should reflect the deletion + addition", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("projectMultipartId"));
-          expect(body.name).to.equal("Multipart Upload Test Project (Updated)");
-          expect(body.logoUrl).to.be.a("string").and.not.empty;
+          expect(body.data.id).to.equal(bru.getVar("projectMultipartId"));
+          expect(body.data.name).to.equal("Multipart Upload Test Project (Updated)");
+          expect(body.data.logoUrl).to.be.a("string").and.not.empty;
           // 2 original image files, minus 1 deleted, plus 1 newly uploaded = 2
-          expect(body.imageUrls).to.be.an("array").with.lengthOf(2);
-          expect(body.imageUrls).to.not.include(bru.getVar("projectMultipartImageUrlToDelete"));
+          expect(body.data.imageUrls).to.be.an("array").with.lengthOf(2);
+          expect(body.data.imageUrls).to.not.include(bru.getVar("projectMultipartImageUrlToDelete"));
         });
 
 settings:

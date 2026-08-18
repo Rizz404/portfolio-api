@@ -10,9 +10,8 @@ http:
     type: json
     data: |-
       {
-        "name": "",
-        "description": "Missing required fields",
-        "status": "",
+        "translations": [],
+        "status": null,
         "logoUrl": null,
         "imageUrls": [],
         "projectLinks": {}
@@ -23,8 +22,16 @@ runtime:
   scripts:
     - type: tests
       code: |-
-        test("blank required fields should be rejected with 400", function () {
+        test("an empty translations list and missing status should be rejected with 400", function () {
           expect(res.getStatus()).to.equal(400);
+        });
+
+        test("validation error should flag the missing fields", function () {
+          const body = res.getBody();
+          expect(body.status).to.equal("error");
+          expect(body.message).to.equal("Validation failed");
+          expect(body.error).to.have.property("translations");
+          expect(body.error).to.have.property("status");
         });
 
 settings:
@@ -34,5 +41,7 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  createProject is the only endpoint annotated with @Valid across all controllers,
-  so this is the only resource where a blank required field actually fails validation.
+  ProjectRequest.translations is @NotEmpty and status is @NotNull; every
+  create/update controller method in this collection is now annotated @Valid, but
+  this is still the clearest resource to exercise a validation failure on since it
+  has no other required fields to accidentally satisfy.

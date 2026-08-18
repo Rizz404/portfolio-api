@@ -1,0 +1,38 @@
+info:
+  name: setup - create batch fixture 2
+  type: http
+  seq: 14
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/projects"
+  body:
+    type: json
+    data: |-
+      {
+        "translations": [
+          { "locale": "en", "name": "Batch Delete Fixture Project 2" }
+        ],
+        "status": "archived"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("fixture project 2 should be created", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          bru.setVar("projectBatchId2", body.data.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Second throwaway project for `delete - batch`. See
+  `setup - create batch fixture 1`.
