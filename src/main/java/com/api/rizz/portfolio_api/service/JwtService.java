@@ -29,23 +29,28 @@ public class JwtService {
         .compact();
   }
 
+  // * Bisa melempar io.jsonwebtoken.JwtException (token expired/malformed/signature invalid)
+  // * atau IllegalArgumentException (token null/kosong) karena tetap melakukan parsing token.
+  // * Caller (JwtAuthFilter) WAJIB menangkap exception ini - jangan biarkan lolos begitu saja,
+  // * karena kalau lolos dari filter, GlobalExceptionHandler tidak akan pernah menangkapnya.
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
   }
 
+  // * Sama seperti extractUsername, method ini melakukan parsing ulang sehingga bisa melempar
+  // * exception yang sama.
   public boolean isTokenValid(String token, UserDetails userDetails) {
-    final String username = extractUsername(token);
-    return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
-  }
-
-  private boolean isTokenExpired(String token) {
-    return extractClaim(token, Claims::getExpiration).before(new Date());
+    final Claims claims = extractAllClaims(token);
+    return claims.getSubject().equals(userDetails.getUsername())
+        && claims.getExpiration().after(new Date());
   }
 
   private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-    final Claims claims =
-        Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
-    return claimsResolver.apply(claims);
+    return claimsResolver.apply(extractAllClaims(token));
+  }
+
+  private Claims extractAllClaims(String token) {
+    return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
   }
 
   private SecretKey getSigningKey() {
