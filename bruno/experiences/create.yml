@@ -11,15 +11,23 @@ http:
     data: |-
       {
         "companyName": "PT Teknologi Nusantara",
-        "position": "Backend Engineer",
-        "description": "Mengembangkan dan memelihara layanan backend berbasis Spring Boot.",
-        "jobdesks": [
-          "Membangun REST API",
-          "Optimasi query database"
-        ],
         "startDate": "2023-01-15",
         "endDate": null,
-        "isCurrent": true
+        "isCurrent": true,
+        "translations": [
+          {
+            "locale": "en",
+            "position": "Backend Engineer",
+            "description": "Developing and maintaining backend services built with Spring Boot.",
+            "jobdesks": ["Building REST APIs", "Database query optimization"]
+          },
+          {
+            "locale": "id",
+            "position": "Backend Engineer",
+            "description": "Mengembangkan dan memelihara layanan backend berbasis Spring Boot.",
+            "jobdesks": ["Membangun REST API", "Optimasi query database"]
+          }
+        ]
       }
   auth: inherit
 
@@ -33,11 +41,11 @@ runtime:
 
         test("response body should contain the generated id and submitted fields", function () {
           const body = res.getBody();
-          expect(body).to.have.property("id");
-          expect(body.companyName).to.equal("PT Teknologi Nusantara");
-          expect(body.isCurrent).to.equal(true);
+          expect(body.data).to.have.property("id");
+          expect(body.data.companyName).to.equal("PT Teknologi Nusantara");
+          expect(body.data.isCurrent).to.equal(true);
 
-          bru.setVar("experienceId", body.id);
+          bru.setVar("experienceId", body.data.id);
         });
 
 settings:
@@ -45,3 +53,12 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  ExperienceRequest keeps companyName/startDate/endDate/isCurrent flat, but
+  position/description/jobdesks moved into a required `translations` array (at
+  least "en"). ExperienceResponse flattens the resolved locale's fields back to
+  the top level.
+
+  Controllers wrap success payloads in SuccessResponse, so the created experience
+  lives under `body.data`, not the root.

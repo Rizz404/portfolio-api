@@ -11,16 +11,17 @@ http:
     data: |-
       {
         "companyName": "PT Teknologi Nusantara",
-        "position": "Senior Backend Engineer",
-        "description": "Naik jabatan, memimpin tim backend.",
-        "jobdesks": [
-          "Membangun REST API",
-          "Code review",
-          "Mentoring junior engineer"
-        ],
         "startDate": "2023-01-15",
         "endDate": "2026-06-30",
-        "isCurrent": false
+        "isCurrent": false,
+        "translations": [
+          {
+            "locale": "en",
+            "position": "Senior Backend Engineer",
+            "description": "Promoted, now leading the backend team.",
+            "jobdesks": ["Building REST APIs", "Code review", "Mentoring junior engineers"]
+          }
+        ]
       }
   auth: inherit
 
@@ -34,9 +35,9 @@ runtime:
 
         test("experience should reflect the updated fields", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("experienceId"));
-          expect(body.position).to.equal("Senior Backend Engineer");
-          expect(body.isCurrent).to.equal(false);
+          expect(body.data.id).to.equal(bru.getVar("experienceId"));
+          expect(body.data.position).to.equal("Senior Backend Engineer");
+          expect(body.data.isCurrent).to.equal(false);
         });
 
 settings:
@@ -46,5 +47,6 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  ExperienceController does not apply @Valid on update, and the mapper overwrites
-  every field, so send the full body here rather than a partial patch.
+  ExperienceController does apply @Valid on update, but the mapper still overwrites
+  every field and translations are reconciled by locale, so send the full body here
+  rather than a partial patch.

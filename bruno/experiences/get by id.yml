@@ -18,8 +18,8 @@ runtime:
 
         test("response body should match the created experience", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("experienceId"));
-          expect(body.companyName).to.equal("PT Teknologi Nusantara");
+          expect(body.data.id).to.equal(bru.getVar("experienceId"));
+          expect(body.data.companyName).to.equal("PT Teknologi Nusantara");
         });
 
 settings:

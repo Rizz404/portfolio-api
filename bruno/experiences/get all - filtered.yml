@@ -31,8 +31,8 @@ runtime:
 
         test("results should only contain matching, current experiences", function () {
           const body = res.getBody();
-          expect(body.content).to.be.an("array");
-          body.content.forEach((experience) => {
+          expect(body.data).to.be.an("array");
+          body.data.forEach((experience) => {
             expect(experience.isCurrent).to.equal(true);
           });
         });

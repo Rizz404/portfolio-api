@@ -1,0 +1,36 @@
+info:
+  name: setup - create batch fixture 1
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/experiences"
+  body:
+    type: json
+    data: |-
+      {
+        "companyName": "Batch Delete Fixture Co 1",
+        "startDate": "2020-01-01",
+        "translations": [{ "locale": "en", "position": "Batch Tester" }]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("fixture experience 1 should be created", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          bru.setVar("experienceBatchId1", body.data.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Throwaway experience created only so `delete - batch` has real ids to delete.
