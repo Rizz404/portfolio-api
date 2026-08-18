@@ -15,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @Slf4j
 @RestControllerAdvice
@@ -79,6 +80,19 @@ public class GlobalExceptionHandler {
     ErrorResponse<String> response =
         new ErrorResponse<>("error", "You don't have permission to access this resource", null);
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+  }
+
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  public ResponseEntity<ErrorResponse<String>> handleMaxUploadSizeExceededException(
+      MaxUploadSizeExceededException ex, HttpServletRequest request) {
+    // * Ditangkap di level servlet (spring.servlet.multipart.max-file-size /
+    // * max-request-size) sebelum request sempat sampai ke validasi custom di
+    // * FileUploadService, misalnya kalau total ukuran request-nya sudah kelewatan duluan.
+    log.warn("Upload size exceeded - Path: {}", request.getRequestURI());
+
+    ErrorResponse<String> response =
+        new ErrorResponse<>("error", "Uploaded file(s) exceed the maximum allowed size", null);
+    return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(response);
   }
 
   @ExceptionHandler(JwtException.class)

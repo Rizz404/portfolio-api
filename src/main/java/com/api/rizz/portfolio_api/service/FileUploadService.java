@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +18,30 @@ public class FileUploadService {
 
   private final Cloudinary cloudinary;
 
+  // * Batasan upload: bisa diatur lewat application.properties, ada default kalau gak di-set.
+  @Value("${app.upload.max-file-size-mb:10}")
+  private long maxFileSizeMb;
+
+  @Value("${app.upload.max-files-per-request:10}")
+  private int maxFilesPerRequest;
+
+  private void validateFile(MultipartFile file) {
+    if (file == null || file.isEmpty()) return;
+
+    long maxBytes = maxFileSizeMb * 1024L * 1024L;
+    if (file.getSize() > maxBytes) {
+      throw new IllegalArgumentException(
+          "File '"
+              + file.getOriginalFilename()
+              + "' exceeds the maximum allowed size of "
+              + maxFileSizeMb
+              + "MB");
+    }
+  }
+
   public String uploadFile(MultipartFile file, String folderName) throws IOException {
+    validateFile(file);
+
     Map<String, Object> options =
         ObjectUtils.asMap(
             "folder", folderName,
@@ -29,8 +53,26 @@ public class FileUploadService {
   }
 
   public List<String> uploadFiles(List<MultipartFile> files, String folderName) throws IOException {
-    List<String> fileUrls = new ArrayList<>();
+    if (files == null || files.isEmpty()) return new ArrayList<>();
 
+    long nonEmptyCount = files.stream().filter(f -> f != null && !f.isEmpty()).count();
+    if (nonEmptyCount > maxFilesPerRequest) {
+      throw new IllegalArgumentException(
+          "Cannot upload more than "
+              + maxFilesPerRequest
+              + " files in a single request (got "
+              + nonEmptyCount
+              + ")");
+    }
+
+    // * Validasi semua file duluan sebelum ada satu pun yang di-upload ke Cloudinary, biar kalau
+    // * ada file di tengah/akhir list yang melanggar batas ukuran, gak ada upload "nyangkut" yang
+    // * sudah kepalang terkirim tapi entity-nya gagal disimpan.
+    for (MultipartFile file : files) {
+      validateFile(file);
+    }
+
+    List<String> fileUrls = new ArrayList<>();
     for (MultipartFile file : files) {
       if (file != null && !file.isEmpty()) {
         String fileUrl = uploadFile(file, folderName);
