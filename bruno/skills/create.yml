@@ -1,0 +1,58 @@
+info:
+  name: create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/skills"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Spring Boot",
+        "category": "framework",
+        "logoUrl": "https://example.com/images/spring-boot-logo.png",
+        "translations": [
+          { "locale": "en", "description": "Java framework for building production-ready backend services." },
+          { "locale": "id", "description": "Framework Java untuk membangun layanan backend siap produksi." }
+        ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the skill and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("response body should contain the generated id and submitted fields", function () {
+          const body = res.getBody();
+          expect(body.data).to.have.property("id");
+          expect(body.data.name).to.equal("Spring Boot");
+          expect(body.data.category).to.equal("framework");
+          // No Accept-Language header is sent, so the server's default locale (en) is
+          // resolved and SkillResponse is flattened from the "en" translation.
+          expect(body.data.description).to.include("production-ready");
+
+          bru.setVar("skillId", body.data.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  SkillController wasn't covered by this collection before - this folder was added
+  alongside the batch-delete/exception-handling fixes made to the other resources.
+
+  SkillRequest keeps name/category/logoUrl flat, but `description` moved into a
+  required `translations` array (at least "en"). SkillResponse flattens the resolved
+  locale's description back to the top level.
+
+  Controllers wrap success payloads in SuccessResponse, so the created skill lives
+  under `body.data`, not the root.

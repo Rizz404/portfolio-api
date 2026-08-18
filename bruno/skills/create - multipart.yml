@@ -1,0 +1,58 @@
+info:
+  name: create - multipart
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/skills"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "name": "Multipart Upload Test Skill",
+            "category": "tool",
+            "translations": [
+              { "locale": "en", "description": "Created via multipart/form-data with a real logo file." }
+            ]
+          }
+      - type: file
+        name: logoFile
+        value:
+          - fixtures/sample-1.jpg
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should create the skill and return 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("logoFile should be uploaded to Cloudinary and returned as a URL", function () {
+          const body = res.getBody();
+          expect(body.data).to.have.property("id");
+          expect(body.data.logoUrl).to.be.a("string").and.not.empty;
+
+          bru.setVar("skillMultipartId", body.data.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises SkillController.createSkillMultipart, which is untouched by `create` (that
+  one only hits createSkillJson). The "data" text part must be sent with
+  contentType: application/json, otherwise Spring can't deserialize the
+  @RequestPart("data") SkillRequest.
+
+  Actually uploads fixtures/sample-1.jpg to Cloudinary. Cleaned up (including the
+  Cloudinary file) by `cleanup - delete multipart fixture`.

@@ -1,0 +1,46 @@
+info:
+  name: update by id
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/skills/{{skillId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Spring Boot 3",
+        "category": "framework",
+        "logoUrl": "https://example.com/images/spring-boot-3-logo.png",
+        "translations": [
+          { "locale": "en", "description": "Latest major version, built on Spring Framework 6 and Java 17+." }
+        ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("skill should reflect the updated fields", function () {
+          const body = res.getBody();
+          expect(body.data.id).to.equal(bru.getVar("skillId"));
+          expect(body.data.name).to.equal("Spring Boot 3");
+          expect(body.data.description).to.include("Java 17");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  SkillController applies @Valid on update, but the mapper still overwrites every
+  field and translations are reconciled by locale, so send the full body here rather
+  than a partial patch.

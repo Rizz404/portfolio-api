@@ -1,0 +1,55 @@
+info:
+  name: update by id - multipart
+  type: http
+  seq: 11
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/skills/{{skillMultipartId}}"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "name": "Multipart Upload Test Skill (Updated)",
+            "category": "tool",
+            "translations": [
+              { "locale": "en", "description": "Updated via multipart/form-data with a replacement logo." }
+            ]
+          }
+      - type: file
+        name: logoFile
+        value:
+          - fixtures/sample-2.jpg
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("logo should be replaced", function () {
+          const body = res.getBody();
+          expect(body.data.id).to.equal(bru.getVar("skillMultipartId"));
+          expect(body.data.name).to.equal("Multipart Upload Test Skill (Updated)");
+          expect(body.data.logoUrl).to.be.a("string").and.not.empty;
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises SkillController.updateSkillMultipart (untouched by `update by id`, which
+  only hits updateSkillJson). Replacing logoFile also exercises the branch in
+  SkillService.updateSkill that deletes the old logo from Cloudinary first.
+
+  Depends on `create - multipart` having run first so `skillMultipartId` is set.

@@ -1,0 +1,36 @@
+info:
+  name: setup - create batch fixture 1
+  type: http
+  seq: 13
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/skills"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Batch Delete Fixture Skill 1",
+        "category": "tool",
+        "translations": [{ "locale": "en" }]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("fixture skill 1 should be created", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          bru.setVar("skillBatchId1", body.data.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Throwaway skill created only so `delete - batch` has real ids to delete.

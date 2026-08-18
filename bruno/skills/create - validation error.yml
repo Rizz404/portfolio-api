@@ -1,0 +1,45 @@
+info:
+  name: create - validation error
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/skills"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "",
+        "category": "not-a-real-category",
+        "logoUrl": null,
+        "translations": []
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("blank name, invalid category and empty translations should be rejected with 400", function () {
+          expect(res.getStatus()).to.equal(400);
+        });
+
+        test("validation error should flag the invalid fields", function () {
+          const body = res.getBody();
+          expect(body.status).to.equal("error");
+          expect(body.message).to.equal("Validation failed");
+          expect(body.error).to.have.property("name");
+          expect(body.error).to.have.property("category");
+          expect(body.error).to.have.property("translations");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  SkillRequest.name is @NotBlank, category must match
+  programming_language|framework|database|tool|other, and translations is @NotEmpty.

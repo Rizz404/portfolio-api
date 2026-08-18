@@ -1,0 +1,32 @@
+info:
+  name: get by id
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{BASE_URL}}/skills/{{skillId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("response body should match the created skill", function () {
+          const body = res.getBody();
+          expect(body.data.id).to.equal(bru.getVar("skillId"));
+          expect(body.data.name).to.equal("Spring Boot");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Depends on `create` having run first in this run/session so `skillId` is set.

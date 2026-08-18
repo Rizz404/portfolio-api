@@ -1,0 +1,36 @@
+info:
+  name: setup - create batch fixture 2
+  type: http
+  seq: 14
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/skills"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Batch Delete Fixture Skill 2",
+        "category": "tool",
+        "translations": [{ "locale": "en" }]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("fixture skill 2 should be created", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          bru.setVar("skillBatchId2", body.data.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Second throwaway skill for `delete - batch`. See `setup - create batch fixture 1`.
