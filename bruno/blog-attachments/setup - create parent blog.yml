@@ -10,13 +10,18 @@ http:
     type: json
     data: |-
       {
-        "title": "Blog Post with Attachments",
-        "content": "Parent blog created solely to exercise the blog-attachments endpoints.",
-        "featuredImage": "https://example.com/images/attachments-post.png",
+        "featuredImageUrl": "https://example.com/images/attachments-post.png",
         "isPublished": true,
         "viewsCount": 0,
         "likesCount": 0,
-        "dislikesCount": 0
+        "dislikesCount": 0,
+        "translations": [
+          {
+            "locale": "en",
+            "title": "Blog Post with Attachments",
+            "content": "Parent blog created solely to exercise the blog-attachments endpoints."
+          }
+        ]
       }
   auth: inherit
 
@@ -27,9 +32,9 @@ runtime:
         test("parent blog should be created", function () {
           expect(res.getStatus()).to.equal(201);
           const body = res.getBody();
-          expect(body).to.have.property("id");
+          expect(body.data).to.have.property("id");
 
-          bru.setVar("attachmentParentBlogId", body.id);
+          bru.setVar("attachmentParentBlogId", body.data.id);
         });
 
 settings:

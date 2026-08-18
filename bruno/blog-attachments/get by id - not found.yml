@@ -12,8 +12,14 @@ runtime:
   scripts:
     - type: tests
       code: |-
-        test("a deleted/unknown blog attachment id currently surfaces as 500", function () {
-          expect(res.getStatus()).to.equal(500);
+        test("a deleted/unknown blog attachment id is rejected with 404", function () {
+          expect(res.getStatus()).to.equal(404);
+        });
+
+        test("error message should mention the missing id", function () {
+          const body = res.getBody();
+          expect(body.status).to.equal("error");
+          expect(body.message).to.include("not found");
         });
 
 settings:
@@ -24,5 +30,8 @@ settings:
 
 docs: |-
   BlogAttachmentService throws NoSuchElementException when an attachment is missing,
-  but there is no @RestControllerAdvice mapping it to 404, so it currently bubbles up
-  as a 500 Internal Server Error.
+  and GlobalExceptionHandler.handleNotFoundException now maps that to 404 (was an
+  unhandled 500 before the handler was added).
+
+  Depends on `delete by id` having run first in this run/session so
+  `blogAttachmentId` no longer exists.

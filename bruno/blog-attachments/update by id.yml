@@ -13,7 +13,7 @@ http:
         "blogId": {{attachmentParentBlogId}},
         "fileName": "architecture-diagram-v2.png",
         "fileUrl": "https://example.com/files/architecture-diagram-v2.png",
-        "fileType": "image/png"
+        "fileType": "image"
       }
   auth: inherit
 
@@ -27,8 +27,8 @@ runtime:
 
         test("attachment should reflect the updated fields", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("blogAttachmentId"));
-          expect(body.fileName).to.equal("architecture-diagram-v2.png");
+          expect(body.data.id).to.equal(bru.getVar("blogAttachmentId"));
+          expect(body.data.fileName).to.equal("architecture-diagram-v2.png");
         });
 
 settings:

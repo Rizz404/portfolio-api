@@ -13,7 +13,7 @@ http:
         "blogId": {{attachmentParentBlogId}},
         "fileName": "architecture-diagram.png",
         "fileUrl": "https://example.com/files/architecture-diagram.png",
-        "fileType": "image/png"
+        "fileType": "image"
       }
   auth: inherit
 
@@ -27,12 +27,12 @@ runtime:
 
         test("response body should contain the generated id and submitted fields", function () {
           const body = res.getBody();
-          expect(body).to.have.property("id");
-          expect(body.blogId).to.equal(bru.getVar("attachmentParentBlogId"));
-          expect(body.fileName).to.equal("architecture-diagram.png");
-          expect(body.fileType).to.equal("image/png");
+          expect(body.data).to.have.property("id");
+          expect(body.data.blogId).to.equal(bru.getVar("attachmentParentBlogId"));
+          expect(body.data.fileName).to.equal("architecture-diagram.png");
+          expect(body.data.fileType).to.equal("image");
 
-          bru.setVar("blogAttachmentId", body.id);
+          bru.setVar("blogAttachmentId", body.data.id);
         });
 
 settings:
@@ -40,3 +40,11 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  BlogAttachmentRequest.fileType is BlogAttachment.FileType (image|document|video|
+  audio|archive|other), not a MIME type string - "image/png" doesn't match any enum
+  constant and fails Jackson deserialization.
+
+  Controllers wrap success payloads in SuccessResponse, so the created attachment
+  lives under `body.data`, not the root.

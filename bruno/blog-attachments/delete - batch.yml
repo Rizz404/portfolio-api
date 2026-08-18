@@ -1,0 +1,41 @@
+info:
+  name: delete - batch
+  type: http
+  seq: 11
+
+http:
+  method: DELETE
+  url: "{{BASE_URL}}/blog-attachments/batch"
+  body:
+    type: json
+    data: |-
+      {
+        "ids": [{{blogAttachmentBatchId1}}, {{blogAttachmentBatchId2}}]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("confirmation message should mention both deleted attachments", function () {
+          const body = res.getBody();
+          expect(String(body.data)).to.include("2");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises BlogAttachmentController.deleteBlogAttachmentBatch /
+  BlogAttachmentService.deleteBlogAttachmentBatch (DELETE /blog-attachments/batch with
+  a BatchDeleteRequest body). Depends on `setup - create batch fixture 1` and
+  `setup - create batch fixture 2`. Runs before `cleanup - delete parent blog` so the
+  parent blog still exists when these attachments are created.

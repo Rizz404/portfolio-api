@@ -18,9 +18,9 @@ runtime:
 
         test("response body should match the created attachment", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("blogAttachmentId"));
-          expect(body.blogId).to.equal(bru.getVar("attachmentParentBlogId"));
-          expect(body.fileName).to.equal("architecture-diagram.png");
+          expect(body.data.id).to.equal(bru.getVar("blogAttachmentId"));
+          expect(body.data.blogId).to.equal(bru.getVar("attachmentParentBlogId"));
+          expect(body.data.fileName).to.equal("architecture-diagram.png");
         });
 
 settings:
