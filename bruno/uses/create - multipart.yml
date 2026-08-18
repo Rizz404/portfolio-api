@@ -16,18 +16,20 @@ http:
           {
             "itemName": "Multipart Upload Test Tool",
             "category": "software",
-            "reasons": "Created via multipart/form-data with a real logo and picture files.",
-            "links": ["https://example.com/multipart-test-tool"]
+            "links": ["https://example.com/multipart-test-tool"],
+            "translations": [
+              { "locale": "en", "reasons": "Created via multipart/form-data with a real logo and picture files." }
+            ]
           }
       - type: file
         name: logoFile
         value:
-          - fixtures/sample-1.png
+          - fixtures/sample-1.jpg
       - type: file
         name: pictureFiles
         value:
-          - fixtures/sample-1.png
-          - fixtures/sample-2.png
+          - fixtures/sample-1.jpg
+          - fixtures/sample-2.jpg
   auth: inherit
 
 runtime:
@@ -40,13 +42,13 @@ runtime:
 
         test("logoFile and pictureFiles should be uploaded to Cloudinary and returned as URLs", function () {
           const body = res.getBody();
-          expect(body).to.have.property("id");
-          expect(body.logoUrl).to.be.a("string").and.not.empty;
-          expect(body.pictures).to.be.an("array").with.lengthOf(2);
-          body.pictures.forEach((url) => expect(url).to.be.a("string").and.not.empty);
+          expect(body.data).to.have.property("id");
+          expect(body.data.logoUrl).to.be.a("string").and.not.empty;
+          expect(body.data.pictures).to.be.an("array").with.lengthOf(2);
+          body.data.pictures.forEach((url) => expect(url).to.be.a("string").and.not.empty);
 
-          bru.setVar("useMultipartId", body.id);
-          bru.setVar("useMultipartPictureUrlToDelete", body.pictures[0]);
+          bru.setVar("useMultipartId", body.data.id);
+          bru.setVar("useMultipartPictureUrlToDelete", body.data.pictures[0]);
         });
 
 settings:
@@ -59,8 +61,8 @@ docs: |-
   Exercises UseController.createUseMultipart, which is untouched by `create` (that one
   only hits createUseJson). The "data" text part must be sent with
   contentType: application/json, otherwise Spring can't deserialize the
-  @RequestPart("data") UseRequest.
+  @RequestPart("data") UseRequest - including its required `translations` array.
 
-  Actually uploads fixtures/sample-1.png and fixtures/sample-2.png to Cloudinary.
+  Actually uploads fixtures/sample-1.jpg and fixtures/sample-2.jpg to Cloudinary.
   Cleaned up (including the Cloudinary files) by
   `cleanup - delete multipart fixture`.

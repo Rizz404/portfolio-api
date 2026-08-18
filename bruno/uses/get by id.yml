@@ -18,8 +18,8 @@ runtime:
 
         test("response body should match the created use", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("useId"));
-          expect(body.itemName).to.equal("Visual Studio Code");
+          expect(body.data.id).to.equal(bru.getVar("useId"));
+          expect(body.data.itemName).to.equal("Visual Studio Code");
         });
 
 settings:

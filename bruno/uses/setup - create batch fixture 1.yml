@@ -1,0 +1,36 @@
+info:
+  name: setup - create batch fixture 1
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/uses"
+  body:
+    type: json
+    data: |-
+      {
+        "itemName": "Batch Delete Fixture Tool 1",
+        "category": "software",
+        "translations": [{ "locale": "en" }]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("fixture use 1 should be created", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          bru.setVar("useBatchId1", body.data.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Throwaway use created only so `delete - batch` has real ids to delete.

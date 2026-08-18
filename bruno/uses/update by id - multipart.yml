@@ -16,18 +16,20 @@ http:
           {
             "itemName": "Multipart Upload Test Tool (Updated)",
             "category": "software",
-            "reasons": "Updated via multipart/form-data with a replacement logo and an extra picture.",
             "links": ["https://example.com/multipart-test-tool"],
-            "deletedPictures": ["{{useMultipartPictureUrlToDelete}}"]
+            "deletedPictures": ["{{useMultipartPictureUrlToDelete}}"],
+            "translations": [
+              { "locale": "en", "reasons": "Updated via multipart/form-data with a replacement logo and an extra picture." }
+            ]
           }
       - type: file
         name: logoFile
         value:
-          - fixtures/sample-2.png
+          - fixtures/sample-2.jpg
       - type: file
         name: newPictureFiles
         value:
-          - fixtures/sample-2.png
+          - fixtures/sample-2.jpg
   auth: inherit
 
 runtime:
@@ -40,12 +42,12 @@ runtime:
 
         test("logo should be replaced and picture list should reflect the deletion + addition", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("useMultipartId"));
-          expect(body.itemName).to.equal("Multipart Upload Test Tool (Updated)");
-          expect(body.logoUrl).to.be.a("string").and.not.empty;
+          expect(body.data.id).to.equal(bru.getVar("useMultipartId"));
+          expect(body.data.itemName).to.equal("Multipart Upload Test Tool (Updated)");
+          expect(body.data.logoUrl).to.be.a("string").and.not.empty;
           // 2 original picture files, minus 1 deleted, plus 1 newly uploaded = 2
-          expect(body.pictures).to.be.an("array").with.lengthOf(2);
-          expect(body.pictures).to.not.include(bru.getVar("useMultipartPictureUrlToDelete"));
+          expect(body.data.pictures).to.be.an("array").with.lengthOf(2);
+          expect(body.data.pictures).to.not.include(bru.getVar("useMultipartPictureUrlToDelete"));
         });
 
 settings:

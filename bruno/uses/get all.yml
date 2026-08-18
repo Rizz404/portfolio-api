@@ -16,10 +16,11 @@ runtime:
           expect(res.getStatus()).to.equal(200);
         });
 
-        test("default (offset) pagination should return a Page object", function () {
+        test("default (offset) pagination should return the page content under data/pagination", function () {
           const body = res.getBody();
-          expect(body).to.have.property("content").that.is.an("array");
-          expect(body).to.have.property("totalElements");
+          expect(body).to.have.property("data").that.is.an("array");
+          expect(body).to.have.property("pagination");
+          expect(body.pagination).to.have.property("total");
         });
 
 settings:
@@ -27,3 +28,7 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  The item list is under `data` and the paging metadata under `pagination`
+  (PagedResponse), not a raw Spring Page object at the root.

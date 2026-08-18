@@ -27,8 +27,8 @@ runtime:
 
         test("results should only contain matching, software category items", function () {
           const body = res.getBody();
-          expect(body.content).to.be.an("array");
-          body.content.forEach((use) => {
+          expect(body.data).to.be.an("array");
+          body.data.forEach((use) => {
             expect(use.category).to.equal("software");
           });
         });

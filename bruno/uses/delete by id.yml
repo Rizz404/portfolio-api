@@ -18,7 +18,7 @@ runtime:
 
         test("confirmation message should mention the deleted id", function () {
           const body = res.getBody();
-          expect(String(body)).to.include(String(bru.getVar("useId")));
+          expect(String(body.data)).to.include(String(bru.getVar("useId")));
         });
 
 settings:

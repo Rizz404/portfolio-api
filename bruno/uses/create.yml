@@ -16,9 +16,12 @@ http:
         "pictures": [
           "https://example.com/images/vscode-1.png"
         ],
-        "reasons": "Editor utama untuk sehari-hari coding, ringan dan extensible.",
         "links": [
           "https://code.visualstudio.com"
+        ],
+        "translations": [
+          { "locale": "en", "reasons": "Main daily-driver editor - lightweight and extensible." },
+          { "locale": "id", "reasons": "Editor utama untuk sehari-hari coding, ringan dan extensible." }
         ]
       }
   auth: inherit
@@ -33,11 +36,11 @@ runtime:
 
         test("response body should contain the generated id and submitted fields", function () {
           const body = res.getBody();
-          expect(body).to.have.property("id");
-          expect(body.itemName).to.equal("Visual Studio Code");
-          expect(body.category).to.equal("software");
+          expect(body.data).to.have.property("id");
+          expect(body.data.itemName).to.equal("Visual Studio Code");
+          expect(body.data.category).to.equal("software");
 
-          bru.setVar("useId", body.id);
+          bru.setVar("useId", body.data.id);
         });
 
 settings:
@@ -45,3 +48,11 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  UseRequest keeps itemName/category flat, but `reasons` moved into a required
+  `translations` array (at least "en"). UseResponse flattens the resolved locale's
+  reasons back into a top-level `reasons` field.
+
+  Controllers wrap success payloads in SuccessResponse, so the created use lives
+  under `body.data`, not the root.

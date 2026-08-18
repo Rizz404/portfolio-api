@@ -16,9 +16,11 @@ http:
         "pictures": [
           "https://example.com/images/vscode-insiders-1.png"
         ],
-        "reasons": "Pindah ke build Insiders untuk fitur terbaru.",
         "links": [
           "https://code.visualstudio.com/insiders"
+        ],
+        "translations": [
+          { "locale": "en", "reasons": "Switched to the Insiders build for the latest features." }
         ]
       }
   auth: inherit
@@ -33,8 +35,8 @@ runtime:
 
         test("use should reflect the updated fields", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("useId"));
-          expect(body.itemName).to.equal("Visual Studio Code Insiders");
+          expect(body.data.id).to.equal(bru.getVar("useId"));
+          expect(body.data.itemName).to.equal("Visual Studio Code Insiders");
         });
 
 settings:
@@ -44,5 +46,6 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  UseController does not apply @Valid on update, and the mapper overwrites every
-  field, so send the full body here rather than a partial patch.
+  UseController does not apply @Valid... actually it does now, but the mapper still
+  overwrites every field and translations are reconciled by locale, so send the full
+  body here rather than a partial patch.
