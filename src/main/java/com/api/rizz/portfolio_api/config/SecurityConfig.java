@@ -1,6 +1,7 @@
 package com.api.rizz.portfolio_api.config;
 
 import com.api.rizz.portfolio_api.security.JwtAuthFilter;
+import com.api.rizz.portfolio_api.security.RateLimitFilter;
 import com.api.rizz.portfolio_api.service.UserDetailServiceImpl;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
   private final JwtAuthFilter jwtAuthFilter;
+  private final RateLimitFilter rateLimitFilter;
   private final UserDetailServiceImpl userDetailsService;
 
   @Bean
@@ -40,6 +42,9 @@ public class SecurityConfig {
         // Mengubah otorisasi endpoint
         .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
         .authenticationProvider(authenticationProvider())
+        // * RateLimitFilter dipasang paling depan (sebelum JwtAuthFilter) supaya request yang
+        // * kelebihan kuota langsung ditolak 429 tanpa sempat diproses autentikasi.
+        .addFilterBefore(rateLimitFilter, JwtAuthFilter.class)
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Mengizinkan
     // seluruh
     // akses tanpa
