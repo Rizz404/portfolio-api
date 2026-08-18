@@ -1,0 +1,6 @@
+name: production
+variables:
+  - name: BASE_URL
+    value: https://dominant-celinka-happiness-overload-8d6bfc1f.koyeb.app/api/v1
+  - name: TOKEN
+    value: ""
