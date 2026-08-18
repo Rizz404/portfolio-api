@@ -24,9 +24,9 @@ runtime:
         test("fixture user should be created", function () {
           expect(res.getStatus()).to.equal(201);
           const body = res.getBody();
-          expect(body.user).to.have.property("id");
+          expect(body.data.user).to.have.property("id");
 
-          bru.setVar("testUserId", body.user.id);
+          bru.setVar("testUserId", body.data.user.id);
         });
 
 settings:
@@ -41,3 +41,9 @@ docs: |-
   provision a fixture user. This request goes through /auth/register instead, which
   creates a real row via AuthService and is a reliable way to get a usable user id for
   the rest of this folder. Cleaned up by `delete by id`.
+
+  This deliberately does NOT overwrite the `TOKEN` environment variable (unlike
+  auth/register.yml) - `get me`/`update me` in this folder exercise whichever
+  account the collection's shared TOKEN currently belongs to (normally the one set
+  up by running the `auth` folder first), not this Budi fixture. Budi is purely a
+  data target for the by-id endpoints below.

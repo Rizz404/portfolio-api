@@ -1,0 +1,39 @@
+info:
+  name: delete - batch
+  type: http
+  seq: 18
+
+http:
+  method: DELETE
+  url: "{{BASE_URL}}/users/batch"
+  body:
+    type: json
+    data: |-
+      {
+        "ids": [{{userBatchId1}}, {{userBatchId2}}]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("confirmation message should mention both deleted users", function () {
+          const body = res.getBody();
+          expect(String(body.data)).to.include("2");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises UserController.deleteUserBatch / UserService.deleteUserBatch (DELETE
+  /users/batch with a BatchDeleteRequest body). Depends on
+  `setup - create batch fixture 1` and `setup - create batch fixture 2`.

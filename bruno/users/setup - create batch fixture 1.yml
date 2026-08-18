@@ -1,0 +1,45 @@
+info:
+  name: setup - create batch fixture 1
+  type: http
+  seq: 16
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/users"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "nickname": "BatchFixture1",
+            "email": "batch.fixture.1@example.com",
+            "password": "SuperSecret123!",
+            "role": "USER",
+            "provider": "LOCAL",
+            "translations": [{ "locale": "en" }]
+          }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("fixture user 1 should be created", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          bru.setVar("userBatchId1", body.data.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Throwaway user created via createUserMultipart (createUserJson is blocked by the
+  malformed @PreAuthorize, see `create`) only so `delete - batch` has real ids to
+  delete. No profilePictFile part is sent - it's optional.

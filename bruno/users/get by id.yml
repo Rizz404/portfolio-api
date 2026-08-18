@@ -1,7 +1,7 @@
 info:
   name: get by id
   type: http
-  seq: 6
+  seq: 7
 
 http:
   method: GET
@@ -18,9 +18,9 @@ runtime:
 
         test("response body should match the fixture user", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("testUserId"));
-          expect(body.email).to.equal("budi.pratama@example.com");
-          expect(body.nickname).to.equal("Budi");
+          expect(body.data.id).to.equal(bru.getVar("testUserId"));
+          expect(body.data.email).to.equal("budi.pratama@example.com");
+          expect(body.data.nickname).to.equal("Budi");
         });
 
 settings:

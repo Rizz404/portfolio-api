@@ -1,7 +1,7 @@
 info:
   name: update by id
   type: http
-  seq: 7
+  seq: 8
 
 http:
   method: PATCH
@@ -17,8 +17,10 @@ http:
         "provider": "LOCAL",
         "gender": "MALE",
         "phoneNumber": "081298765432",
-        "bio": "Backend enthusiast, updated bio.",
-        "address": "Bandung, Indonesia"
+        "address": "Bandung, Indonesia",
+        "translations": [
+          { "locale": "en", "bio": "Backend enthusiast, updated bio." }
+        ]
       }
   auth: inherit
 
@@ -32,9 +34,9 @@ runtime:
 
         test("user should reflect the updated fields", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("testUserId"));
-          expect(body.fullName).to.equal("Budi Pratama");
-          expect(body.bio).to.equal("Backend enthusiast, updated bio.");
+          expect(body.data.id).to.equal(bru.getVar("testUserId"));
+          expect(body.data.fullName).to.equal("Budi Pratama");
+          expect(body.data.bio).to.equal("Backend enthusiast, updated bio.");
         });
 
 settings:
@@ -47,4 +49,5 @@ docs: |-
   UserMapper.updateEntityFromRequest has no null-ignore strategy and overwrites every
   field, including `password` (there's no @NotBlank on it), so a partial patch here
   would null out the fixture user's password hash. Send the full body (keeping `email`
-  identical, since it's a unique column) rather than a partial patch.
+  identical, since it's a unique column) rather than a partial patch. bio now lives in
+  `translations` rather than as a flat field.

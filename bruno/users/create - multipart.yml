@@ -1,7 +1,7 @@
 info:
   name: create - multipart
   type: http
-  seq: 10
+  seq: 13
 
 http:
   method: POST
@@ -20,12 +20,15 @@ http:
             "password": "SuperSecret123!",
             "role": "USER",
             "provider": "LOCAL",
-            "gender": "OTHER"
+            "gender": "OTHER",
+            "translations": [
+              { "locale": "en", "bio": "Created via multipart/form-data." }
+            ]
           }
       - type: file
         name: profilePictFile
         value:
-          - fixtures/sample-1.png
+          - fixtures/sample-1.jpg
   auth: inherit
 
 runtime:
@@ -38,11 +41,11 @@ runtime:
 
         test("profilePictFile should be uploaded to Cloudinary and returned as a URL", function () {
           const body = res.getBody();
-          expect(body).to.have.property("id");
-          expect(body.profilePict).to.be.a("string").and.not.empty;
-          expect(body.email).to.equal("multipart.test@example.com");
+          expect(body.data).to.have.property("id");
+          expect(body.data.profilePict).to.be.a("string").and.not.empty;
+          expect(body.data.email).to.equal("multipart.test@example.com");
 
-          bru.setVar("userMultipartId", body.id);
+          bru.setVar("userMultipartId", body.data.id);
         });
 
 settings:
@@ -58,7 +61,8 @@ docs: |-
   independent way to provision a user (besides /auth/register).
 
   The "data" text part must be sent with contentType: application/json, otherwise
-  Spring can't deserialize the @RequestPart("data") UserRequest.
+  Spring can't deserialize the @RequestPart("data") UserRequest - including its
+  required `translations` array.
 
-  Actually uploads fixtures/sample-1.png to Cloudinary. Cleaned up (including the
+  Actually uploads fixtures/sample-1.jpg to Cloudinary. Cleaned up (including the
   Cloudinary file) by `cleanup - delete multipart fixture`.

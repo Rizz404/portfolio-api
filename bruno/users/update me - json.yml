@@ -1,0 +1,63 @@
+info:
+  name: update me - json
+  type: http
+  seq: 9
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/users/me"
+  body:
+    type: json
+    data: |-
+      {
+        "nickname": "Me Updated",
+        "fullName": "Current User (Updated via /me)",
+        "email": "{{meEmail}}",
+        "role": "ADMIN",
+        "provider": "GOOGLE",
+        "phoneNumber": "081200000000",
+        "address": "Updated via /users/me",
+        "translations": [
+          { "locale": "en", "bio": "Updated via PATCH /users/me." }
+        ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("allowed fields are updated but role/provider are silently kept unchanged", function () {
+          const body = res.getBody();
+          expect(body.data.id).to.equal(bru.getVar("meUserId"));
+          expect(body.data.nickname).to.equal("Me Updated");
+          expect(body.data.bio).to.equal("Updated via PATCH /users/me.");
+
+          // The request body asks for role=ADMIN/provider=GOOGLE, but
+          // UserService.updateCurrentUser restores the previous role/provider
+          // regardless of what's sent, so self-service updates can't escalate
+          // privileges or fake the auth provider.
+          expect(body.data.role).to.equal(bru.getVar("mePreviousRole"));
+          expect(body.data.provider).to.equal(bru.getVar("mePreviousProvider"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises UserController.updateCurrentUserJson / UserService.updateCurrentUser(...,
+  restrictSelfFields=true). Unlike `update by id` (which lets an authenticated caller
+  patch *any* user by id, including role/provider), this endpoint always reverts
+  role/provider to their pre-update values no matter what the request body sends -
+  the self-service update can't be used to self-promote to ADMIN or spoof the auth
+  provider.
+
+  Depends on `get me` having run first so `meEmail`/`mePreviousRole`/
+  `mePreviousProvider` are set.

@@ -1,7 +1,7 @@
 info:
   name: get all - filtered
   type: http
-  seq: 4
+  seq: 5
 
 http:
   method: GET
@@ -35,8 +35,8 @@ runtime:
 
         test("results should only contain matching users with role USER", function () {
           const body = res.getBody();
-          expect(body.content).to.be.an("array");
-          body.content.forEach((user) => {
+          expect(body.data).to.be.an("array");
+          body.data.forEach((user) => {
             expect(user.role).to.equal("USER");
             expect(
               user.nickname.toLowerCase().includes("budi") ||

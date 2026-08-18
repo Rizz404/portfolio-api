@@ -1,0 +1,60 @@
+info:
+  name: update me - multipart
+  type: http
+  seq: 10
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/users/me"
+  body:
+    type: multipart-form
+    data:
+      - type: text
+        name: data
+        contentType: application/json
+        value: |-
+          {
+            "nickname": "Me Updated",
+            "fullName": "Current User (Updated via /me multipart)",
+            "email": "{{meEmail}}",
+            "role": "ADMIN",
+            "provider": "GOOGLE",
+            "translations": [
+              { "locale": "en", "bio": "Updated via multipart PATCH /users/me." }
+            ]
+          }
+      - type: file
+        name: profilePictFile
+        value:
+          - fixtures/sample-3.jpg
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("profile picture is replaced, but role/provider stay restricted", function () {
+          const body = res.getBody();
+          expect(body.data.id).to.equal(bru.getVar("meUserId"));
+          expect(body.data.profilePict).to.be.a("string").and.not.empty;
+          expect(body.data.role).to.equal(bru.getVar("mePreviousRole"));
+          expect(body.data.provider).to.equal(bru.getVar("mePreviousProvider"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises UserController.updateCurrentUserMultipart, the multipart counterpart to
+  `update me - json`. Also replaces the profile picture, exercising the branch in
+  UserService.updateUser that deletes the old Cloudinary file first.
+
+  Depends on `get me` having run first so `meEmail`/`mePreviousRole`/
+  `mePreviousProvider` are set.

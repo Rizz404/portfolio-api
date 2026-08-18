@@ -1,7 +1,7 @@
 info:
   name: update by id - multipart
   type: http
-  seq: 11
+  seq: 14
 
 http:
   method: PATCH
@@ -19,12 +19,15 @@ http:
             "email": "multipart.test@example.com",
             "role": "USER",
             "provider": "LOCAL",
-            "gender": "OTHER"
+            "gender": "OTHER",
+            "translations": [
+              { "locale": "en", "bio": "Updated via multipart/form-data." }
+            ]
           }
       - type: file
         name: profilePictFile
         value:
-          - fixtures/sample-2.png
+          - fixtures/sample-2.jpg
   auth: inherit
 
 runtime:
@@ -37,9 +40,9 @@ runtime:
 
         test("profile picture should be replaced", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("userMultipartId"));
-          expect(body.fullName).to.equal("Multipart Upload Test User (Updated)");
-          expect(body.profilePict).to.be.a("string").and.not.empty;
+          expect(body.data.id).to.equal(bru.getVar("userMultipartId"));
+          expect(body.data.fullName).to.equal("Multipart Upload Test User (Updated)");
+          expect(body.data.profilePict).to.be.a("string").and.not.empty;
         });
 
 settings:

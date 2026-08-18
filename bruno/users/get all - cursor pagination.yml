@@ -1,7 +1,7 @@
 info:
   name: get all - cursor pagination
   type: http
-  seq: 5
+  seq: 6
 
 http:
   method: GET
@@ -25,9 +25,10 @@ runtime:
           expect(res.getStatus()).to.equal(200);
         });
 
-        test("cursor pagination should return a plain array, not a Page object", function () {
+        test("cursor pagination should return the item list under data, with cursor metadata", function () {
           const body = res.getBody();
-          expect(body).to.be.an("array");
+          expect(body.data).to.be.an("array");
+          expect(body).to.have.property("cursor");
         });
 
 settings:

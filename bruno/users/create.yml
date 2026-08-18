@@ -18,8 +18,10 @@ http:
         "provider": "LOCAL",
         "gender": "FEMALE",
         "phoneNumber": "081234567890",
-        "bio": "Frontend enthusiast.",
-        "address": "Jakarta, Indonesia"
+        "address": "Jakarta, Indonesia",
+        "translations": [
+          { "locale": "en", "bio": "Frontend enthusiast." }
+        ]
       }
   auth: inherit
 
@@ -41,11 +43,16 @@ docs: |-
   UserController.createUserJson is annotated @PreAuthorize("hasRole('USER', 'ADMIN')"),
   but hasRole(String) only accepts a single role argument (hasAnyRole(String...) is the
   varargs one). SpEL fails to resolve a matching method for the 2-arg call, throws a
-  SpelEvaluationException while the security interceptor evaluates the expression, and
-  since there is no @RestControllerAdvice for it, the request currently fails with 500
-  regardless of the caller's role. This test documents that current (not ideal)
-  behavior; update the expected status (and probably the annotation, to
+  SpelEvaluationException while the security interceptor evaluates the expression.
+  SpelEvaluationException isn't AuthenticationException/AccessDeniedException, so it
+  falls through to GlobalExceptionHandler's catch-all Exception handler and still
+  surfaces as 500 regardless of the caller's role. This test documents that current
+  (not ideal) behavior; update the expected status (and probably the annotation, to
   @PreAuthorize("hasAnyRole('USER', 'ADMIN')")) once it's fixed.
+
+  The body must still be a fully valid UserRequest (translations included) - @Valid
+  argument resolution happens before the @PreAuthorize check runs, so an invalid body
+  would fail with 400 before ever reaching the SpEL error this test is documenting.
 
   Because this endpoint cannot reliably create a user, the rest of this folder uses
   `setup - register fixture user` (via /auth/register) to get a usable fixture instead.
