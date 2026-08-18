@@ -23,7 +23,7 @@ http:
           "https://example.com/images/dash-v4-1.png"
         ],
         "projectLinks": {
-          "repo": "https://github.com/rizqiansyah/vue-portfolio"
+          "github": "https://github.com/rizqiansyah/vue-portfolio"
         }
       }
   auth: inherit

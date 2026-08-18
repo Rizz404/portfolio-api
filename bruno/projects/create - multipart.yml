@@ -23,7 +23,7 @@ http:
             ],
             "status": "active",
             "projectLinks": {
-              "repo": "https://github.com/rizqiansyah/multipart-test"
+              "github": "https://github.com/rizqiansyah/multipart-test"
             }
           }
       - type: file

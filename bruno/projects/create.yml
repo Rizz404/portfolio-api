@@ -29,7 +29,7 @@ http:
           "https://example.com/images/dash-2.png"
         ],
         "projectLinks": {
-          "repo": "https://github.com/rizqiansyah/vue-portfolio",
+          "github": "https://github.com/rizqiansyah/vue-portfolio",
           "demo": "https://rizqiansyah-portfolio.vercel.app",
           "figma": "https://figma.com/file/xyz123"
         }
