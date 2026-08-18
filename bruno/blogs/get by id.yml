@@ -18,9 +18,9 @@ runtime:
 
         test("response body should match the created blog", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("blogId"));
-          expect(body.title).to.equal("Belajar Spring Boot 3 dari Nol");
-          expect(body.blogAttachments).to.be.an("array");
+          expect(body.data.id).to.equal(bru.getVar("blogId"));
+          expect(body.data.title).to.equal("Learning Spring Boot 3 from Scratch");
+          expect(body.data.blogAttachments).to.be.an("array");
         });
 
 settings:

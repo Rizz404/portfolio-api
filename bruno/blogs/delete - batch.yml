@@ -1,0 +1,39 @@
+info:
+  name: delete - batch
+  type: http
+  seq: 14
+
+http:
+  method: DELETE
+  url: "{{BASE_URL}}/blogs/batch"
+  body:
+    type: json
+    data: |-
+      {
+        "ids": [{{blogBatchId1}}, {{blogBatchId2}}]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("confirmation message should mention both deleted blogs", function () {
+          const body = res.getBody();
+          expect(String(body.data)).to.include("2");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Exercises BlogController.deleteBlogBatch / BlogService.deleteBlogBatch (DELETE
+  /blogs/batch with a BatchDeleteRequest body). Depends on
+  `setup - create batch fixture 1` and `setup - create batch fixture 2`.

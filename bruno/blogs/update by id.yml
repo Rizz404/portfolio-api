@@ -10,13 +10,18 @@ http:
     type: json
     data: |-
       {
-        "title": "Belajar Spring Boot 3 dari Nol (Updated)",
-        "content": "Revisi artikel dengan contoh kode terbaru.",
-        "featuredImage": "https://example.com/images/spring-boot-3-v2.png",
+        "featuredImageUrl": "https://example.com/images/spring-boot-3-v2.png",
         "isPublished": true,
         "viewsCount": 10,
         "likesCount": 2,
-        "dislikesCount": 0
+        "dislikesCount": 0,
+        "translations": [
+          {
+            "locale": "en",
+            "title": "Learning Spring Boot 3 from Scratch (Updated)",
+            "content": "Revised article with the latest code examples."
+          }
+        ]
       }
   auth: inherit
 
@@ -30,9 +35,9 @@ runtime:
 
         test("blog should reflect the updated fields and regenerated slug", function () {
           const body = res.getBody();
-          expect(body.id).to.equal(bru.getVar("blogId"));
-          expect(body.title).to.equal("Belajar Spring Boot 3 dari Nol (Updated)");
-          expect(body.slug).to.equal("belajar-spring-boot-3-dari-nol-updated");
+          expect(body.data.id).to.equal(bru.getVar("blogId"));
+          expect(body.data.title).to.equal("Learning Spring Boot 3 from Scratch (Updated)");
+          expect(body.data.slug).to.equal("learning-spring-boot-3-from-scratch-updated");
         });
 
 settings:
@@ -42,5 +47,6 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  BlogController does not apply @Valid on update, and the mapper overwrites every
-  field, so send the full body here rather than a partial patch.
+  BlogController does apply @Valid on update, but the mapper still overwrites every
+  field and translations are reconciled by locale, so send the full body here rather
+  than a partial patch.

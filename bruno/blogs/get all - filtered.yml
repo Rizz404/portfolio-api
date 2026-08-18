@@ -31,8 +31,8 @@ runtime:
 
         test("results should only contain blogs matching the search keyword", function () {
           const body = res.getBody();
-          expect(body.content).to.be.an("array");
-          body.content.forEach((blog) => {
+          expect(body.data).to.be.an("array");
+          body.data.forEach((blog) => {
             const haystack = `${blog.title} ${blog.content}`.toLowerCase();
             expect(haystack).to.include("spring boot");
           });

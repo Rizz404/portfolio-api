@@ -10,13 +10,23 @@ http:
     type: json
     data: |-
       {
-        "title": "Belajar Spring Boot 3 dari Nol",
-        "content": "Artikel ini membahas dasar-dasar Spring Boot 3 untuk pemula.",
-        "featuredImage": "https://example.com/images/spring-boot-3.png",
+        "featuredImageUrl": "https://example.com/images/spring-boot-3.png",
         "isPublished": true,
         "viewsCount": 0,
         "likesCount": 0,
-        "dislikesCount": 0
+        "dislikesCount": 0,
+        "translations": [
+          {
+            "locale": "en",
+            "title": "Learning Spring Boot 3 from Scratch",
+            "content": "This article covers the basics of Spring Boot 3 for beginners."
+          },
+          {
+            "locale": "id",
+            "title": "Belajar Spring Boot 3 dari Nol",
+            "content": "Artikel ini membahas dasar-dasar Spring Boot 3 untuk pemula."
+          }
+        ]
       }
   auth: inherit
 
@@ -30,12 +40,12 @@ runtime:
 
         test("response body should contain the generated id, slug and submitted fields", function () {
           const body = res.getBody();
-          expect(body).to.have.property("id");
-          expect(body).to.have.property("slug");
-          expect(body.title).to.equal("Belajar Spring Boot 3 dari Nol");
-          expect(body.isPublished).to.equal(true);
+          expect(body.data).to.have.property("id");
+          expect(body.data).to.have.property("slug");
+          expect(body.data.title).to.equal("Learning Spring Boot 3 from Scratch");
+          expect(body.data.isPublished).to.equal(true);
 
-          bru.setVar("blogId", body.id);
+          bru.setVar("blogId", body.data.id);
         });
 
 settings:
@@ -43,3 +53,13 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  BlogRequest's URL field is `featuredImageUrl` (the old body sent `featuredImage`,
+  which doesn't exist on the DTO and was silently ignored by Jackson). title/content
+  moved into a required `translations` array (at least "en"); BlogResponse flattens
+  the resolved locale's title/content and still exposes the image url as
+  `featuredImage`.
+
+  Controllers wrap success payloads in SuccessResponse, so the created blog lives
+  under `body.data`, not the root.

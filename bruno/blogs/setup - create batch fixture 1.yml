@@ -1,0 +1,36 @@
+info:
+  name: setup - create batch fixture 1
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/blogs"
+  body:
+    type: json
+    data: |-
+      {
+        "translations": [
+          { "locale": "en", "title": "Batch Delete Fixture Blog 1", "content": "Fixture content." }
+        ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("fixture blog 1 should be created", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          bru.setVar("blogBatchId1", body.data.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Throwaway blog created only so `delete - batch` has real ids to delete.

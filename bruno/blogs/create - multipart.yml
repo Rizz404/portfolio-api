@@ -14,22 +14,27 @@ http:
         contentType: application/json
         value: |-
           {
-            "title": "Multipart Upload Test Blog",
-            "content": "Created via multipart/form-data with a real featured image and attachments.",
             "isPublished": true,
             "viewsCount": 0,
             "likesCount": 0,
-            "dislikesCount": 0
+            "dislikesCount": 0,
+            "translations": [
+              {
+                "locale": "en",
+                "title": "Multipart Upload Test Blog",
+                "content": "Created via multipart/form-data with a real featured image and attachments."
+              }
+            ]
           }
       - type: file
         name: featuredImageFile
         value:
-          - fixtures/sample-1.png
+          - fixtures/sample-1.jpg
       - type: file
         name: attachments
         value:
-          - fixtures/sample-1.png
-          - fixtures/sample-2.png
+          - fixtures/sample-1.jpg
+          - fixtures/sample-2.jpg
   auth: inherit
 
 runtime:
@@ -42,14 +47,14 @@ runtime:
 
         test("featuredImageFile and attachments should be uploaded to Cloudinary", function () {
           const body = res.getBody();
-          expect(body).to.have.property("id");
-          expect(body.featuredImage).to.be.a("string").and.not.empty;
-          expect(body.blogAttachments).to.be.an("array").with.lengthOf(2);
-          body.blogAttachments.forEach((attachment) => {
+          expect(body.data).to.have.property("id");
+          expect(body.data.featuredImage).to.be.a("string").and.not.empty;
+          expect(body.data.blogAttachments).to.be.an("array").with.lengthOf(2);
+          body.data.blogAttachments.forEach((attachment) => {
             expect(attachment.fileUrl).to.be.a("string").and.not.empty;
           });
 
-          bru.setVar("blogMultipartId", body.id);
+          bru.setVar("blogMultipartId", body.data.id);
         });
 
 settings:
@@ -62,8 +67,8 @@ docs: |-
   Exercises BlogController.createBlogMultipart, which is untouched by `create` (that
   one only hits createBlogJson). The "data" text part must be sent with
   contentType: application/json, otherwise Spring can't deserialize the
-  @RequestPart("data") BlogRequest.
+  @RequestPart("data") BlogRequest - including its required `translations` array.
 
-  Actually uploads fixtures/sample-1.png and fixtures/sample-2.png to Cloudinary, each
+  Actually uploads fixtures/sample-1.jpg and fixtures/sample-2.jpg to Cloudinary, each
   becoming its own BlogAttachment row. Cleaned up (including the Cloudinary files) by
   `cleanup - delete multipart fixture`.
