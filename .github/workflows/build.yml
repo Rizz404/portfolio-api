@@ -1,0 +1,37 @@
+name: Build & Push Backend Image
+
+on:
+  push:
+    branches: [main] # trigger tiap push ke main, gak perlu mikir tag manual, edisi malas buat version
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kode
+        uses: actions/checkout@v4
+
+      - name: Ambil short SHA buat tag image
+        id: vars
+        run: echo "tag=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login ke Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }} # Personal Access Token docker hub
+
+      - name: Build & push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          # dua tag: SHA buat jejak versi persis (bisa rollback), "latest" buat yang males milih
+          tags: |
+            docker.io/rizz404/portfolio-api:${{ steps.vars.outputs.tag }}
+            docker.io/rizz404/portfolio-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
