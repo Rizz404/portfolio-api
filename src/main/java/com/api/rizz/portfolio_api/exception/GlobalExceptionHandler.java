@@ -10,17 +10,32 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  // * Pesan asli Jackson biasanya diakhiri " at [Source: ...; byte offset/line: #...]" atau
+  // * "(through reference chain: ...)" - bagian ini detail internal (nama class DTO lengkap,
+  // * byte offset) yang gak perlu ditampilkan ke client. Kalimat inti sebelum itu (mis. "Cannot
+  // * deserialize value of type X from String Y") sudah cukup jelas buat debugging.
+  private String simplifyMessage(String rawMessage) {
+    if (rawMessage == null || rawMessage.isBlank()) {
+      return "Malformed request body. Please check your JSON syntax and field types.";
+    }
+    int cutoff = rawMessage.indexOf(" at [Source");
+    return (cutoff > 0 ? rawMessage.substring(0, cutoff) : rawMessage).trim();
+  }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorResponse<Map<String, String>>> handleValidationException(
@@ -34,6 +49,58 @@ public class GlobalExceptionHandler {
 
     ErrorResponse<Map<String, String>> response =
         new ErrorResponse<>("error", "Validation failed", fieldErrors);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ErrorResponse<String>> handleHttpMessageNotReadableException(
+      HttpMessageNotReadableException ex, HttpServletRequest request) {
+    // * Meng-cover body JSON yang gagal di-parse - baik syntax error murni maupun value yang gak
+    // * cocok sama tipe field (mis. key Map<LinkType, String> diisi string yang bukan salah satu
+    // * value enum-nya). Pesan asli dari Jackson cukup jelas buat debugging, cuma dipangkas bagian
+    // * "at [Source: ...]"-nya yang isinya detail internal (class loader, byte offset, dst).
+    log.warn("Malformed request body: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+
+    ErrorResponse<String> response =
+        new ErrorResponse<>("error", simplifyMessage(ex.getMostSpecificCause().getMessage()), null);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+  }
+
+  @ExceptionHandler(MissingServletRequestPartException.class)
+  public ResponseEntity<ErrorResponse<String>> handleMissingServletRequestPartException(
+      MissingServletRequestPartException ex, HttpServletRequest request) {
+    // * Meng-cover request multipart yang gak nyertain part wajib, mis. lupa nempelin part "data"
+    // * di endpoint create/update yang pakai @RequestPart.
+    log.warn(
+        "Missing multipart part '{}' - Path: {}", ex.getRequestPartName(), request.getRequestURI());
+
+    ErrorResponse<String> response =
+        new ErrorResponse<>(
+            "error",
+            "Missing required part '" + ex.getRequestPartName() + "' in the request",
+            null);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ErrorResponse<String>> handleMethodArgumentTypeMismatchException(
+      MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+    // * Meng-cover @PathVariable/@RequestParam yang gak bisa dikonversi ke tipe yang diharapkan,
+    // * mis. GET /projects/abc (id-nya harus Long) atau ?cursor=abc.
+    log.warn(
+        "Type mismatch for parameter '{}': '{}' - Path: {}",
+        ex.getName(),
+        ex.getValue(),
+        request.getRequestURI());
+
+    String requiredType =
+        ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "a valid value";
+    ErrorResponse<String> response =
+        new ErrorResponse<>(
+            "error",
+            "Invalid value '%s' for parameter '%s', expected %s"
+                .formatted(ex.getValue(), ex.getName(), requiredType),
+            null);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
