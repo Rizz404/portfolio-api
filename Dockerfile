@@ -31,7 +31,10 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0"
 ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 8080
 
+# * Cek grup "core" (db + diskSpace + ping), bukan root /actuator/health -- root tetap ikut
+# * redis (buat visibility manual), tapi grup "core" sengaja exclude redis biar container ini
+# * gak ke-flag unhealthy/restart cuma gara-gara redis down (lihat application.properties).
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
-    CMD curl -f http://localhost:8080/api/v1/actuator/health || exit 1
+    CMD curl -f http://localhost:8080/api/v1/actuator/health/core || exit 1
 
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]

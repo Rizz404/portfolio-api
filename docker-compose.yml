@@ -83,8 +83,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      # * redis cuma butuh container-nya kelar start, gak wajib "healthy" -- biar backend tetep
+      # * bisa jalan meski redis lagi bermasalah/down (lihat MANAGEMENT_HEALTH_REDIS_ENABLED di
+      # * bawah, di-set false biar /actuator/health -- yang dipakai Dockerfile HEALTHCHECK -- gak
+      # * ikut DOWN gara-gara redis).
       redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME}?user=${DB_USER}&password=${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
@@ -95,6 +99,9 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      # * true: status redis tetap dilaporkan di /actuator/health kalau dia hidup. Container ini
+      # * gak kena imbas kalau redis down karena Dockerfile HEALTHCHECK ngecek grup "core" yang
+      # * sengaja exclude redis (lihat application.properties).
       MANAGEMENT_HEALTH_REDIS_ENABLED: "true"
     ports:
       - "8080:8080"
