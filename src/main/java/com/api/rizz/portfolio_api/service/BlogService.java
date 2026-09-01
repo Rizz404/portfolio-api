@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +43,11 @@ public class BlogService {
   private final FileUploadService fileUploadService;
 
   private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("title", "content");
+
+  // * Nama cache Redis buat domain blog (lihat CacheConfig). Query dievict semua (allEntries)
+  // * tiap ada mutasi (create/update/delete) -- daripada invalidate parsial per kombinasi
+  // * filter/sort/page yang gak kebayang jumlahnya.
+  private static final String CACHE_NAME = "blogs";
 
   private LanguageCode resolveRequestLocale() {
     String lang = LocaleContextHolder.getLocale().getLanguage();
@@ -110,6 +117,7 @@ public class BlogService {
 
   // * Dari springframework bukan jakarta Transactional nya
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public BlogResponse createBlog(
       BlogRequest blogRequest, MultipartFile featuredImage, List<MultipartFile> attachments) {
     try {
@@ -177,6 +185,11 @@ public class BlogService {
   }
 
   @Transactional(readOnly = true)
+  @Cacheable(
+      cacheNames = CACHE_NAME,
+      key =
+          "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+              + " + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy + ':' + #sortDir")
   public Object findAllBlogs(
       String search, Long cursor, int page, int size, List<String> sortBy, List<String> sortDir) {
     Specification<Blog> spec =
@@ -247,6 +260,9 @@ public class BlogService {
   }
 
   @Transactional(readOnly = true)
+  @Cacheable(
+      cacheNames = CACHE_NAME,
+      key = "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #id")
   public BlogResponse findBlogById(Long id) {
     Blog blog =
         blogRepository
@@ -258,6 +274,7 @@ public class BlogService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public BlogResponse updateBlog(
       Long id,
       BlogRequest blogRequest,
@@ -329,6 +346,7 @@ public class BlogService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public void deleteBlog(Long id) {
     Blog blog =
         blogRepository
@@ -367,6 +385,7 @@ public class BlogService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public void deleteBlogBatch(List<Long> ids) {
     List<Blog> blogs = blogRepository.findAllById(ids);
 

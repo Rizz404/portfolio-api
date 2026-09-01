@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +39,11 @@ public class SkillService {
   private final FileUploadService fileUploadService;
 
   private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("description");
+
+  // * Nama cache Redis buat domain skill (lihat CacheConfig). Query dievict semua (allEntries)
+  // * tiap ada mutasi (create/update/delete) -- daripada invalidate parsial per kombinasi
+  // * filter/sort/page yang gak kebayang jumlahnya.
+  private static final String CACHE_NAME = "skills";
 
   private LanguageCode resolveRequestLocale() {
     String lang = LocaleContextHolder.getLocale().getLanguage();
@@ -93,6 +100,7 @@ public class SkillService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public SkillResponse createSkill(SkillRequest skillRequest, MultipartFile logoFile) {
     try {
       long newId = snowflakeGenerator.nextId();
@@ -133,6 +141,15 @@ public class SkillService {
   // * @Transactional wajib: mapper resolve translations (LAZY @OneToMany) di toResponse(),
   // * butuh session Hibernate masih terbuka; open-in-view=false jadi gak otomatis
   @Transactional(readOnly = true)
+  // * Locale ikut jadi bagian key -- response-nya ke-resolve per locale (lihat SkillMapper), jadi
+  // * kalau gak ikut dimasukin, request locale ID bisa ke-serve cache hasil locale EN (atau
+  // * sebaliknya).
+  @Cacheable(
+      cacheNames = CACHE_NAME,
+      key =
+          "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+              + " + ':' + #category + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy"
+              + " + ':' + #sortDir")
   public Object findAllSkills(
       String search,
       String category,
@@ -205,6 +222,9 @@ public class SkillService {
   }
 
   @Transactional(readOnly = true)
+  @Cacheable(
+      cacheNames = CACHE_NAME,
+      key = "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #id")
   public SkillResponse findSkillById(Long id) {
     Skill skill =
         skillRepository
@@ -216,6 +236,7 @@ public class SkillService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public SkillResponse updateSkill(Long id, SkillRequest skillRequest, MultipartFile logoFile) {
     try {
       Skill skill =
@@ -263,6 +284,7 @@ public class SkillService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public void deleteSkill(Long id) {
     Skill skill =
         skillRepository
@@ -284,6 +306,7 @@ public class SkillService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public void deleteSkillBatch(List<Long> ids) {
     List<Skill> skills = skillRepository.findAllById(ids);
 

@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +45,11 @@ public class ProjectService {
   // * translation (join lewat @OneToMany rapuh untuk Sort/QueryUtils) - di-drop diam-diam dari
   // * sortBy kalau diminta.
   private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("name", "description");
+
+  // * Nama cache Redis buat domain project (lihat CacheConfig). Query dievict semua (allEntries)
+  // * tiap ada mutasi (create/update/delete) -- daripada invalidate parsial per kombinasi
+  // * filter/sort/page yang gak kebayang jumlahnya.
+  private static final String CACHE_NAME = "projects";
 
   // * Resolve locale dari Accept-Language header (via LocaleContextHolder), fallback ke 'en'
   // * kalau bahasanya gak didukung.
@@ -105,6 +112,7 @@ public class ProjectService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public ProjectResponse createProject(
       ProjectRequest projectRequest, MultipartFile logoFile, List<MultipartFile> imageFiles) {
     try {
@@ -172,6 +180,12 @@ public class ProjectService {
   // * @Transactional wajib: mapper resolve translations (LAZY @OneToMany) di toResponse(),
   // * butuh session Hibernate masih terbuka; open-in-view=false jadi gak otomatis
   @Transactional(readOnly = true)
+  @Cacheable(
+      cacheNames = CACHE_NAME,
+      key =
+          "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+              + " + ':' + #status + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy"
+              + " + ':' + #sortDir")
   public Object findAllProjects(
       String search,
       String status,
@@ -251,6 +265,9 @@ public class ProjectService {
   }
 
   @Transactional(readOnly = true)
+  @Cacheable(
+      cacheNames = CACHE_NAME,
+      key = "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #id")
   public ProjectResponse findProjectById(Long id) {
     Project project =
         projectRepository
@@ -262,6 +279,7 @@ public class ProjectService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public ProjectResponse updateProject(
       Long id,
       ProjectRequest projectRequest,
@@ -338,6 +356,7 @@ public class ProjectService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public void deleteProject(Long id) {
     Project project =
         projectRepository
@@ -367,6 +386,7 @@ public class ProjectService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public void deleteProjectBatch(List<Long> ids) {
     // * Ambil semua entity sekaligus dalam 1 query, bukan findById satu-satu
     List<Project> projects = projectRepository.findAllById(ids);

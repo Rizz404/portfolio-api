@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +38,11 @@ public class UseService {
   private final FileUploadService fileUploadService;
 
   private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("reasons");
+
+  // * Nama cache Redis buat domain use (lihat CacheConfig). Query dievict semua (allEntries) tiap
+  // * ada mutasi (create/update/delete) -- daripada invalidate parsial per kombinasi
+  // * filter/sort/page yang gak kebayang jumlahnya.
+  private static final String CACHE_NAME = "uses";
 
   private List<UseTranslation> buildTranslations(List<UseTranslationRequest> requests, Use use) {
     List<UseTranslation> translations = new ArrayList<>();
@@ -74,6 +81,7 @@ public class UseService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public UseResponse createUse(
       UseRequest useRequest, MultipartFile logoFile, List<MultipartFile> pictureFiles) {
     try {
@@ -126,6 +134,12 @@ public class UseService {
   // * @Transactional wajib: mapper resolve translations (LAZY @OneToMany) di toResponse(),
   // * butuh session Hibernate masih terbuka; open-in-view=false jadi gak otomatis
   @Transactional(readOnly = true)
+  @Cacheable(
+      cacheNames = CACHE_NAME,
+      key =
+          "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+              + " + ':' + #category + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy"
+              + " + ':' + #sortDir")
   public Object findAllUses(
       String search,
       String category,
@@ -199,6 +213,9 @@ public class UseService {
   }
 
   @Transactional(readOnly = true)
+  @Cacheable(
+      cacheNames = CACHE_NAME,
+      key = "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #id")
   public UseResponse findUseById(Long id) {
     Use use =
         useRepository
@@ -210,6 +227,7 @@ public class UseService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public UseResponse updateUse(
       Long id, UseRequest useRequest, MultipartFile logoFile, List<MultipartFile> pictures) {
     try {
@@ -271,6 +289,7 @@ public class UseService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public void deleteUse(Long id) {
     Use use =
         useRepository
@@ -300,6 +319,7 @@ public class UseService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public void deleteUseBatch(List<Long> ids) {
     List<Use> uses = useRepository.findAllById(ids);
 

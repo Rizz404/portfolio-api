@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +40,11 @@ public class ExperienceService {
 
   private static final Set<String> TRANSLATABLE_SORT_FIELDS =
       Set.of("position", "description", "jobdesks");
+
+  // * Nama cache Redis buat domain experience (lihat CacheConfig). Query dievict semua
+  // * (allEntries) tiap ada mutasi (create/update/delete) -- daripada invalidate parsial per
+  // * kombinasi filter/sort/page yang gak kebayang jumlahnya.
+  private static final String CACHE_NAME = "experiences";
 
   private LanguageCode resolveRequestLocale() {
     String lang = LocaleContextHolder.getLocale().getLanguage();
@@ -101,6 +108,7 @@ public class ExperienceService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public ExperienceResponse createExperience(ExperienceRequest experienceRequest) {
     long newId = snowflakeGenerator.nextId();
     Experience experience = experienceMapper.toEntity(experienceRequest);
@@ -121,6 +129,12 @@ public class ExperienceService {
   // * @Transactional wajib: mapper resolve translations (LAZY @OneToMany) di toResponse(),
   // * butuh session Hibernate masih terbuka; open-in-view=false jadi gak otomatis
   @Transactional(readOnly = true)
+  @Cacheable(
+      cacheNames = CACHE_NAME,
+      key =
+          "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+              + " + ':' + #isCurrent + ':' + #startDate + ':' + #endDate + ':' + #cursor + ':'"
+              + " + #page + ':' + #size + ':' + #sortBy + ':' + #sortDir")
   public Object findAllExperiences(
       String search,
       Boolean isCurrent,
@@ -212,6 +226,9 @@ public class ExperienceService {
   }
 
   @Transactional(readOnly = true)
+  @Cacheable(
+      cacheNames = CACHE_NAME,
+      key = "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #id")
   public ExperienceResponse findExperienceById(Long id) {
     Experience experience =
         experienceRepository
@@ -223,6 +240,7 @@ public class ExperienceService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public ExperienceResponse updateExperience(Long id, ExperienceRequest experienceRequest) {
     Experience experience =
         experienceRepository
@@ -241,6 +259,7 @@ public class ExperienceService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public void deleteExperience(Long id) {
     if (!experienceRepository.existsById(id)) {
       throw new NoSuchElementException("Experience with ID: %d not found".formatted(id));
@@ -250,6 +269,7 @@ public class ExperienceService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
   public void deleteExperienceBatch(List<Long> ids) {
     List<Experience> experiences = experienceRepository.findAllById(ids);
 

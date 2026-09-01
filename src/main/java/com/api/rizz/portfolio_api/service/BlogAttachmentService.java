@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,11 @@ public class BlogAttachmentService {
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
 
+  // * BlogResponse (di-cache di BlogService dengan cache name "blogs") ikut nyimpen daftar
+  // * attachment-nya -- jadi mutasi attachment lewat service ini juga wajib evict cache "blogs",
+  // * bukan cuma yang di BlogService sendiri, biar gak nyisain data attachment yang basi.
   @Transactional
+  @CacheEvict(cacheNames = "blogs", allEntries = true)
   public BlogAttachmentResponse createBlogAttachment(BlogAttachmentRequest blogAttachmentRequest) {
     long newId = snowflakeGenerator.nextId();
     BlogAttachment blogAttachment = blogAttachmentMapper.toEntity(blogAttachmentRequest);
@@ -109,6 +114,7 @@ public class BlogAttachmentService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = "blogs", allEntries = true)
   public BlogAttachmentResponse updateBlogAttachment(
       Long id, BlogAttachmentRequest blogAttachmentRequest) {
     BlogAttachment blogAttachment =
@@ -127,6 +133,7 @@ public class BlogAttachmentService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = "blogs", allEntries = true)
   public void deleteBlogAttachment(Long id) {
     BlogAttachment attachment =
         blogAttachmentRepository
@@ -150,6 +157,7 @@ public class BlogAttachmentService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = "blogs", allEntries = true)
   public void deleteBlogAttachmentBatch(List<Long> ids) {
     List<BlogAttachment> attachments = blogAttachmentRepository.findAllById(ids);
 
