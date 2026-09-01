@@ -29,12 +29,16 @@ USER spring:spring
 
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0"
 ENV SPRING_PROFILES_ACTIVE=prod
-EXPOSE 8080
+# * Default 8080, tapi bisa di-override lewat env APP_PORT di runtime (docker-compose.yml) --
+# * dipakai bareng buat EXPOSE, HEALTHCHECK, dan port yang didengerin Spring (lihat ENTRYPOINT).
+ENV APP_PORT=8080
+EXPOSE ${APP_PORT}
 
 # * Cek grup "core" (db + diskSpace + ping), bukan root /actuator/health -- root tetap ikut
 # * redis (buat visibility manual), tapi grup "core" sengaja exclude redis biar container ini
 # * gak ke-flag unhealthy/restart cuma gara-gara redis down (lihat application.properties).
+# * Shell form (bukan JSON array) biar $APP_PORT di-resolve pas healthcheck jalan, bukan pas build.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
-    CMD curl -f http://localhost:8080/api/v1/actuator/health/core || exit 1
+    CMD curl -f http://localhost:${APP_PORT}/api/v1/actuator/health/core || exit 1
 
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -Dserver.port=$APP_PORT -jar app.jar"]

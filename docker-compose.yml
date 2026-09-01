@@ -103,8 +103,11 @@ services:
       # * gak kena imbas kalau redis down karena Dockerfile HEALTHCHECK ngecek grup "core" yang
       # * sengaja exclude redis (lihat application.properties).
       MANAGEMENT_HEALTH_REDIS_ENABLED: "true"
+      # * APP_PORT juga dipakai app buat nentuin server.port (lihat ENTRYPOINT di Dockerfile),
+      # * jadi host port & port yang didengerin Spring ikut berubah bareng kalau di-override.
+      APP_PORT: ${APP_PORT:-8080}
     ports:
-      - "8080:8080"
+      - "${APP_PORT:-8080}:${APP_PORT:-8080}"
       # * langsung expose, karena gak ada Caddy di compose ini -- frontend hit backend ini langsung
     logging:
       driver: json-file
