@@ -1,0 +1,110 @@
+services:
+  db:
+    image: docker.io/postgres:17-alpine
+    restart: unless-stopped
+    # * wal_level=logical wajib biar Postgres ini bisa jadi publisher buat replication ke Neon
+    # * max_slot_wal_keep_size ngebatesin WAL yang ditahan kalau subscriber (Neon) disconnect lama
+    command: >
+      postgres
+      -c wal_level=logical
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c max_slot_wal_keep_size=1GB
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    mem_limit: 512m
+
+  # * One-shot job: nambah rule pg_hba.conf buat replication + bikin role & publication.
+  # * Auto-jalan sekali tiap stack di-deploy dari Portainer, terus exit -- gak butuh shell access.
+  # * Idempotent (SELECT ... WHERE NOT EXISTS ... \gexec), aman dijalanin ulang.
+  db-init-replication:
+    image: docker.io/postgres:17-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+      DB_USER: ${DB_USER}
+      DB_NAME: ${DB_NAME}
+      REPLICATOR_USER: ${REPLICATOR_USER}
+      REPLICATOR_PASSWORD: ${REPLICATOR_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        HBA=/var/lib/postgresql/data/pg_hba.conf
+        grep -qxF "host replication $$REPLICATOR_USER 0.0.0.0/0 scram-sha-256" "$$HBA" || \
+          echo "host replication $$REPLICATOR_USER 0.0.0.0/0 scram-sha-256" >> "$$HBA"
+        psql -h db -U "$$DB_USER" -d "$$DB_NAME" -v ON_ERROR_STOP=1 <<-EOSQL
+          SELECT pg_reload_conf();
+          SELECT 'CREATE ROLE ' || quote_ident('$$REPLICATOR_USER') || ' WITH REPLICATION LOGIN PASSWORD ''$$REPLICATOR_PASSWORD'''
+          WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$$REPLICATOR_USER') \gexec
+          SELECT 'CREATE PUBLICATION portfolio_pub FOR ALL TABLES'
+          WHERE NOT EXISTS (SELECT FROM pg_publication WHERE pubname = 'portfolio_pub') \gexec
+        EOSQL
+
+  redis:
+    image: docker.io/redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    mem_limit: 128m
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME}?user=${DB_USER}&password=${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MANAGEMENT_HEALTH_REDIS_ENABLED: "true"
+    ports:
+      - "8080:8080"
+      # * langsung expose, karena gak ada Caddy di compose ini -- frontend hit backend ini langsung
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    mem_limit: 512m
+    cpus: 1.0
+
+volumes:
+  db_data:
+  redis_data:
