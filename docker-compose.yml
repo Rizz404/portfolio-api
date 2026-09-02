@@ -4,6 +4,8 @@ services:
     restart: unless-stopped
     # * wal_level=logical wajib biar Postgres ini bisa jadi publisher buat replication ke Neon
     # * max_slot_wal_keep_size ngebatesin WAL yang ditahan kalau subscriber (Neon) disconnect lama
+    ports:
+      - "${DB_EXTERNAL_PORT}:5432"
     command: >
       postgres
       -c wal_level=logical
