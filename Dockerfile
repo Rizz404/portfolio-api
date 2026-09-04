@@ -28,7 +28,7 @@ COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
 USER spring:spring
 
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0"
-ENV SPRING_PROFILES_ACTIVE=prod
+ENV SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
 # * Default 8080, tapi bisa di-override lewat env APP_PORT di runtime (docker-compose.yml) --
 # * dipakai bareng buat EXPOSE, HEALTHCHECK, dan port yang didengerin Spring (lihat ENTRYPOINT).
 ENV APP_PORT=8080
