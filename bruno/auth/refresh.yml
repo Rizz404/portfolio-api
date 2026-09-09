@@ -32,14 +32,13 @@ runtime:
           expect(res.getStatus()).to.equal(200);
         });
 
-        test("response body should contain a new access token and a new refresh token", function () {
+        test("response body should contain a new access token and the SAME refresh token", function () {
           const body = res.getBody();
           expect(body.data).to.have.property("token");
-          expect(body.data).to.have.property("refreshToken");
+          expect(body.data.refreshToken).to.equal(bru.getVar("refreshToken"));
           expect(body.data.user.email).to.equal("rizky.tester@example.com");
 
           bru.setVar("accessToken", body.data.token);
-          bru.setVar("refreshToken", body.data.refreshToken);
         });
 
 settings:
@@ -49,10 +48,13 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  Exchanges the refresh token issued by `login` for a fresh access+refresh token pair
-  (AuthService#refresh), no password required. Rotates `refreshToken` in this
-  collection - the previous refresh token still works until its own expiry though,
-  since refresh tokens are stateless JWTs with no DB-backed revocation (see
-  JwtService/AuthService comments for that trade-off).
+  Exchanges the refresh token issued by `login` for a new access token
+  (AuthService#refresh), no password required. The refresh token is returned
+  UNCHANGED (not rotated) - since it's a stateless JWT with no DB-backed revocation,
+  rotating it on every call would just reset its expiry and let a session extend
+  itself forever as long as it's used at least once within any refresh-token window.
+  Returning the same token instead means the session has a hard ceiling: once the
+  original refresh token (issued at login/register) expires, the client must log in
+  with a password again.
 
   Depends on `login` having run first in this run/session to populate `refreshToken`.

@@ -82,11 +82,13 @@ public class AuthService {
     return new AuthResponse(token, refreshToken, userMapper.toResponse(user));
   }
 
-  // * Menukar refresh token yang masih valid jadi pasangan access+refresh token baru, tanpa
-  // * user perlu login ulang pakai password. Refresh token lama otomatis "habis masa pakai"-nya
-  // * secara alami begitu expired - karena stateless (bukan DB-backed), tidak ada mekanisme
-  // * revoke sebelum expired (mis. saat logout paksa/ganti password); trade-off ini sadar
-  // * diambil demi kesederhanaan, lihat catatan di JwtService.
+  // * Menukar refresh token yang masih valid jadi access token baru, tanpa user perlu login
+  // * ulang pakai password. Refresh token yang dikirim balik APA ADANYA (tidak di-rotasi) -
+  // * ini sengaja: karena stateless (bukan DB-backed), tidak ada cara meng-invalidate refresh
+  // * token lama, jadi kalau tiap refresh menerbitkan refresh token baru dengan expiry baru,
+  // * sesi bisa diperpanjang tanpa batas selama dipakai rutin. Dengan mengembalikan refresh
+  // * token yang sama, umur sesi dibatasi keras sampai expiry aslinya (app.jwt.refresh-expiration
+  // * sejak login/register) - setelah itu client wajib login ulang pakai password.
   @Transactional
   public AuthResponse refresh(RefreshTokenRequest request) {
     String refreshToken = request.refreshToken();
@@ -108,8 +110,7 @@ public class AuthService {
     }
 
     String newToken = jwtService.generateToken(user);
-    String newRefreshToken = jwtService.generateRefreshToken(user);
 
-    return new AuthResponse(newToken, newRefreshToken, userMapper.toResponse(user));
+    return new AuthResponse(newToken, refreshToken, userMapper.toResponse(user));
   }
 }
