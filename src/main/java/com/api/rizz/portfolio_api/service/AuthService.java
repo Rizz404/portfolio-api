@@ -1,6 +1,7 @@
 package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.LoginRequest;
+import com.api.rizz.portfolio_api.dto.request.RefreshTokenRequest;
 import com.api.rizz.portfolio_api.dto.request.RegisterRequest;
 import com.api.rizz.portfolio_api.dto.response.AuthResponse;
 import com.api.rizz.portfolio_api.entity.LanguageCode;
@@ -61,8 +62,9 @@ public class AuthService {
     User savedUser = userRepository.save(user);
 
     var token = jwtService.generateToken(user);
+    var refreshToken = jwtService.generateRefreshToken(user);
 
-    return new AuthResponse(token, userMapper.toResponse(savedUser));
+    return new AuthResponse(token, refreshToken, userMapper.toResponse(savedUser));
   }
 
   @Transactional
@@ -75,7 +77,39 @@ public class AuthService {
             .findByEmail(request.email())
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
     String token = jwtService.generateToken(user);
+    String refreshToken = jwtService.generateRefreshToken(user);
 
-    return new AuthResponse(token, userMapper.toResponse(user));
+    return new AuthResponse(token, refreshToken, userMapper.toResponse(user));
+  }
+
+  // * Menukar refresh token yang masih valid jadi pasangan access+refresh token baru, tanpa
+  // * user perlu login ulang pakai password. Refresh token lama otomatis "habis masa pakai"-nya
+  // * secara alami begitu expired - karena stateless (bukan DB-backed), tidak ada mekanisme
+  // * revoke sebelum expired (mis. saat logout paksa/ganti password); trade-off ini sadar
+  // * diambil demi kesederhanaan, lihat catatan di JwtService.
+  @Transactional
+  public AuthResponse refresh(RefreshTokenRequest request) {
+    String refreshToken = request.refreshToken();
+
+    // * Tolak kalau ini access token (atau token rusak/expired) - keduanya dilempar sebagai
+    // * JwtException/IllegalArgumentException yang sudah ditangani GlobalExceptionHandler.
+    if (!jwtService.isRefreshToken(refreshToken)) {
+      throw new IllegalArgumentException("Token is not a refresh token");
+    }
+
+    String email = jwtService.extractUsername(refreshToken);
+    User user =
+        userRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+    if (!jwtService.isTokenValid(refreshToken, user)) {
+      throw new IllegalArgumentException("Refresh token is invalid or expired");
+    }
+
+    String newToken = jwtService.generateToken(user);
+    String newRefreshToken = jwtService.generateRefreshToken(user);
+
+    return new AuthResponse(newToken, newRefreshToken, userMapper.toResponse(user));
   }
 }

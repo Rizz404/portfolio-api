@@ -1,6 +1,7 @@
 package com.api.rizz.portfolio_api.controller;
 
 import com.api.rizz.portfolio_api.dto.request.LoginRequest;
+import com.api.rizz.portfolio_api.dto.request.RefreshTokenRequest;
 import com.api.rizz.portfolio_api.dto.request.RegisterRequest;
 import com.api.rizz.portfolio_api.dto.response.AuthResponse;
 import com.api.rizz.portfolio_api.dto.response.SuccessResponse;
@@ -39,6 +40,17 @@ public class AuthController {
 
     SuccessResponse<AuthResponse> successResponse =
         new SuccessResponse<>("User logged", authResponse);
+
+    return ResponseEntity.ok(successResponse);
+  }
+
+  @PostMapping("/refresh")
+  public ResponseEntity<SuccessResponse<AuthResponse>> refresh(
+      @Valid @RequestBody RefreshTokenRequest request) {
+    AuthResponse authResponse = authService.refresh(request);
+
+    SuccessResponse<AuthResponse> successResponse =
+        new SuccessResponse<>("Token refreshed", authResponse);
 
     return ResponseEntity.ok(successResponse);
   }

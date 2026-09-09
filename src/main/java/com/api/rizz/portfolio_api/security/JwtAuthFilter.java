@@ -45,6 +45,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     final String jwt = authHeader.substring(7);
 
     try {
+      // * Refresh token tidak boleh dipakai buat mengakses endpoint biasa - cuma valid buat
+      // * ditukar jadi access token baru lewat POST /auth/refresh (lihat AuthService#refresh).
+      if (jwtService.isRefreshToken(jwt)) {
+        filterChain.doFilter(request, response);
+        return;
+      }
+
       final String userEmail = jwtService.extractUsername(jwt);
 
       // * Kalau ada email tapi belum authenticated
