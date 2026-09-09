@@ -8,6 +8,7 @@ import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.User;
 import com.api.rizz.portfolio_api.entity.User.Role;
 import com.api.rizz.portfolio_api.entity.UserTranslation;
+import com.api.rizz.portfolio_api.exception.InvalidTokenException;
 import com.api.rizz.portfolio_api.mapper.AuthMapper;
 import com.api.rizz.portfolio_api.mapper.UserMapper;
 import com.api.rizz.portfolio_api.repository.UserRepository;
@@ -93,20 +94,23 @@ public class AuthService {
   public AuthResponse refresh(RefreshTokenRequest request) {
     String refreshToken = request.refreshToken();
 
-    // * Tolak kalau ini access token (atau token rusak/expired) - keduanya dilempar sebagai
-    // * JwtException/IllegalArgumentException yang sudah ditangani GlobalExceptionHandler.
+    // * Semua kegagalan di sini pakai InvalidTokenException (-> 401), bukan
+    // * IllegalArgumentException (-> 400): dari sudut pandang client, "token bukan refresh
+    // * token"/"user sudah gak ada"/"expired" itu sama-sama berarti "refresh token gak bisa
+    // * dipakai, login ulang" - JwtException (token rusak/signature invalid/expired secara
+    // * native) juga berakhir di 401 yang sama lewat GlobalExceptionHandler.
     if (!jwtService.isRefreshToken(refreshToken)) {
-      throw new IllegalArgumentException("Token is not a refresh token");
+      throw new InvalidTokenException("Token is not a refresh token");
     }
 
     String email = jwtService.extractUsername(refreshToken);
     User user =
         userRepository
             .findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            .orElseThrow(() -> new InvalidTokenException("User not found"));
 
     if (!jwtService.isTokenValid(refreshToken, user)) {
-      throw new IllegalArgumentException("Refresh token is invalid or expired");
+      throw new InvalidTokenException("Refresh token is invalid or expired");
     }
 
     String newToken = jwtService.generateToken(user);

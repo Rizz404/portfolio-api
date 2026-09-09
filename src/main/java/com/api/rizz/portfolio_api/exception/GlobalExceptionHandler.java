@@ -12,7 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -141,8 +144,31 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse<String>> handleAccessDeniedException(
       AccessDeniedException ex, HttpServletRequest request) {
     // * Meng-cover kegagalan @PreAuthorize (termasuk AuthorizationDeniedException di Spring
-    // * Security 6, yang merupakan subclass dari AccessDeniedException) - baik karena belum
-    // * login sama sekali maupun karena role/permission tidak cukup.
+    // * Security 6, yang merupakan subclass dari AccessDeniedException). Karena ini
+    // * @RestControllerAdvice (jalan di dalam DispatcherServlet), exception-nya ketangkep DI
+    // * SINI duluan - sebelum sempat sampai ke ExceptionTranslationFilter milik Spring Security
+    // * yang biasanya membedakan anonymous (-> 401 via AuthenticationEntryPoint) vs authenticated
+    // * tapi kurang izin (-> 403). Makanya dibedakan manual: kalau belum/tidak lagi terautentikasi
+    // * (termasuk token expired/invalid yang oleh JwtAuthFilter sengaja diperlakukan sebagai
+    // * anonymous, lihat komentar di sana) -> 401, kalau sudah login tapi role/permission-nya
+    // * tidak cukup -> 403.
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    boolean isUnauthenticated =
+        authentication == null
+            || !authentication.isAuthenticated()
+            || authentication instanceof AnonymousAuthenticationToken;
+
+    if (isUnauthenticated) {
+      log.warn(
+          "Unauthenticated access attempt: {} - Path: {}",
+          ex.getMessage(),
+          request.getRequestURI());
+
+      ErrorResponse<String> response =
+          new ErrorResponse<>("error", "Authentication is required to access this resource", null);
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
     log.warn("Access denied: {} - Path: {}", ex.getMessage(), request.getRequestURI());
 
     ErrorResponse<String> response =
@@ -178,6 +204,22 @@ public class GlobalExceptionHandler {
     ErrorResponse<String> response =
         new ErrorResponse<>("error", "Uploaded file(s) exceed the maximum allowed size", null);
     return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(response);
+  }
+
+  @ExceptionHandler(InvalidTokenException.class)
+  public ResponseEntity<ErrorResponse<String>> handleInvalidTokenException(
+      InvalidTokenException ex, HttpServletRequest request) {
+    // * Meng-cover kegagalan AuthService#refresh yang levelnya "token gak bisa dipakai" (bukan
+    // * access token, user pemiliknya sudah gak ada, dst) - disatukan ke 401 yang sama dengan
+    // * JwtException di bawah biar client bisa pakai satu aturan: 401 dari /auth/refresh berarti
+    // * refresh token-nya sudah gak valid, wajib login ulang. Pesan asli tetap di-log di server,
+    // * client cukup dikasih pesan generik biar gak bocorin detail kenapa persisnya (mis. apakah
+    // * user-nya masih ada atau tidak).
+    log.warn("Invalid refresh token: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+
+    ErrorResponse<String> response =
+        new ErrorResponse<>("error", "Invalid or expired refresh token", null);
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
   }
 
   @ExceptionHandler(JwtException.class)
