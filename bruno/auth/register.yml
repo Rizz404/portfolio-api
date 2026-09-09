@@ -38,10 +38,12 @@ runtime:
         test("response body should contain a token and the created user", function () {
           const body = res.getBody();
           expect(body.data).to.have.property("token");
+          expect(body.data).to.have.property("refreshToken");
           expect(body.data.user).to.have.property("id");
           expect(body.data.user.email).to.equal("rizky.tester@example.com");
 
           bru.setVar("accessToken", body.data.token);
+          bru.setVar("refreshToken", body.data.refreshToken);
           bru.setVar("authUserId", body.data.user.id);
         });
 

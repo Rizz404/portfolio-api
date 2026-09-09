@@ -1,17 +1,16 @@
 info:
-  name: login
+  name: refresh
   type: http
-  seq: 4
+  seq: 6
 
 http:
   method: POST
-  url: "{{BASE_URL}}/auth/login"
+  url: "{{BASE_URL}}/auth/refresh"
   body:
     type: json
     data: |-
       {
-        "email": "rizky.tester@example.com",
-        "password": "SuperSecret123!"
+        "refreshToken": "{{refreshToken}}"
       }
   auth: inherit
 
@@ -23,17 +22,17 @@ runtime:
 
         if (data && data.data.token){
           bru.setEnvVar("TOKEN", data.data.token)
-          console.log("Get token success")
+          console.log("Refresh token success")
         } else{
-          console.log("Get token failed")
+          console.log("Refresh token failed")
         }
     - type: tests
       code: |-
-        test("should log in and return 200", function () {
+        test("should refresh and return 200", function () {
           expect(res.getStatus()).to.equal(200);
         });
 
-        test("response body should contain a fresh token for the registered user", function () {
+        test("response body should contain a new access token and a new refresh token", function () {
           const body = res.getBody();
           expect(body.data).to.have.property("token");
           expect(body.data).to.have.property("refreshToken");
@@ -41,7 +40,6 @@ runtime:
 
           bru.setVar("accessToken", body.data.token);
           bru.setVar("refreshToken", body.data.refreshToken);
-          bru.setVar("authUserId", body.data.user.id);
         });
 
 settings:
@@ -51,8 +49,10 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  The token/user live under `body.data` (SuccessResponse envelope), not the root.
+  Exchanges the refresh token issued by `login` for a fresh access+refresh token pair
+  (AuthService#refresh), no password required. Rotates `refreshToken` in this
+  collection - the previous refresh token still works until its own expiry though,
+  since refresh tokens are stateless JWTs with no DB-backed revocation (see
+  JwtService/AuthService comments for that trade-off).
 
-  Depends on `register` having run first in this run/session to create the account.
-  Overwrites `accessToken`/`refreshToken`/`TOKEN` with freshly issued tokens - `refresh`
-  depends on `refreshToken` being set here.
+  Depends on `login` having run first in this run/session to populate `refreshToken`.

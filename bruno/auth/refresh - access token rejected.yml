@@ -1,0 +1,49 @@
+info:
+  name: refresh - access token rejected
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/auth/refresh"
+  body:
+    type: json
+    data: |-
+      {
+        "refreshToken": "{{accessToken}}"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("a well-formed access token is rejected with 400", function () {
+          expect(res.getStatus()).to.equal(400);
+        });
+
+        test("error message should say it is not a refresh token", function () {
+          const body = res.getBody();
+          expect(body.status).to.equal("error");
+          expect(body.message).to.equal("Token is not a refresh token");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Confirms an access token can't be replayed as a refresh token: both token types are
+  signed with the same secret, so they're told apart by the "type" claim
+  (JwtService#isRefreshToken). AuthService#refresh throws
+  IllegalArgumentException("Token is not a refresh token") when it's an access token,
+  mapped to 400 by GlobalExceptionHandler.
+
+  Also relevant: JwtAuthFilter#doFilterInternal treats a refresh token sent as a
+  Bearer access token the same way (silently anonymous) - the reverse direction isn't
+  covered by an HTTP test here since an access token IS valid Authorization-header
+  input, just rejected specifically by /auth/refresh's own check.
+
+  Depends on `login` having run first in this run/session to populate `accessToken`.

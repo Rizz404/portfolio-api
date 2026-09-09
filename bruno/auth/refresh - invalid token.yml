@@ -1,0 +1,41 @@
+info:
+  name: refresh - invalid token
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/auth/refresh"
+  body:
+    type: json
+    data: |-
+      {
+        "refreshToken": "not-a-real-token"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("a malformed refresh token is rejected with 401", function () {
+          expect(res.getStatus()).to.equal(401);
+        });
+
+        test("error message should not leak parsing details", function () {
+          const body = res.getBody();
+          expect(body.status).to.equal("error");
+          expect(body.message).to.equal("Invalid or expired token");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  JwtService#isRefreshToken re-parses the token before AuthService can even check its
+  type, so a malformed/unsigned string throws JwtException (here: MalformedJwtException)
+  straight away. GlobalExceptionHandler.handleJwtException maps that to 401 with a
+  generic message - same handling path an expired refresh token would hit.
