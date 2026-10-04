@@ -11,9 +11,10 @@ import com.api.rizz.portfolio_api.entity.ProjectTranslation;
 import com.api.rizz.portfolio_api.mapper.ProjectMapper;
 import com.api.rizz.portfolio_api.repository.ProjectRepository;
 import com.api.rizz.portfolio_api.util.QueryFilters;
+import com.api.rizz.portfolio_api.util.QuerySorting;
+import com.api.rizz.portfolio_api.util.ResourceSort;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -24,11 +25,9 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,26 +42,10 @@ public class ProjectService {
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
 
-  // * Field translatable yang gak bisa di-sort langsung karena kolomnya sekarang ada di tabel
-  // * translation (join lewat @OneToMany rapuh untuk Sort/QueryUtils) - di-drop diam-diam dari
-  // * sortBy kalau diminta.
-  private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("name", "description");
-
   // * Nama cache Redis buat domain project (lihat CacheConfig). Query dievict semua (allEntries)
   // * tiap ada mutasi (create/update/delete) -- daripada invalidate parsial per kombinasi
   // * filter/sort/page yang gak kebayang jumlahnya.
   private static final String CACHE_NAME = "projects";
-
-  // * Resolve locale dari Accept-Language header (via LocaleContextHolder), fallback ke 'en'
-  // * kalau bahasanya gak didukung.
-  private LanguageCode resolveRequestLocale() {
-    String lang = LocaleContextHolder.getLocale().getLanguage();
-    try {
-      return LanguageCode.valueOf(lang);
-    } catch (IllegalArgumentException e) {
-      return LanguageCode.en;
-    }
-  }
 
   // * Slug selalu dibuat dari nama locale 'en' (default/fallback), bukan dari locale
   // * request-time, biar slug stabil gak berubah tergantung Accept-Language header
@@ -213,7 +196,7 @@ public class ProjectService {
   @Cacheable(
       cacheNames = CACHE_NAME,
       key =
-          "'list:v2:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+          "'list:v4:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
               + " + ':' + #status + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy"
               + " + ':' + #sortDir + ':' + #filter")
   public Object findAllProjects(
@@ -222,10 +205,11 @@ public class ProjectService {
       Long cursor,
       int page,
       int size,
-      List<String> sortBy,
-      List<String> sortDir,
+      String sortBy,
+      String sortDir,
       ProjectFilter filter) {
     QueryFilters.validatePaging(page, size);
+    QuerySorting.Plan sorting = QuerySorting.plan(ResourceSort.PROJECT, cursor, sortBy, sortDir);
     List<ProjectStatus> statuses = QueryFilters.enums(status, ProjectStatus.class, "status");
     List<String> projectTypes =
         QueryFilters.enums(filter.getProjectTypes(), Project.ProjectType.class, "projectTypes")
@@ -242,14 +226,13 @@ public class ProjectService {
           // * 1. Siapkan Filter (Where Clause Dinamis)
           List<Predicate> predicates = new ArrayList<>();
 
-          // * Kalau ada keyword pencarian di nama project - join ke translation sesuai locale
-          // * request (Accept-Language), fallback 'en'. Project yang cuma punya translation 'en'
-          // * gak bakal match search pas Accept-Language: id, meski tetap tampil (fallback) kalau
-          // * di-fetch by ID - trade-off yang diterima, bukan bug.
+          // * Pencarian translation hanya pada bahasa request, tanpa fallback.
           if (search != null && !search.isBlank()) {
-            Join<Project, ProjectTranslation> t = root.join("translations", JoinType.LEFT);
-            predicates.add(cb.equal(t.get("locale"), resolveRequestLocale()));
-            predicates.add(cb.like(cb.lower(t.get("name")), "%" + search.toLowerCase() + "%"));
+            Join<Project, ProjectTranslation> t = QueryFilters.currentTranslation(root, cb);
+            predicates.add(
+                cb.like(
+                    cb.lower(t.get("name")),
+                    "%" + search.toLowerCase(java.util.Locale.ROOT) + "%"));
           }
 
           // * Kalau mau filter berdasarkan status (active/development)
@@ -276,28 +259,19 @@ public class ProjectService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
-    spec = spec.and(QueryFilters.common(filter));
-
-    // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort =
-        QueryFilters.sort(
-            cursor,
-            sortBy,
-            sortDir,
-            Set.of("id", "slug", "status", "createdAt", "updatedAt"),
-            TRANSLATABLE_SORT_FIELDS);
+    spec = spec.and(QueryFilters.common(filter)).and(sorting.specification());
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {
       // * LOGIKA CURSOR: Ambil 'size + 1' untuk mengecek apakah masih ada sisa data untuk next page
-      Pageable limitOnly = PageRequest.of(0, size + 1, finalSort);
+      Pageable limitOnly = PageRequest.of(0, size + 1);
       Page<Project> result = projectRepository.findAll(spec, limitOnly);
       return result.getContent().stream().map(projectMapper::toResponse).toList();
     } else {
       // * LOGIKA OFFSET (Default): Butuh info total halaman dan total data
       // * Kurangi 1 biar gak minus page nya
       int actualPage = page > 0 ? page - 1 : 0;
-      Pageable pageable = PageRequest.of(actualPage, size, finalSort);
+      Pageable pageable = PageRequest.of(actualPage, size);
       Page<Project> result = projectRepository.findAll(spec, pageable);
       return result.map(projectMapper::toResponse);
     }

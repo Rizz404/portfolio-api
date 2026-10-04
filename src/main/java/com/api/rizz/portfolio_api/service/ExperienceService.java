@@ -10,24 +10,22 @@ import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.mapper.ExperienceMapper;
 import com.api.rizz.portfolio_api.repository.ExperienceRepository;
 import com.api.rizz.portfolio_api.util.QueryFilters;
+import com.api.rizz.portfolio_api.util.QuerySorting;
+import com.api.rizz.portfolio_api.util.ResourceSort;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,22 +38,10 @@ public class ExperienceService {
   private final ExperienceMapper experienceMapper;
   private final SnowflakeGenerator snowflakeGenerator;
 
-  private static final Set<String> TRANSLATABLE_SORT_FIELDS =
-      Set.of("position", "description", "jobdesks");
-
   // * Nama cache Redis buat domain experience (lihat CacheConfig). Query dievict semua
   // * (allEntries) tiap ada mutasi (create/update/delete) -- daripada invalidate parsial per
   // * kombinasi filter/sort/page yang gak kebayang jumlahnya.
   private static final String CACHE_NAME = "experiences";
-
-  private LanguageCode resolveRequestLocale() {
-    String lang = LocaleContextHolder.getLocale().getLanguage();
-    try {
-      return LanguageCode.valueOf(lang);
-    } catch (IllegalArgumentException e) {
-      return LanguageCode.en;
-    }
-  }
 
   private List<ExperienceTranslation> buildTranslations(
       List<ExperienceTranslationRequest> requests, Experience experience) {
@@ -134,7 +120,7 @@ public class ExperienceService {
   @Cacheable(
       cacheNames = CACHE_NAME,
       key =
-          "'list:v2:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+          "'list:v4:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
               + " + ':' + #isCurrent + ':' + #startDate + ':' + #endDate + ':' + #cursor + ':'"
               + " + #page + ':' + #size + ':' + #sortBy + ':' + #sortDir + ':' + #filter")
   public Object findAllExperiences(
@@ -145,27 +131,26 @@ public class ExperienceService {
       Long cursor,
       int page,
       int size,
-      List<String> sortBy,
-      List<String> sortDir,
+      String sortBy,
+      String sortDir,
       ExperienceFilter filter) {
     QueryFilters.validatePaging(page, size);
+    QuerySorting.Plan sorting = QuerySorting.plan(ResourceSort.EXPERIENCE, cursor, sortBy, sortDir);
     QueryFilters.validateRange(startDate, endDate, "startDate/endDate");
     Specification<Experience> spec =
         (root, query, cb) -> {
           // * 1. Siapkan Filter (Where Clause Dinamis)
           List<Predicate> predicates = new ArrayList<>();
 
-          // * Kalau ada keyword pencarian di company name (tetap di tabel utama) dan position
-          // * (join ke translation sesuai locale request, fallback 'en')
+          // * Company name bisa cocok langsung; position hanya pada bahasa request.
           if (search != null && !search.isBlank()) {
-            String searchKeyword = "%" + search.toLowerCase() + "%";
-            Join<Experience, ExperienceTranslation> t = root.join("translations", JoinType.LEFT);
+            String searchKeyword = "%" + search.toLowerCase(java.util.Locale.ROOT) + "%";
+            Join<Experience, ExperienceTranslation> t = QueryFilters.currentTranslation(root, cb);
 
             // * cb.or() = Pilih salah satu yang cocok (OR)
             Predicate searchCompanyName = cb.like(cb.lower(root.get("companyName")), searchKeyword);
             Predicate searchPosition = cb.like(cb.lower(t.get("position")), searchKeyword);
 
-            predicates.add(cb.equal(t.get("locale"), resolveRequestLocale()));
             predicates.add(cb.or(searchCompanyName, searchPosition));
           }
 
@@ -182,8 +167,7 @@ public class ExperienceService {
           }
           if (QueryFilters.hasText(filter.getPosition())) {
             Join<Experience, ExperienceTranslation> positionTranslation =
-                root.join("translations", JoinType.LEFT);
-            predicates.add(cb.equal(positionTranslation.get("locale"), resolveRequestLocale()));
+                QueryFilters.currentTranslation(root, cb);
             predicates.add(
                 cb.like(
                     cb.lower(positionTranslation.get("position")),
@@ -205,29 +189,19 @@ public class ExperienceService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
-    spec = spec.and(QueryFilters.common(filter));
-
-    // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort =
-        QueryFilters.sort(
-            cursor,
-            sortBy,
-            sortDir,
-            Set.of(
-                "id", "companyName", "startDate", "endDate", "isCurrent", "createdAt", "updatedAt"),
-            TRANSLATABLE_SORT_FIELDS);
+    spec = spec.and(QueryFilters.common(filter)).and(sorting.specification());
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {
       // * LOGIKA CURSOR: Ambil 'size + 1' untuk mengecek apakah masih ada sisa data untuk next page
-      Pageable limitOnly = PageRequest.of(0, size + 1, finalSort);
+      Pageable limitOnly = PageRequest.of(0, size + 1);
       Page<Experience> result = experienceRepository.findAll(spec, limitOnly);
       return result.getContent().stream().map(experienceMapper::toResponse).toList();
     } else {
       // * LOGIKA OFFSET (Default): Butuh info total halaman dan total data
       // * Kurangi 1 biar gak minus page nya
       int actualPage = page > 0 ? page - 1 : 0;
-      Pageable pageable = PageRequest.of(actualPage, size, finalSort);
+      Pageable pageable = PageRequest.of(actualPage, size);
       Page<Experience> result = experienceRepository.findAll(spec, pageable);
       return result.map(experienceMapper::toResponse);
     }

@@ -10,6 +10,8 @@ import com.api.rizz.portfolio_api.entity.SkillTranslation;
 import com.api.rizz.portfolio_api.mapper.SkillMapper;
 import com.api.rizz.portfolio_api.repository.SkillRepository;
 import com.api.rizz.portfolio_api.util.QueryFilters;
+import com.api.rizz.portfolio_api.util.QuerySorting;
+import com.api.rizz.portfolio_api.util.ResourceSort;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
@@ -17,15 +19,12 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,21 +39,10 @@ public class SkillService {
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
 
-  private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("description");
-
   // * Nama cache Redis buat domain skill (lihat CacheConfig). Query dievict semua (allEntries)
   // * tiap ada mutasi (create/update/delete) -- daripada invalidate parsial per kombinasi
   // * filter/sort/page yang gak kebayang jumlahnya.
   private static final String CACHE_NAME = "skills";
-
-  private LanguageCode resolveRequestLocale() {
-    String lang = LocaleContextHolder.getLocale().getLanguage();
-    try {
-      return LanguageCode.valueOf(lang);
-    } catch (IllegalArgumentException e) {
-      return LanguageCode.en;
-    }
-  }
 
   private List<SkillTranslation> buildTranslations(
       List<SkillTranslationRequest> requests, Skill skill) {
@@ -149,7 +137,7 @@ public class SkillService {
   @Cacheable(
       cacheNames = CACHE_NAME,
       key =
-          "'list:v2:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+          "'list:v4:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
               + " + ':' + #category + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy"
               + " + ':' + #sortDir + ':' + #filter")
   public Object findAllSkills(
@@ -158,10 +146,11 @@ public class SkillService {
       Long cursor,
       int page,
       int size,
-      List<String> sortBy,
-      List<String> sortDir,
+      String sortBy,
+      String sortDir,
       CommonFilter filter) {
     QueryFilters.validatePaging(page, size);
+    QuerySorting.Plan sorting = QuerySorting.plan(ResourceSort.SKILL, cursor, sortBy, sortDir);
     List<Skill.SkillCategory> categories =
         QueryFilters.enums(category, Skill.SkillCategory.class, "category");
     Specification<Skill> spec =
@@ -171,7 +160,10 @@ public class SkillService {
 
           // * Kalau ada keyword pencarian di name (name tetap di tabel utama, bukan translatable)
           if (search != null && !search.isBlank()) {
-            predicates.add(cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"));
+            predicates.add(
+                cb.like(
+                    cb.lower(root.get("name")),
+                    "%" + search.toLowerCase(java.util.Locale.ROOT) + "%"));
           }
 
           // * Kalau mau filter berdasarkan category
@@ -186,28 +178,19 @@ public class SkillService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
-    spec = spec.and(QueryFilters.common(filter));
-
-    // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort =
-        QueryFilters.sort(
-            cursor,
-            sortBy,
-            sortDir,
-            Set.of("id", "name", "category", "logoUrl", "createdAt", "updatedAt"),
-            TRANSLATABLE_SORT_FIELDS);
+    spec = spec.and(QueryFilters.common(filter)).and(sorting.specification());
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {
       // * LOGIKA CURSOR: Ambil 'size + 1' untuk mengecek apakah masih ada sisa data untuk next page
-      Pageable limitOnly = PageRequest.of(0, size + 1, finalSort);
+      Pageable limitOnly = PageRequest.of(0, size + 1);
       Page<Skill> result = skillRepository.findAll(spec, limitOnly);
       return result.getContent().stream().map(skillMapper::toResponse).toList();
     } else {
       // * LOGIKA OFFSET (Default): Butuh info total halaman dan total data
       // * Kurangi 1 biar gak minus page nya
       int actualPage = page > 0 ? page - 1 : 0;
-      Pageable pageable = PageRequest.of(actualPage, size, finalSort);
+      Pageable pageable = PageRequest.of(actualPage, size);
       Page<Skill> result = skillRepository.findAll(spec, pageable);
       return result.map(skillMapper::toResponse);
     }

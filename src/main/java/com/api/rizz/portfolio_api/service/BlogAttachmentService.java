@@ -7,19 +7,19 @@ import com.api.rizz.portfolio_api.entity.BlogAttachment;
 import com.api.rizz.portfolio_api.mapper.BlogAttachmentMapper;
 import com.api.rizz.portfolio_api.repository.BlogAttachmentRepository;
 import com.api.rizz.portfolio_api.util.QueryFilters;
+import com.api.rizz.portfolio_api.util.QuerySorting;
+import com.api.rizz.portfolio_api.util.ResourceSort;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,13 +56,10 @@ public class BlogAttachmentService {
 
   @Transactional(readOnly = true)
   public Object findAllBlogAttachments(
-      Long cursor,
-      int page,
-      int size,
-      List<String> sortBy,
-      List<String> sortDir,
-      BlogAttachmentFilter filter) {
+      Long cursor, int page, int size, String sortBy, String sortDir, BlogAttachmentFilter filter) {
     QueryFilters.validatePaging(page, size);
+    QuerySorting.Plan sorting =
+        QuerySorting.plan(ResourceSort.BLOG_ATTACHMENT, cursor, sortBy, sortDir);
     List<BlogAttachment.FileType> fileTypes =
         QueryFilters.enums(filter.getFileType(), BlogAttachment.FileType.class, "fileType");
     Specification<BlogAttachment> spec =
@@ -90,28 +87,19 @@ public class BlogAttachmentService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
-    spec = spec.and(QueryFilters.common(filter));
-
-    // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort =
-        QueryFilters.sort(
-            cursor,
-            sortBy,
-            sortDir,
-            Set.of("id", "fileName", "fileUrl", "fileType", "createdAt", "updatedAt"),
-            Set.of());
+    spec = spec.and(QueryFilters.common(filter)).and(sorting.specification());
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {
       // * LOGIKA CURSOR: Ambil 'size + 1' untuk mengecek apakah masih ada sisa data untuk next page
-      Pageable limitOnly = PageRequest.of(0, size + 1, finalSort);
+      Pageable limitOnly = PageRequest.of(0, size + 1);
       Page<BlogAttachment> result = blogAttachmentRepository.findAll(spec, limitOnly);
       return result.getContent().stream().map(blogAttachmentMapper::toResponse).toList();
     } else {
       // * LOGIKA OFFSET (Default): Butuh info total halaman dan total data
       // * Kurangi 1 biar gak minus page nya
       int actualPage = page > 0 ? page - 1 : 0;
-      Pageable pageable = PageRequest.of(actualPage, size, finalSort);
+      Pageable pageable = PageRequest.of(actualPage, size);
       Page<BlogAttachment> result = blogAttachmentRepository.findAll(spec, pageable);
       return result.map(blogAttachmentMapper::toResponse);
     }

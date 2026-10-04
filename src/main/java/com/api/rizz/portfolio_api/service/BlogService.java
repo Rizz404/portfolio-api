@@ -12,24 +12,22 @@ import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.mapper.BlogMapper;
 import com.api.rizz.portfolio_api.repository.BlogRepository;
 import com.api.rizz.portfolio_api.util.QueryFilters;
+import com.api.rizz.portfolio_api.util.QuerySorting;
+import com.api.rizz.portfolio_api.util.ResourceSort;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,21 +42,10 @@ public class BlogService {
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
 
-  private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("title", "content");
-
   // * Nama cache Redis buat domain blog (lihat CacheConfig). Query dievict semua (allEntries)
   // * tiap ada mutasi (create/update/delete) -- daripada invalidate parsial per kombinasi
   // * filter/sort/page yang gak kebayang jumlahnya.
   private static final String CACHE_NAME = "blogs";
-
-  private LanguageCode resolveRequestLocale() {
-    String lang = LocaleContextHolder.getLocale().getLanguage();
-    try {
-      return LanguageCode.valueOf(lang);
-    } catch (IllegalArgumentException e) {
-      return LanguageCode.en;
-    }
-  }
 
   private String enTitle(List<BlogTranslationRequest> requests) {
     return requests.stream()
@@ -190,34 +177,33 @@ public class BlogService {
   @Cacheable(
       cacheNames = CACHE_NAME,
       key =
-          "'list:v2:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+          "'list:v4:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
               + " + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy + ':' + #sortDir + ':' + #filter")
   public Object findAllBlogs(
       String search,
       Long cursor,
       int page,
       int size,
-      List<String> sortBy,
-      List<String> sortDir,
+      String sortBy,
+      String sortDir,
       BlogFilter filter) {
     QueryFilters.validatePaging(page, size);
+    QuerySorting.Plan sorting = QuerySorting.plan(ResourceSort.BLOG, cursor, sortBy, sortDir);
     QueryFilters.validateRange(filter.getMinViews(), filter.getMaxViews(), "minViews/maxViews");
     Specification<Blog> spec =
         (root, query, cb) -> {
           // * 1. Siapkan Filter (Where Clause Dinamis)
           List<Predicate> predicates = new ArrayList<>();
 
-          // * Kalau ada keyword pencarian di title dan content - join ke translation sesuai
-          // * locale request (Accept-Language), fallback 'en'
+          // * Title/content hanya dicari pada bahasa request.
           if (search != null && !search.isBlank()) {
-            String searchKeyword = "%" + search.toLowerCase() + "%";
-            Join<Blog, BlogTranslation> t = root.join("translations", JoinType.LEFT);
+            String searchKeyword = "%" + search.toLowerCase(java.util.Locale.ROOT) + "%";
+            Join<Blog, BlogTranslation> t = QueryFilters.currentTranslation(root, cb);
 
             // * cb.or() = Pilih salah satu yang cocok (OR)
             Predicate searchTitle = cb.like(cb.lower(t.get("title")), searchKeyword);
             Predicate searchContent = cb.like(cb.lower(t.get("content")), searchKeyword);
 
-            predicates.add(cb.equal(t.get("locale"), resolveRequestLocale()));
             predicates.add(cb.or(searchTitle, searchContent));
           }
 
@@ -241,36 +227,19 @@ public class BlogService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
-    spec = spec.and(QueryFilters.common(filter));
-
-    // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort =
-        QueryFilters.sort(
-            cursor,
-            sortBy,
-            sortDir,
-            Set.of(
-                "id",
-                "slug",
-                "isPublished",
-                "viewsCount",
-                "likesCount",
-                "dislikesCount",
-                "createdAt",
-                "updatedAt"),
-            TRANSLATABLE_SORT_FIELDS);
+    spec = spec.and(QueryFilters.common(filter)).and(sorting.specification());
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {
       // * LOGIKA CURSOR: Ambil 'size + 1' untuk mengecek apakah masih ada sisa data untuk next page
-      Pageable limitOnly = PageRequest.of(0, size + 1, finalSort);
+      Pageable limitOnly = PageRequest.of(0, size + 1);
       Page<Blog> result = blogRepository.findAll(spec, limitOnly);
       return result.getContent().stream().map(blogMapper::toResponse).toList();
     } else {
       // * LOGIKA OFFSET (Default): Butuh info total halaman dan total data
       // * Kurangi 1 biar gak minus page nya
       int actualPage = page > 0 ? page - 1 : 0;
-      Pageable pageable = PageRequest.of(actualPage, size, finalSort);
+      Pageable pageable = PageRequest.of(actualPage, size);
       Page<Blog> result = blogRepository.findAll(spec, pageable);
       return result.map(blogMapper::toResponse);
     }

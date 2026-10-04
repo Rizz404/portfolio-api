@@ -10,6 +10,8 @@ import com.api.rizz.portfolio_api.entity.UserTranslation;
 import com.api.rizz.portfolio_api.mapper.UserMapper;
 import com.api.rizz.portfolio_api.repository.UserRepository;
 import com.api.rizz.portfolio_api.util.QueryFilters;
+import com.api.rizz.portfolio_api.util.QuerySorting;
+import com.api.rizz.portfolio_api.util.ResourceSort;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
@@ -17,12 +19,10 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +36,6 @@ public class UserService {
   private final UserMapper userMapper;
   private final SnowflakeGenerator snowflakeGenerator;
   private final FileUploadService fileUploadService;
-
-  private static final Set<String> TRANSLATABLE_SORT_FIELDS = Set.of("bio");
 
   private List<UserTranslation> buildTranslations(
       List<UserTranslationRequest> requests, User user) {
@@ -126,10 +124,11 @@ public class UserService {
       Long cursor,
       int page,
       int size,
-      List<String> sortBy,
-      List<String> sortDir,
+      String sortBy,
+      String sortDir,
       UserFilter filter) {
     QueryFilters.validatePaging(page, size);
+    QuerySorting.Plan sorting = QuerySorting.plan(ResourceSort.USER, cursor, sortBy, sortDir);
     List<User.Role> roles = QueryFilters.enums(role, User.Role.class, "role");
     List<User.AuthProvider> providers =
         QueryFilters.enums(provider, User.AuthProvider.class, "provider");
@@ -142,7 +141,7 @@ public class UserService {
           List<Predicate> predicates = new ArrayList<>();
 
           if (search != null && !search.isBlank()) {
-            String searchKeyword = "%" + search.toLowerCase() + "%";
+            String searchKeyword = "%" + search.toLowerCase(java.util.Locale.ROOT) + "%";
 
             // * cb.or() = Pilih salah satu yang cocok (OR)
             Predicate searchEmail = cb.like(cb.lower(root.get("email")), searchKeyword);
@@ -194,38 +193,19 @@ public class UserService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
-    spec = spec.and(QueryFilters.common(filter));
-
-    // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort =
-        QueryFilters.sort(
-            cursor,
-            sortBy,
-            sortDir,
-            Set.of(
-                "id",
-                "nickname",
-                "fullName",
-                "email",
-                "role",
-                "provider",
-                "gender",
-                "dateOfBirth",
-                "createdAt",
-                "updatedAt"),
-            TRANSLATABLE_SORT_FIELDS);
+    spec = spec.and(QueryFilters.common(filter)).and(sorting.specification());
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {
       // * LOGIKA CURSOR: Ambil 'size + 1' untuk mengecek apakah masih ada sisa data untuk next page
-      Pageable limitOnly = PageRequest.of(0, size + 1, finalSort);
+      Pageable limitOnly = PageRequest.of(0, size + 1);
       Page<User> result = userRepository.findAll(spec, limitOnly);
       return result.getContent().stream().map(userMapper::toResponse).toList();
     } else {
       // * LOGIKA OFFSET (Default): Butuh info total halaman dan total data
       // * Kurangi 1 biar gak minus page nya
       int actualPage = page > 0 ? page - 1 : 0;
-      Pageable pageable = PageRequest.of(actualPage, size, finalSort);
+      Pageable pageable = PageRequest.of(actualPage, size);
       Page<User> result = userRepository.findAll(spec, pageable);
       return result.map(userMapper::toResponse);
     }
