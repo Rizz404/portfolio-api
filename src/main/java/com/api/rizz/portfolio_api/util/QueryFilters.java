@@ -1,19 +1,41 @@
 package com.api.rizz.portfolio_api.util;
 
 import com.api.rizz.portfolio_api.dto.request.filter.CommonFilter;
+import com.api.rizz.portfolio_api.entity.LanguageCode;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import org.springframework.data.domain.Sort;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.jpa.domain.Specification;
 
 /** Builds typed predicates; values are passed to Criteria rather than concatenated into SQL. */
 public final class QueryFilters {
   private QueryFilters() {}
+
+  /** Reuse one LEFT JOIN restricted to the current locale for both search and sorting. */
+  @SuppressWarnings("unchecked")
+  public static <T, R> Join<T, R> currentTranslation(Root<T> root, CriteriaBuilder cb) {
+    for (Join<T, ?> join : root.getJoins()) {
+      if ("current_translation".equals(join.getAlias())) {
+        return (Join<T, R>) join;
+      }
+    }
+    LanguageCode language;
+    try {
+      language = LanguageCode.valueOf(LocaleContextHolder.getLocale().getLanguage());
+    } catch (IllegalArgumentException e) {
+      language = LanguageCode.en;
+    }
+    Join<T, R> translation = root.join("translations", JoinType.LEFT);
+    translation.alias("current_translation");
+    translation.on(cb.equal(translation.get("locale"), language));
+    return translation;
+  }
 
   public static boolean hasText(String value) {
     return value != null && !value.isBlank();
@@ -111,36 +133,5 @@ public final class QueryFilters {
     if (page < 1 || size < 1 || size > 100) {
       throw new IllegalArgumentException("page must be >= 1 and size must be between 1 and 100");
     }
-  }
-
-  public static Sort sort(
-      Long cursor,
-      List<String> sortBy,
-      List<String> sortDir,
-      Set<String> allowedFields,
-      Set<String> translatedFields) {
-    Sort sort = Sort.unsorted();
-    for (int i = 0; i < sortBy.size(); i++) {
-      String field = sortBy.get(i);
-      // Preserve the existing handling of fields moved to translation tables.
-      if (translatedFields.contains(field)) {
-        continue;
-      }
-      if (!allowedFields.contains(field)) {
-        throw new IllegalArgumentException("Unsupported sortBy field: " + field);
-      }
-      String direction = i < sortDir.size() ? sortDir.get(i) : "asc";
-      if (!direction.equalsIgnoreCase("asc") && !direction.equalsIgnoreCase("desc")) {
-        throw new IllegalArgumentException("sortDir must be asc or desc");
-      }
-      sort = sort.and(Sort.by(Sort.Direction.fromString(direction), field));
-    }
-    // An ID cursor requires ID ordering to prevent skipped or repeated results.
-    if (cursor != null) {
-      return Sort.by("id").descending();
-    }
-    return sort.isUnsorted()
-        ? Sort.by("createdAt").descending().and(Sort.by("id").descending())
-        : sort.getOrderFor("id") == null ? sort.and(Sort.by("id").descending()) : sort;
   }
 }
