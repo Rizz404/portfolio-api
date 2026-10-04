@@ -8,7 +8,7 @@ http:
   url: "{{BASE_URL}}/experiences"
   params:
     - name: cursor
-      value: "1"
+      value: "9223372036854775807"
       type: query
       disabled: false
     - name: size
@@ -36,3 +36,7 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  Start with the largest bigint cursor, then use cursor.nextCursor with the same filters.
+  Cursor ordering is id desc. Custom sortBy requires page pagination.

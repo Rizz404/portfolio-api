@@ -8,7 +8,7 @@ http:
   url: "{{BASE_URL}}/projects"
   params:
     - name: cursor
-      value: "1"
+      value: "9223372036854775807"
       type: query
       disabled: false
     - name: size
@@ -43,3 +43,5 @@ docs: |-
   Both offset and cursor pagination put the item list under `body.data` - the
   difference is the sibling metadata key: `pagination` (PagingInfo) for offset,
   `cursor` (CursorInfo: nextCursor/perPage/hasNextPage) for cursor-based paging.
+  Start with the largest bigint cursor, then use cursor.nextCursor with the same filters.
+  Cursor ordering is id desc. Custom sortBy requires page pagination.

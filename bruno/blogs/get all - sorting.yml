@@ -1,0 +1,60 @@
+info:
+  name: get all - sorting
+  type: http
+  seq: 50
+
+http:
+  method: GET
+  url: "{{BASE_URL}}/blogs"
+  headers:
+    - name: Accept-Language
+      value: id
+      disabled: false
+  params:
+    - name: sortBy
+      value: title
+      type: query
+      disabled: false
+    - name: sortDir
+      value: asc
+      type: query
+      disabled: false
+    - name: page
+      value: "1"
+      type: query
+      disabled: false
+    - name: size
+      value: "10"
+      type: query
+      disabled: false
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("should return a page ordered by the requested field", function () {
+          expect(res.getStatus()).to.equal(200);
+          const body = res.getBody();
+          expect(body.data).to.be.an("array");
+          expect(body).to.have.property("pagination");
+        });
+
+        test("translation sorting only returns the current language", function () {
+          res.getBody().data.forEach((item) => {
+            expect(item.resolvedLocale).to.equal("id");
+          });
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Custom sorting uses page pagination. cursor only supports id desc.
+
+  Sorting uses Indonesian translations only. Resources without an Indonesian
+  translation are excluded; no English fallback is used for ordering.
+  NULL values are last and id desc breaks ties.
