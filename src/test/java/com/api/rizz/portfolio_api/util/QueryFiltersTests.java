@@ -8,9 +8,8 @@ import com.api.rizz.portfolio_api.dto.request.filter.CommonFilter;
 import com.api.rizz.portfolio_api.entity.Project.ProjectStatus;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 class QueryFiltersTests {
   @Test
@@ -37,26 +36,35 @@ class QueryFiltersTests {
   }
 
   @Test
-  void usesIdOrderForIdCursorsAndAddsAnOffsetTieBreaker() {
-    Set<String> fields = Set.of("id", "createdAt");
-    assertThat(QueryFilters.sort(100L, List.of("createdAt"), List.of("asc"), fields, Set.of()))
-        .isEqualTo(Sort.by("id").descending());
-    assertThat(QueryFilters.sort(null, List.of("createdAt"), List.of("asc"), fields, Set.of()))
-        .isEqualTo(Sort.by("createdAt").ascending().and(Sort.by("id").descending()));
+  void defaultsToIdOrderForCursorsAndCreatedDateForPages() {
+    assertThat(QuerySorting.plan(ResourceSort.PROJECT, 100L, null, null))
+        .isEqualTo(new QuerySorting.Plan(ResourceSort.PROJECT.field("id"), Direction.DESC));
+    assertThat(QuerySorting.plan(ResourceSort.PROJECT, null, null, null))
+        .isEqualTo(new QuerySorting.Plan(ResourceSort.PROJECT.field("createdAt"), Direction.DESC));
+    assertThat(QuerySorting.plan(ResourceSort.PROJECT, null, "name", "asc"))
+        .isEqualTo(new QuerySorting.Plan(ResourceSort.PROJECT.field("name"), Direction.ASC));
   }
 
   @Test
   void rejectsUnsupportedSortingBeforeExecutingAQuery() {
-    assertThatThrownBy(
-            () ->
-                QueryFilters.sort(
-                    null, List.of("password"), List.of("asc"), Set.of("id"), Set.of()))
+    assertThatThrownBy(() -> QuerySorting.plan(ResourceSort.USER, null, "password", "asc"))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("password");
-    assertThatThrownBy(
-            () ->
-                QueryFilters.sort(null, List.of("id"), List.of("invalid"), Set.of("id"), Set.of()))
+    assertThatThrownBy(() -> QuerySorting.plan(ResourceSort.PROJECT, null, "id", "invalid"))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("sortDir");
+  }
+
+  @Test
+  void rejectsMultipleSortValuesAndCursorConflicts() {
+    assertThatThrownBy(() -> QuerySorting.plan(ResourceSort.PROJECT, null, "name,status", "asc"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("sortBy", "one value");
+    assertThatThrownBy(() -> QuerySorting.plan(ResourceSort.PROJECT, null, "name", "asc,desc"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("sortDir", "one value");
+    assertThatThrownBy(() -> QuerySorting.plan(ResourceSort.PROJECT, 100L, "name", "asc"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Cursor pagination");
   }
 }

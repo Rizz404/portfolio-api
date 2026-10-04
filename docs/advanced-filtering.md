@@ -17,7 +17,7 @@ HTTP 400 beserta daftar nilai yang valid. Parameter kosong tidak menerapkan filt
 | `createdFrom`, `createdTo` | Batas inklusif `createdAt` |
 | `updatedFrom`, `updatedTo` | Batas inklusif `updatedAt` |
 | `page`, `size` | Page mulai 1; size 1–100, default 10 |
-| `sortBy`, `sortDir` | Beberapa field dan arah `asc`/`desc`; default `createdAt desc` |
+| `sortBy`, `sortDir` | Satu field dan satu arah `asc`/`desc`; default `createdAt desc` |
 | `cursor` | Ambil ID lebih kecil dari cursor, selalu dengan urutan `id desc` |
 
 Timestamp memakai ISO 8601 dengan zona waktu, misalnya
@@ -25,14 +25,64 @@ Timestamp memakai ISO 8601 dengan zona waktu, misalnya
 `%2B` pada URL. Rentang terbalik menghasilkan HTTP 400. Filter diterapkan sebelum
 pagination dan penghitungan total.
 
-Sorting hanya menerima field scalar yang didukung resource. Field terjemahan yang
-sebelumnya diabaikan (`name`/`description` project, `title`/`content` blog,
-`position`/`description`/`jobdesks` experience, `description` skill, `reasons` use,
-`bio` user) tetap diabaikan. ID menjadi pemecah seri pada offset pagination agar
-urutan stabil. Cursor memakai urutan ID; `sortBy`/`sortDir` tidak mengubah urutan
-cursor. Gunakan cursor ID terbesar, misalnya `9223372036854775807`, untuk memulai
-cursor pagination, lalu kirim `cursor.nextCursor` pada request berikutnya dengan
-filter yang sama.
+Sorting dilakukan di database sebelum pagination. Teks diurutkan tanpa membedakan
+huruf besar/kecil, dengan collation database; ini bukan urutan kamus bahasa atau
+pengurutan berdasarkan relevansi. NULL selalu berada terakhir untuk kedua arah.
+ID menjadi pemecah seri (`id desc`) jika belum diminta sebagai field sorting.
+
+Hanya **satu `sortBy` dan satu `sortDir`** yang aktif, misalnya
+`sortBy=name&sortDir=asc`. Mengirim beberapa nilai dengan koma atau mengulang
+parameter sorting menghasilkan HTTP 400, termasuk jika nilainya sama.
+Nilai kosong, field tidak didukung, dan arah tidak valid juga menghasilkan 400.
+Filter tetap bisa memakai beberapa nilai dan digabung dengan filter lain.
+
+Cursor hanya mendukung `id desc`. Sorting tidak dikirim otomatis memilih `id desc`
+saat memakai cursor. Custom sorting bersama cursor menghasilkan HTTP 400;
+gunakan pagination `page` untuk sorting nama/judul atau field lain. Gunakan cursor
+ID terbesar, misalnya `9223372036854775807`, untuk memulai cursor pagination, lalu
+kirim `cursor.nextCursor` pada request berikutnya dengan filter yang sama.
+
+## Bahasa pencarian dan sorting
+
+Field translation hanya dicari dan diurutkan pada **bahasa request saat ini**
+dari `Accept-Language` (`id` atau `en`), tanpa fallback ke bahasa lain.
+Header tidak dikirim atau bahasa tidak didukung memakai bahasa default `en`.
+
+Jika salah satu field sorting berada di tabel translation, hasil hanya mencakup
+resource yang memiliki baris translation bahasa request. Batasan ini juga dipakai
+untuk menghitung total pagination. Jika baris tersebut ada tetapi field-nya NULL,
+resource tetap masuk dengan NULL terakhir; nilai Inggris tidak dipakai sebagai
+pengganti. Join translation dibatasi per bahasa dan digunakan bersama oleh search
+dan sorting agar tidak menggandakan resource.
+
+Contoh: nama project Inggris `Zulu`, nama Indonesia `Zebra`. Dengan
+`Accept-Language: id`, `search=Zulu` tidak cocok dan `sortBy=name` memakai `Zebra`.
+Project yang hanya punya translation Inggris tidak masuk dalam sorting nama pada
+bahasa Indonesia.
+
+Pencarian field utama tetap dapat cocok tanpa translation bahasa request, misalnya
+`search=Acme` pada experience melalui `companyName`. Sorting field utama saja juga
+tidak mensyaratkan translation bahasa request. Dalam kedua situasi ini, mapper
+response tetap memakai perilaku fallback yang sudah ada; pembatasan bahasa di atas
+berlaku untuk pencocokan dan pengurutan **field translation**.
+
+## Field sorting
+
+Semua endpoint mendukung `id`, `createdAt`, dan `updatedAt`. Field tambahan:
+
+| Endpoint | Field utama / relasi | Field translation |
+| --- | --- | --- |
+| `/projects` | `slug`, `status` | `name`, `description` |
+| `/blogs` | `slug`, `isPublished`, `viewsCount`, `likesCount`, `dislikesCount` | `title`, `content` |
+| `/experiences` | `companyName`, `startDate`, `endDate`, `isCurrent` | `position`, `description` |
+| `/skills` | `name`, `category`, `logoUrl` | `description` |
+| `/uses` | `itemName`, `category`, `logoUrl` | `reasons` |
+| `/users` | `nickname`, `fullName`, `email`, `role`, `provider`, `gender`, `dateOfBirth`, `placeOfBirth`, `address`, `phoneNumber` | `bio` |
+| `/blog-attachments` | `fileName`, `fileUrl`, `fileType`, `blogId` | — |
+
+Nama field bersifat case-sensitive. Enum diurutkan menurut nilai teks database,
+tanpa prioritas bisnis khusus. Array/object seperti `jobdesks`, `projectTypes`,
+`projectLinks`, dan `techStack` tidak mendukung sorting biasa dan menghasilkan 400.
 
 ## Filter tiap resource
 
@@ -48,7 +98,8 @@ filter yang sama.
 
 `slug`, `email`, dan `nickname` memakai kecocokan persis; email/nickname mengabaikan
 huruf besar/kecil. `search`, `companyName`, dan `position` mencari substring.
-Pencarian pada field terjemahan mengikuti `Accept-Language` seperti sebelumnya.
+Pencarian pada field terjemahan dibatasi pada `Accept-Language` seperti dijelaskan
+di bagian bahasa pencarian dan sorting.
 
 Project `projectTypes` memeriksa anggota array JSONB, `linkTypes` memeriksa key
 `projectLinks`, dan `techStack` memeriksa nama/key teknologi secara persis dan
@@ -87,10 +138,17 @@ GET /api/v1/blogs?isPublished=false&minViews=5&maxViews=100
 GET /api/v1/blog-attachments?blogId=10&fileType=image,document
 GET /api/v1/experiences?isCurrent=false&companyName=acme&startDate=2021-01-01
 GET /api/v1/users?role=ADMIN,USER&provider=LOCAL&gender=FEMALE
+GET /api/v1/projects?status=active,development&sortBy=name&sortDir=asc
+Accept-Language: id
+
+GET /api/v1/blogs?isPublished=true&sortBy=title&sortDir=asc
+Accept-Language: en
+
+GET /api/v1/blog-attachments?sortBy=blogId&sortDir=asc
 ```
 
 Cache daftar mencakup locale, semua filter, sorting, dan pagination. Prefix cache
-daftar diperbarui agar hasil dengan perilaku lama tidak dipakai kembali.
+daftar memakai `list:v4:` agar hasil sorting lama tidak dipakai kembali.
 
 ## Pengujian PostgreSQL
 
