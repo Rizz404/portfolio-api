@@ -62,6 +62,19 @@ public class ProjectService {
     }
   }
 
+  // * Slug selalu dibuat dari nama locale 'en' (default/fallback), bukan dari locale
+  // * request-time, biar slug stabil gak berubah tergantung Accept-Language header
+  private String generateSlug(ProjectRequest projectRequest) {
+    String enName =
+        projectRequest.translations().stream()
+            .filter(t -> t.locale() == LanguageCode.en)
+            .findFirst()
+            .map(ProjectTranslationRequest::name)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Default locale (en) translation is required"));
+    return enName.toLowerCase().replaceAll("[^a-z0-9]+", "-");
+  }
+
   private List<ProjectTranslation> buildTranslations(
       List<ProjectTranslationRequest> requests, Project project) {
     List<ProjectTranslation> translations = new ArrayList<>();
@@ -118,17 +131,7 @@ public class ProjectService {
     try {
       long newId = snowflakeGenerator.nextId();
 
-      // * Slug selalu dibuat dari nama locale 'en' (default/fallback), bukan dari locale
-      // * request-time, biar slug stabil gak berubah tergantung Accept-Language header
-      String enName =
-          projectRequest.translations().stream()
-              .filter(t -> t.locale() == LanguageCode.en)
-              .findFirst()
-              .map(ProjectTranslationRequest::name)
-              .orElseThrow(
-                  () ->
-                      new IllegalArgumentException("Default locale (en) translation is required"));
-      String generatedSlug = enName.toLowerCase().replaceAll("[^a-z0-9]+", "-");
+      String generatedSlug = generateSlug(projectRequest);
       Project project = projectMapper.toEntity(projectRequest);
 
       project.setId(newId);
@@ -175,6 +178,31 @@ public class ProjectService {
     } catch (IOException e) {
       throw new RuntimeException("Error when communicate with cloudinary: " + e.getMessage(), e);
     }
+  }
+
+  // * Create banyak project (beserta translations-nya) sekaligus dalam 1 transaksi: kalau ada satu
+  // * yang gagal, semuanya di-rollback (all-or-nothing). JSON only - upload file gak didukung di
+  // * batch, logo/image pakai URL string. createProject dipanggil via this (bukan proxy) jadi
+  // * @CacheEvict-nya gak jalan per item, cukup evict sekali di method ini.
+  @Transactional
+  @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
+  public List<ProjectResponse> createProjectBatch(List<ProjectRequest> requests) {
+    // * Slug diturunkan dari nama 'en' dan UNIQUE di DB, jadi tolak duplikat dalam 1 batch di awal
+    // * dengan pesan yang jelas, bukan nunggu constraint violation di flush.
+    Set<String> seenSlugs = new java.util.HashSet<>();
+    for (int i = 0; i < requests.size(); i++) {
+      String slug = generateSlug(requests.get(i));
+      if (!seenSlugs.add(slug)) {
+        throw new IllegalArgumentException(
+            "Duplicate project name (slug '%s') in batch at index %d".formatted(slug, i));
+      }
+    }
+
+    List<ProjectResponse> responses = new ArrayList<>();
+    for (ProjectRequest request : requests) {
+      responses.add(createProject(request, null, null));
+    }
+    return responses;
   }
 
   // * @Transactional wajib: mapper resolve translations (LAZY @OneToMany) di toResponse(),

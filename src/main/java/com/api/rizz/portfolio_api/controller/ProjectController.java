@@ -2,6 +2,7 @@ package com.api.rizz.portfolio_api.controller;
 
 import com.api.rizz.portfolio_api.CursorResponse;
 import com.api.rizz.portfolio_api.dto.request.BatchDeleteRequest;
+import com.api.rizz.portfolio_api.dto.request.BatchProjectRequest;
 import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
 import com.api.rizz.portfolio_api.dto.response.CursorInfo;
 import com.api.rizz.portfolio_api.dto.response.PagedResponse;
@@ -60,6 +61,20 @@ public class ProjectController {
 
     SuccessResponse<ProjectResponse> successResponse =
         new SuccessResponse<>("Project created", projectResponse);
+    return ResponseEntity.status(HttpStatus.CREATED).body(successResponse);
+  }
+
+  // * Create banyak project sekaligus (JSON only, all-or-nothing). Setiap item punya translations
+  // * sendiri, sama seperti POST /projects biasa.
+  @PreAuthorize("isAuthenticated()")
+  @PostMapping(value = "/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<SuccessResponse<List<ProjectResponse>>> createProjectBatch(
+      @Valid @RequestBody BatchProjectRequest request) {
+    List<ProjectResponse> projectResponses = projectService.createProjectBatch(request.projects());
+
+    SuccessResponse<List<ProjectResponse>> successResponse =
+        new SuccessResponse<>(
+            "%d project(s) created".formatted(projectResponses.size()), projectResponses);
     return ResponseEntity.status(HttpStatus.CREATED).body(successResponse);
   }
 
