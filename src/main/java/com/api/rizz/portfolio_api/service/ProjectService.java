@@ -2,6 +2,7 @@ package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.ProjectRequest;
 import com.api.rizz.portfolio_api.dto.request.ProjectTranslationRequest;
+import com.api.rizz.portfolio_api.dto.request.filter.ProjectFilter;
 import com.api.rizz.portfolio_api.dto.response.ProjectResponse;
 import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.Project;
@@ -9,6 +10,7 @@ import com.api.rizz.portfolio_api.entity.Project.ProjectStatus;
 import com.api.rizz.portfolio_api.entity.ProjectTranslation;
 import com.api.rizz.portfolio_api.mapper.ProjectMapper;
 import com.api.rizz.portfolio_api.repository.ProjectRepository;
+import com.api.rizz.portfolio_api.util.QueryFilters;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -211,9 +213,9 @@ public class ProjectService {
   @Cacheable(
       cacheNames = CACHE_NAME,
       key =
-          "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+          "'list:v2:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
               + " + ':' + #status + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy"
-              + " + ':' + #sortDir")
+              + " + ':' + #sortDir + ':' + #filter")
   public Object findAllProjects(
       String search,
       String status,
@@ -221,7 +223,20 @@ public class ProjectService {
       int page,
       int size,
       List<String> sortBy,
-      List<String> sortDir) {
+      List<String> sortDir,
+      ProjectFilter filter) {
+    QueryFilters.validatePaging(page, size);
+    List<ProjectStatus> statuses = QueryFilters.enums(status, ProjectStatus.class, "status");
+    List<String> projectTypes =
+        QueryFilters.enums(filter.getProjectTypes(), Project.ProjectType.class, "projectTypes")
+            .stream()
+            .map(Enum::name)
+            .toList();
+    List<String> linkTypes =
+        QueryFilters.enums(filter.getLinkTypes(), Project.LinkType.class, "linkTypes").stream()
+            .map(Enum::name)
+            .toList();
+    List<String> techStack = QueryFilters.values(filter.getTechStack());
     Specification<Project> spec =
         (root, query, cb) -> {
           // * 1. Siapkan Filter (Where Clause Dinamis)
@@ -238,8 +253,20 @@ public class ProjectService {
           }
 
           // * Kalau mau filter berdasarkan status (active/development)
-          if (status != null && !status.isBlank()) {
-            predicates.add(cb.equal(root.get("status"), ProjectStatus.valueOf(status)));
+          if (!statuses.isEmpty()) {
+            predicates.add(root.get("status").in(statuses));
+          }
+          if (QueryFilters.hasText(filter.getSlug())) {
+            predicates.add(cb.equal(root.get("slug"), filter.getSlug()));
+          }
+          if (!projectTypes.isEmpty()) {
+            predicates.add(QueryFilters.jsonContainsAny(root, cb, "projectTypes", projectTypes));
+          }
+          if (!linkTypes.isEmpty()) {
+            predicates.add(QueryFilters.jsonContainsAny(root, cb, "projectLinks", linkTypes));
+          }
+          if (!techStack.isEmpty()) {
+            predicates.add(QueryFilters.jsonContainsAny(root, cb, "techStack", techStack));
           }
 
           // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
@@ -249,32 +276,16 @@ public class ProjectService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
+    spec = spec.and(QueryFilters.common(filter));
+
     // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort = Sort.unsorted();
-
-    for (int i = 0; i < sortBy.size(); i++) {
-      String field = sortBy.get(i);
-
-      // * Field translatable (name/description) sekarang ada di tabel terpisah - sort lewat
-      // * @OneToMany join rapuh di Spring Data QueryUtils, jadi di-drop diam-diam alih-alih 500
-      if (TRANSLATABLE_SORT_FIELDS.contains(field)) {
-        continue;
-      }
-
-      // Jaga-jaga kalau project ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita
-      // default
-      // ke 'asc'
-      String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
-
-      // Bikin gerbong saat ini
-      Sort currentSort =
-          direction.equalsIgnoreCase("desc")
-              ? Sort.by(field).descending()
-              : Sort.by(field).ascending();
-
-      // Sambungin ke kereta utama pakai .and() !
-      finalSort = finalSort.and(currentSort);
-    }
+    Sort finalSort =
+        QueryFilters.sort(
+            cursor,
+            sortBy,
+            sortDir,
+            Set.of("id", "slug", "status", "createdAt", "updatedAt"),
+            TRANSLATABLE_SORT_FIELDS);
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {

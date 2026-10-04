@@ -2,12 +2,14 @@ package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.UserRequest;
 import com.api.rizz.portfolio_api.dto.request.UserTranslationRequest;
+import com.api.rizz.portfolio_api.dto.request.filter.UserFilter;
 import com.api.rizz.portfolio_api.dto.response.UserResponse;
 import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.User;
 import com.api.rizz.portfolio_api.entity.UserTranslation;
 import com.api.rizz.portfolio_api.mapper.UserMapper;
 import com.api.rizz.portfolio_api.repository.UserRepository;
+import com.api.rizz.portfolio_api.util.QueryFilters;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
@@ -125,7 +127,15 @@ public class UserService {
       int page,
       int size,
       List<String> sortBy,
-      List<String> sortDir) {
+      List<String> sortDir,
+      UserFilter filter) {
+    QueryFilters.validatePaging(page, size);
+    List<User.Role> roles = QueryFilters.enums(role, User.Role.class, "role");
+    List<User.AuthProvider> providers =
+        QueryFilters.enums(provider, User.AuthProvider.class, "provider");
+    List<User.Gender> genders = QueryFilters.enums(gender, User.Gender.class, "gender");
+    QueryFilters.validateRange(
+        filter.getDateOfBirthFrom(), filter.getDateOfBirthTo(), "dateOfBirthFrom/dateOfBirthTo");
     Specification<User> spec =
         (root, query, cb) -> {
           // * 1. Siapkan Filter (Where Clauser Dinamis)
@@ -143,18 +153,38 @@ public class UserService {
           }
 
           // * Kalau mau filter berdasarkan role
-          if (role != null && !role.isBlank()) {
-            predicates.add(cb.equal(root.get("role"), role));
+          if (!roles.isEmpty()) {
+            predicates.add(root.get("role").in(roles));
           }
 
           // * Kalau mau filter berdasarkan provider
-          if (provider != null && !provider.isBlank()) {
-            predicates.add(cb.equal(root.get("provider"), provider));
+          if (!providers.isEmpty()) {
+            predicates.add(root.get("provider").in(providers));
           }
 
           // * Kalau mau filter berdasarkan gender
-          if (gender != null && !gender.isBlank()) {
-            predicates.add(cb.equal(root.get("gender"), gender));
+          if (!genders.isEmpty()) {
+            predicates.add(root.get("gender").in(genders));
+          }
+          if (QueryFilters.hasText(filter.getEmail())) {
+            predicates.add(
+                cb.equal(
+                    cb.lower(root.get("email")),
+                    filter.getEmail().toLowerCase(java.util.Locale.ROOT)));
+          }
+          if (QueryFilters.hasText(filter.getNickname())) {
+            predicates.add(
+                cb.equal(
+                    cb.lower(root.get("nickname")),
+                    filter.getNickname().toLowerCase(java.util.Locale.ROOT)));
+          }
+          if (filter.getDateOfBirthFrom() != null) {
+            predicates.add(
+                cb.greaterThanOrEqualTo(root.get("dateOfBirth"), filter.getDateOfBirthFrom()));
+          }
+          if (filter.getDateOfBirthTo() != null) {
+            predicates.add(
+                cb.lessThanOrEqualTo(root.get("dateOfBirth"), filter.getDateOfBirthTo()));
           }
 
           // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
@@ -164,30 +194,26 @@ public class UserService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
+    spec = spec.and(QueryFilters.common(filter));
+
     // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort = Sort.unsorted();
-
-    for (int i = 0; i < sortBy.size(); i++) {
-      String field = sortBy.get(i);
-
-      // * bio sekarang ada di tabel terpisah - drop diam-diam alih-alih error
-      if (TRANSLATABLE_SORT_FIELDS.contains(field)) {
-        continue;
-      }
-
-      // Jaga-jaga kalau userr ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
-      // ke 'asc'
-      String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
-
-      // Bikin gerbong saat ini
-      Sort currentSort =
-          direction.equalsIgnoreCase("desc")
-              ? Sort.by(field).descending()
-              : Sort.by(field).ascending();
-
-      // Sambungin ke kereta utama pakai .and() !
-      finalSort = finalSort.and(currentSort);
-    }
+    Sort finalSort =
+        QueryFilters.sort(
+            cursor,
+            sortBy,
+            sortDir,
+            Set.of(
+                "id",
+                "nickname",
+                "fullName",
+                "email",
+                "role",
+                "provider",
+                "gender",
+                "dateOfBirth",
+                "createdAt",
+                "updatedAt"),
+            TRANSLATABLE_SORT_FIELDS);
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {

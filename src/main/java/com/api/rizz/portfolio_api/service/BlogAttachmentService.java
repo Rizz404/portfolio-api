@@ -1,16 +1,19 @@
 package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.BlogAttachmentRequest;
+import com.api.rizz.portfolio_api.dto.request.filter.BlogAttachmentFilter;
 import com.api.rizz.portfolio_api.dto.response.BlogAttachmentResponse;
 import com.api.rizz.portfolio_api.entity.BlogAttachment;
 import com.api.rizz.portfolio_api.mapper.BlogAttachmentMapper;
 import com.api.rizz.portfolio_api.repository.BlogAttachmentRepository;
+import com.api.rizz.portfolio_api.util.QueryFilters;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -51,12 +54,34 @@ public class BlogAttachmentService {
     return blogAttachmentMapper.toResponse(savedBlogAttachment);
   }
 
+  @Transactional(readOnly = true)
   public Object findAllBlogAttachments(
-      Long cursor, int page, int size, List<String> sortBy, List<String> sortDir) {
+      Long cursor,
+      int page,
+      int size,
+      List<String> sortBy,
+      List<String> sortDir,
+      BlogAttachmentFilter filter) {
+    QueryFilters.validatePaging(page, size);
+    List<BlogAttachment.FileType> fileTypes =
+        QueryFilters.enums(filter.getFileType(), BlogAttachment.FileType.class, "fileType");
     Specification<BlogAttachment> spec =
         (root, query, cb) -> {
           // * 1. Siapkan Filter (Where Clause Dinamis)
           List<Predicate> predicates = new ArrayList<>();
+
+          if (QueryFilters.hasText(filter.getSearch())) {
+            predicates.add(
+                cb.like(
+                    cb.lower(root.get("fileName")),
+                    "%" + filter.getSearch().toLowerCase(java.util.Locale.ROOT) + "%"));
+          }
+          if (filter.getBlogId() != null) {
+            predicates.add(cb.equal(root.get("blog").get("id"), filter.getBlogId()));
+          }
+          if (!fileTypes.isEmpty()) {
+            predicates.add(root.get("fileType").in(fileTypes));
+          }
 
           // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
           if (cursor != null) {
@@ -65,25 +90,16 @@ public class BlogAttachmentService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
+    spec = spec.and(QueryFilters.common(filter));
+
     // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort = Sort.unsorted();
-
-    for (int i = 0; i < sortBy.size(); i++) {
-      String field = sortBy.get(i);
-
-      // Jaga-jaga kalau user ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
-      // ke 'asc'
-      String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
-
-      // Bikin gerbong saat ini
-      Sort currentSort =
-          direction.equalsIgnoreCase("desc")
-              ? Sort.by(field).descending()
-              : Sort.by(field).ascending();
-
-      // Sambungin ke kereta utama pakai .and() !
-      finalSort = finalSort.and(currentSort);
-    }
+    Sort finalSort =
+        QueryFilters.sort(
+            cursor,
+            sortBy,
+            sortDir,
+            Set.of("id", "fileName", "fileUrl", "fileType", "createdAt", "updatedAt"),
+            Set.of());
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {

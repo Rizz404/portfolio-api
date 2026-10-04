@@ -2,12 +2,14 @@ package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.ExperienceRequest;
 import com.api.rizz.portfolio_api.dto.request.ExperienceTranslationRequest;
+import com.api.rizz.portfolio_api.dto.request.filter.ExperienceFilter;
 import com.api.rizz.portfolio_api.dto.response.ExperienceResponse;
 import com.api.rizz.portfolio_api.entity.Experience;
 import com.api.rizz.portfolio_api.entity.ExperienceTranslation;
 import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.mapper.ExperienceMapper;
 import com.api.rizz.portfolio_api.repository.ExperienceRepository;
+import com.api.rizz.portfolio_api.util.QueryFilters;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -132,9 +134,9 @@ public class ExperienceService {
   @Cacheable(
       cacheNames = CACHE_NAME,
       key =
-          "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+          "'list:v2:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
               + " + ':' + #isCurrent + ':' + #startDate + ':' + #endDate + ':' + #cursor + ':'"
-              + " + #page + ':' + #size + ':' + #sortBy + ':' + #sortDir")
+              + " + #page + ':' + #size + ':' + #sortBy + ':' + #sortDir + ':' + #filter")
   public Object findAllExperiences(
       String search,
       Boolean isCurrent,
@@ -144,7 +146,10 @@ public class ExperienceService {
       int page,
       int size,
       List<String> sortBy,
-      List<String> sortDir) {
+      List<String> sortDir,
+      ExperienceFilter filter) {
+    QueryFilters.validatePaging(page, size);
+    QueryFilters.validateRange(startDate, endDate, "startDate/endDate");
     Specification<Experience> spec =
         (root, query, cb) -> {
           // * 1. Siapkan Filter (Where Clause Dinamis)
@@ -165,8 +170,24 @@ public class ExperienceService {
           }
 
           // * Harus kek gini kalo bool
-          if (Boolean.TRUE.equals(isCurrent)) {
+          if (isCurrent != null) {
             predicates.add(cb.equal(root.get("isCurrent"), isCurrent));
+          }
+
+          if (QueryFilters.hasText(filter.getCompanyName())) {
+            predicates.add(
+                cb.like(
+                    cb.lower(root.get("companyName")),
+                    "%" + filter.getCompanyName().toLowerCase(java.util.Locale.ROOT) + "%"));
+          }
+          if (QueryFilters.hasText(filter.getPosition())) {
+            Join<Experience, ExperienceTranslation> positionTranslation =
+                root.join("translations", JoinType.LEFT);
+            predicates.add(cb.equal(positionTranslation.get("locale"), resolveRequestLocale()));
+            predicates.add(
+                cb.like(
+                    cb.lower(positionTranslation.get("position")),
+                    "%" + filter.getPosition().toLowerCase(java.util.Locale.ROOT) + "%"));
           }
 
           // * Start date end date logic yang sering dipake
@@ -184,30 +205,17 @@ public class ExperienceService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
+    spec = spec.and(QueryFilters.common(filter));
+
     // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort = Sort.unsorted();
-
-    for (int i = 0; i < sortBy.size(); i++) {
-      String field = sortBy.get(i);
-
-      // * position/description/jobdesks sekarang ada di tabel terpisah - drop diam-diam
-      if (TRANSLATABLE_SORT_FIELDS.contains(field)) {
-        continue;
-      }
-
-      // Jaga-jaga kalau user ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
-      // ke 'asc'
-      String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
-
-      // Bikin gerbong saat ini
-      Sort currentSort =
-          direction.equalsIgnoreCase("desc")
-              ? Sort.by(field).descending()
-              : Sort.by(field).ascending();
-
-      // Sambungin ke kereta utama pakai .and() !
-      finalSort = finalSort.and(currentSort);
-    }
+    Sort finalSort =
+        QueryFilters.sort(
+            cursor,
+            sortBy,
+            sortDir,
+            Set.of(
+                "id", "companyName", "startDate", "endDate", "isCurrent", "createdAt", "updatedAt"),
+            TRANSLATABLE_SORT_FIELDS);
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {

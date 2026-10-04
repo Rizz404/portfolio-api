@@ -2,6 +2,7 @@ package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.BlogRequest;
 import com.api.rizz.portfolio_api.dto.request.BlogTranslationRequest;
+import com.api.rizz.portfolio_api.dto.request.filter.BlogFilter;
 import com.api.rizz.portfolio_api.dto.response.BlogResponse;
 import com.api.rizz.portfolio_api.entity.Blog;
 import com.api.rizz.portfolio_api.entity.BlogAttachment;
@@ -10,6 +11,7 @@ import com.api.rizz.portfolio_api.entity.BlogTranslation;
 import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.mapper.BlogMapper;
 import com.api.rizz.portfolio_api.repository.BlogRepository;
+import com.api.rizz.portfolio_api.util.QueryFilters;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -188,10 +190,18 @@ public class BlogService {
   @Cacheable(
       cacheNames = CACHE_NAME,
       key =
-          "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
-              + " + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy + ':' + #sortDir")
+          "'list:v2:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+              + " + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy + ':' + #sortDir + ':' + #filter")
   public Object findAllBlogs(
-      String search, Long cursor, int page, int size, List<String> sortBy, List<String> sortDir) {
+      String search,
+      Long cursor,
+      int page,
+      int size,
+      List<String> sortBy,
+      List<String> sortDir,
+      BlogFilter filter) {
+    QueryFilters.validatePaging(page, size);
+    QueryFilters.validateRange(filter.getMinViews(), filter.getMaxViews(), "minViews/maxViews");
     Specification<Blog> spec =
         (root, query, cb) -> {
           // * 1. Siapkan Filter (Where Clause Dinamis)
@@ -211,6 +221,19 @@ public class BlogService {
             predicates.add(cb.or(searchTitle, searchContent));
           }
 
+          if (filter.getIsPublished() != null) {
+            predicates.add(cb.equal(root.get("isPublished"), filter.getIsPublished()));
+          }
+          if (QueryFilters.hasText(filter.getSlug())) {
+            predicates.add(cb.equal(root.get("slug"), filter.getSlug()));
+          }
+          if (filter.getMinViews() != null) {
+            predicates.add(cb.greaterThanOrEqualTo(root.get("viewsCount"), filter.getMinViews()));
+          }
+          if (filter.getMaxViews() != null) {
+            predicates.add(cb.lessThanOrEqualTo(root.get("viewsCount"), filter.getMaxViews()));
+          }
+
           // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
           if (cursor != null) {
             predicates.add(cb.lessThan(root.get("id"), cursor));
@@ -218,30 +241,24 @@ public class BlogService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
+    spec = spec.and(QueryFilters.common(filter));
+
     // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort = Sort.unsorted();
-
-    for (int i = 0; i < sortBy.size(); i++) {
-      String field = sortBy.get(i);
-
-      // * title/content sekarang ada di tabel terpisah - drop diam-diam alih-alih error
-      if (TRANSLATABLE_SORT_FIELDS.contains(field)) {
-        continue;
-      }
-
-      // Jaga-jaga kalau user ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
-      // ke 'asc'
-      String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
-
-      // Bikin gerbong saat ini
-      Sort currentSort =
-          direction.equalsIgnoreCase("desc")
-              ? Sort.by(field).descending()
-              : Sort.by(field).ascending();
-
-      // Sambungin ke kereta utama pakai .and() !
-      finalSort = finalSort.and(currentSort);
-    }
+    Sort finalSort =
+        QueryFilters.sort(
+            cursor,
+            sortBy,
+            sortDir,
+            Set.of(
+                "id",
+                "slug",
+                "isPublished",
+                "viewsCount",
+                "likesCount",
+                "dislikesCount",
+                "createdAt",
+                "updatedAt"),
+            TRANSLATABLE_SORT_FIELDS);
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {

@@ -2,12 +2,14 @@ package com.api.rizz.portfolio_api.service;
 
 import com.api.rizz.portfolio_api.dto.request.SkillRequest;
 import com.api.rizz.portfolio_api.dto.request.SkillTranslationRequest;
+import com.api.rizz.portfolio_api.dto.request.filter.CommonFilter;
 import com.api.rizz.portfolio_api.dto.response.SkillResponse;
 import com.api.rizz.portfolio_api.entity.LanguageCode;
 import com.api.rizz.portfolio_api.entity.Skill;
 import com.api.rizz.portfolio_api.entity.SkillTranslation;
 import com.api.rizz.portfolio_api.mapper.SkillMapper;
 import com.api.rizz.portfolio_api.repository.SkillRepository;
+import com.api.rizz.portfolio_api.util.QueryFilters;
 import com.api.rizz.portfolio_api.util.SnowflakeGenerator;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
@@ -147,9 +149,9 @@ public class SkillService {
   @Cacheable(
       cacheNames = CACHE_NAME,
       key =
-          "T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
+          "'list:v2:' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale() + ':' + #search"
               + " + ':' + #category + ':' + #cursor + ':' + #page + ':' + #size + ':' + #sortBy"
-              + " + ':' + #sortDir")
+              + " + ':' + #sortDir + ':' + #filter")
   public Object findAllSkills(
       String search,
       String category,
@@ -157,7 +159,11 @@ public class SkillService {
       int page,
       int size,
       List<String> sortBy,
-      List<String> sortDir) {
+      List<String> sortDir,
+      CommonFilter filter) {
+    QueryFilters.validatePaging(page, size);
+    List<Skill.SkillCategory> categories =
+        QueryFilters.enums(category, Skill.SkillCategory.class, "category");
     Specification<Skill> spec =
         (root, query, cb) -> {
           // * 1. Siapkan Filter (Where Clause Dinamis)
@@ -169,8 +175,8 @@ public class SkillService {
           }
 
           // * Kalau mau filter berdasarkan category
-          if (category != null && !category.isBlank()) {
-            predicates.add(cb.equal(root.get("category"), category));
+          if (!categories.isEmpty()) {
+            predicates.add(root.get("category").in(categories));
           }
 
           // * Kalau pakai Cursor Pagination (Cari ID yang lebih kecil dari cursor)
@@ -180,30 +186,16 @@ public class SkillService {
           return cb.and(predicates.toArray(Predicate[]::new));
         };
 
+    spec = spec.and(QueryFilters.common(filter));
+
     // * 2. Siapkan Sorting (Ascending / Descending)
-    Sort finalSort = Sort.unsorted();
-
-    for (int i = 0; i < sortBy.size(); i++) {
-      String field = sortBy.get(i);
-
-      // * description sekarang ada di tabel terpisah - drop diam-diam alih-alih error
-      if (TRANSLATABLE_SORT_FIELDS.contains(field)) {
-        continue;
-      }
-
-      // Jaga-jaga kalau user ngirim sortBy 2 biji, tapi sortDir cuma 1. Kita default
-      // ke 'asc'
-      String direction = (i < sortDir.size()) ? sortDir.get(i) : "asc";
-
-      // Bikin gerbong saat ini
-      Sort currentSort =
-          direction.equalsIgnoreCase("desc")
-              ? Sort.by(field).descending()
-              : Sort.by(field).ascending();
-
-      // Sambungin ke kereta utama pakai .and() !
-      finalSort = finalSort.and(currentSort);
-    }
+    Sort finalSort =
+        QueryFilters.sort(
+            cursor,
+            sortBy,
+            sortDir,
+            Set.of("id", "name", "category", "logoUrl", "createdAt", "updatedAt"),
+            TRANSLATABLE_SORT_FIELDS);
 
     // * 3. Eksekusi Pencarian!
     if (cursor != null) {
