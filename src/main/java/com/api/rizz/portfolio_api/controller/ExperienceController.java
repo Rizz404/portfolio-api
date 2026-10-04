@@ -3,6 +3,7 @@ package com.api.rizz.portfolio_api.controller;
 import com.api.rizz.portfolio_api.CursorResponse;
 import com.api.rizz.portfolio_api.dto.request.BatchDeleteRequest;
 import com.api.rizz.portfolio_api.dto.request.ExperienceRequest;
+import com.api.rizz.portfolio_api.dto.request.filter.ExperienceFilter;
 import com.api.rizz.portfolio_api.dto.response.CursorInfo;
 import com.api.rizz.portfolio_api.dto.response.ExperienceResponse;
 import com.api.rizz.portfolio_api.dto.response.PagedResponse;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,19 +48,18 @@ public class ExperienceController {
   @GetMapping("")
   public ResponseEntity<?> findAllExperiences(
       @RequestParam(required = false) String search,
-      // * Cuma jadiin string default valuenya untuk bolean jadi bisa di convert ke
-      // * string
-      @RequestParam(defaultValue = "false") Boolean isCurrent,
+      @RequestParam(required = false) Boolean isCurrent,
       @RequestParam(required = false) LocalDate startDate,
       @RequestParam(required = false) LocalDate endDate,
       @RequestParam(required = false) Long cursor,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
-      @RequestParam(defaultValue = "desc") List<String> sortDir) {
+      @RequestParam(defaultValue = "desc") List<String> sortDir,
+      @Valid @ModelAttribute ExperienceFilter filter) {
     Object response =
         experienceService.findAllExperiences(
-            search, isCurrent, startDate, endDate, cursor, page, size, sortBy, sortDir);
+            search, isCurrent, startDate, endDate, cursor, page, size, sortBy, sortDir, filter);
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
       PagingInfo pagingInfo =
@@ -77,7 +78,8 @@ public class ExperienceController {
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
       @SuppressWarnings("unchecked")
-      List<ExperienceResponse> data = (List<ExperienceResponse>) listResult;
+      List<ExperienceResponse> data =
+          new java.util.ArrayList<>((List<ExperienceResponse>) listResult);
 
       String nextCursor = null;
       boolean hasNextPage = false;

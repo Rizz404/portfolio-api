@@ -3,6 +3,7 @@ package com.api.rizz.portfolio_api.controller;
 import com.api.rizz.portfolio_api.CursorResponse;
 import com.api.rizz.portfolio_api.dto.request.BatchDeleteRequest;
 import com.api.rizz.portfolio_api.dto.request.UserRequest;
+import com.api.rizz.portfolio_api.dto.request.filter.UserFilter;
 import com.api.rizz.portfolio_api.dto.response.CursorInfo;
 import com.api.rizz.portfolio_api.dto.response.PagedResponse;
 import com.api.rizz.portfolio_api.dto.response.PagingInfo;
@@ -20,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,10 +74,11 @@ public class UserController {
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") List<String> sortBy,
-      @RequestParam(defaultValue = "desc") List<String> sortDir) {
+      @RequestParam(defaultValue = "desc") List<String> sortDir,
+      @Valid @ModelAttribute UserFilter filter) {
     Object response =
         userService.findAllUsers(
-            search, role, provider, gender, cursor, page, size, sortBy, sortDir);
+            search, role, provider, gender, cursor, page, size, sortBy, sortDir, filter);
 
     if (response instanceof org.springframework.data.domain.Page<?> pageResult) {
       PagingInfo pagingInfo =
@@ -94,7 +97,7 @@ public class UserController {
       return ResponseEntity.ok(pagedResponse);
     } else if (response instanceof java.util.List<?> listResult) {
       @SuppressWarnings("unchecked")
-      List<UserResponse> data = (List<UserResponse>) listResult;
+      List<UserResponse> data = new java.util.ArrayList<>((List<UserResponse>) listResult);
 
       String nextCursor = null;
       boolean hasNextPage = false;
