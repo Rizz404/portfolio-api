@@ -78,9 +78,7 @@ services:
     mem_limit: 128m
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: docker.io/rizz404/portfolio-api:latest
     restart: unless-stopped
     depends_on:
       db:
