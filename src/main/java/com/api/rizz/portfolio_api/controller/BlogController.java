@@ -68,8 +68,8 @@ public class BlogController {
       @RequestParam(required = false) Long cursor,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "10") int size,
-      @RequestParam(defaultValue = "createdAt") List<String> sortBy,
-      @RequestParam(defaultValue = "desc") List<String> sortDir,
+      @RequestParam(required = false) String sortBy,
+      @RequestParam(required = false) String sortDir,
       @Valid @ModelAttribute BlogFilter filter) {
     Object response = blogService.findAllBlogs(search, cursor, page, size, sortBy, sortDir, filter);
 
