@@ -35,19 +35,24 @@ jobs:
             docker.io/rizz404/portfolio-api:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Deploy stack di Portainer
+      # * Deploy ke newest server: SSH lalu jalanin scripts/deploy.sh (git pull + pull image tag SHA + up).
+      # * Di-skip otomatis kalau secret NEWEST_DEPLOY_* belum di-set, jadi push tetap cuma build & push.
+      - name: Deploy ke newest server
         env:
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          PORTAINER_WEBHOOK_ID: ${{ secrets.PORTAINER_WEBHOOK_ID }}
+          DEPLOY_SSH_KEY: ${{ secrets.NEWEST_DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.NEWEST_DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ secrets.NEWEST_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.NEWEST_DEPLOY_USER }}
+          TAG: ${{ steps.vars.outputs.tag }}
         run: |
+          if [ -z "$DEPLOY_SSH_KEY" ] || [ -z "$DEPLOY_HOST" ]; then
+            echo "::notice::NEWEST_DEPLOY_* belum di-set, deploy di-skip"
+            exit 0
+          fi
           install -m 700 -d ~/.ssh
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-          ssh -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
-            "curl --fail-with-body --silent --show-error -X POST 'http://127.0.0.1:9000/api/stacks/webhooks/$PORTAINER_WEBHOOK_ID'"
+          ssh -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" "/opt/portfolio-api/scripts/deploy.sh $TAG"
