@@ -6,6 +6,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 TAG="${1:-latest}"
+# * Tag dikirim dari luar (CI via SSH), jadi cuma terima karakter aman biar gak bisa disusupi command lain.
+if ! [[ "${TAG}" =~ ^[A-Za-z0-9._-]+$ ]]; then
+  echo "Tag tidak valid: ${TAG}" >&2
+  exit 2
+fi
 IMAGE="docker.io/rizz404/portfolio-api:${TAG}"
 
 git pull --ff-only

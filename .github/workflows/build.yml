@@ -35,7 +35,8 @@ jobs:
             docker.io/rizz404/portfolio-api:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      # * Deploy ke newest server: SSH lalu jalanin scripts/deploy.sh (git pull + pull image tag SHA + up).
+      # * Deploy ke newest server: SSH kirim tag SHA saja. Di server, authorized_keys milik key ini dikunci
+      # * (command=) ke scripts/deploy.sh, jadi key ini cuma bisa deploy (git pull + pull image + up).
       # * Di-skip otomatis kalau secret NEWEST_DEPLOY_* belum di-set, jadi push tetap cuma build & push.
       - name: Deploy ke newest server
         env:
@@ -55,4 +56,4 @@ jobs:
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-          ssh -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" "/opt/portfolio-api/scripts/deploy.sh $TAG"
+          ssh -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" "$TAG"
