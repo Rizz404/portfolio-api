@@ -18,7 +18,6 @@ import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +42,25 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /** Run against a disposable PostgreSQL database using FILTER_TEST_DATABASE_URL. */
+/** Integration tests using an isolated PostgreSQL Testcontainer. */
+@Testcontainers
 @SpringJUnitConfig(AdvancedFilteringIntegrationTests.Config.class)
-@EnabledIfEnvironmentVariable(named = "FILTER_TEST_DATABASE_URL", matches = ".+")
 @Transactional
 @Sql("/filtering-fixtures.sql")
 class AdvancedFilteringIntegrationTests {
+
+  @Container
+  static PostgreSQLContainer postgres =
+      new PostgreSQLContainer("postgres:18-alpine")
+          .withDatabaseName("portfolio_test")
+          .withUsername("portfolio_test")
+          .withPassword("portfolio_test_password");
+
   @Autowired ApplicationContext context;
   @Autowired CacheManager cacheManager;
   MockMvc mvc;
@@ -580,7 +591,8 @@ class AdvancedFilteringIntegrationTests {
   static class Config {
     @Bean
     DataSource dataSource() {
-      return new DriverManagerDataSource(System.getenv("FILTER_TEST_DATABASE_URL"));
+      return new DriverManagerDataSource(
+          postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
     }
 
     @Bean(initMethod = "migrate")

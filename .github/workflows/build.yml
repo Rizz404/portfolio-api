@@ -1,8 +1,7 @@
 name: Build & Push Backend Image
 
 on:
-  push:
-    branches: [main] # trigger tiap push ke main, gak perlu mikir tag manual, edisi malas buat version
+  workflow_dispatch:
 
 jobs:
   build:

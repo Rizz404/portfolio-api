@@ -49,6 +49,7 @@ services:
       redis:
         condition: service_started
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME}?user=${DB_USER}&password=${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}

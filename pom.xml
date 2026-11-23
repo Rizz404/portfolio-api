@@ -139,6 +139,17 @@
 			<artifactId>cloudinary-http5</artifactId>
 			<version>2.3.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 
@@ -176,10 +187,10 @@
 				</configuration>
 				<executions>
 					<execution>
-						<id>spotless-apply</id>
+						<id>spotless-check</id>
 						<phase>process-sources</phase>
 						<goals>
-							<goal>apply</goal>
+							<goal>check</goal>
 						</goals>
 					</execution>
 				</executions>
