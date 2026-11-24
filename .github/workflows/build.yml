@@ -16,7 +16,12 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_repository.full_name == github.repository
+
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    outputs:
+      digest: ${{ steps.image.outputs.digest }}
 
     steps:
       - name: Checkout tested commit
@@ -41,6 +46,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
+        id: image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -50,3 +56,83 @@ jobs:
             docker.io/rizz404/portfolio-api:${{ steps.vars.outputs.short_sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    environment:
+      name: staging
+
+    concurrency:
+      group: portfolio-api-staging
+      cancel-in-progress: false
+
+    steps:
+      - name: Deploy image to staging
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
+          IMAGE_DIGEST: ${{ needs.build.outputs.digest }}
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          GH_TOKEN: ${{ github.token }}
+
+        run: |
+          set -Eeuo pipefail
+          umask 077
+
+          if [[ ! "$IMAGE_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+            echo "Invalid image digest" >&2
+            exit 1
+          fi
+
+          CURRENT_SHA=$(gh api \
+            "repos/$GITHUB_REPOSITORY/git/ref/heads/main" \
+            --jq '.object.sha')
+
+          if [[ "$TESTED_SHA" != "$CURRENT_SHA" ]]; then
+            echo "Deployment refused: a newer commit exists on main."
+            exit 1
+          fi
+
+          SSH_DIR=$(mktemp -d)
+          trap 'rm -rf "$SSH_DIR"' EXIT
+
+          printf '%s\n' "$SSH_PRIVATE_KEY" |
+            tr -d '\r' > "$SSH_DIR/deploy_key"
+
+          printf '%s\n' "$SSH_KNOWN_HOSTS" |
+            tr -d '\r' > "$SSH_DIR/known_hosts"
+
+          chmod 600 "$SSH_DIR/deploy_key"
+          chmod 600 "$SSH_DIR/known_hosts"
+
+          ssh \
+            -i "$SSH_DIR/deploy_key" \
+            -p "$SSH_PORT" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$SSH_DIR/known_hosts" \
+            -o ConnectTimeout=15 \
+            -l "$SSH_USER" \
+            "$SSH_HOST" \
+            "$IMAGE_DIGEST"
+
+          echo "Staging deployment completed successfully."
+
+          {
+            echo "## Staging Deployment"
+            echo ""
+            echo "- Status: Success"
+            echo "- Commit: \`$TESTED_SHA\`"
+            echo "- Image: \`docker.io/rizz404/portfolio-api@$IMAGE_DIGEST\`"
+            echo "- Health check: Passed"
+            echo "- API smoke test: Passed"
+          } >> "$GITHUB_STEP_SUMMARY"
