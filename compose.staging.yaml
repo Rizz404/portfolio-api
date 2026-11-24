@@ -1,0 +1,86 @@
+name: portfolio-api-staging
+
+services:
+  db:
+    image: docker.io/postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: portfolio_staging
+      POSTGRES_USER: portfolio_staging
+      POSTGRES_PASSWORD: ${STAGING_DB_PASSWORD:?Required}
+    volumes:
+      - db_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U portfolio_staging -d portfolio_staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 512m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  redis:
+    image: docker.io/redis:7-alpine
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --requirepass
+      - ${STAGING_REDIS_PASSWORD:?Required}
+      - --maxmemory
+      - 64mb
+      - --maxmemory-policy
+      - allkeys-lru
+    environment:
+      REDISCLI_AUTH: ${STAGING_REDIS_PASSWORD:?Required}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 128m
+    cpus: 0.25
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  backend:
+    image: ${STAGING_BACKEND_IMAGE:?Required}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/portfolio_staging
+      SPRING_DATASOURCE_USERNAME: portfolio_staging
+      SPRING_DATASOURCE_PASSWORD: ${STAGING_DB_PASSWORD:?Required}
+      JWT_SECRET: ${STAGING_JWT_SECRET:?Required}
+      JWT_EXPIRATION: 900000
+      CLOUDINARY_CLOUD_NAME: ${STAGING_CLOUDINARY_CLOUD_NAME:?Required}
+      CLOUDINARY_API_KEY: ${STAGING_CLOUDINARY_API_KEY:?Required}
+      CLOUDINARY_API_SECRET: ${STAGING_CLOUDINARY_API_SECRET:?Required}
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${STAGING_REDIS_PASSWORD:?Required}
+      MANAGEMENT_HEALTH_REDIS_ENABLED: "true"
+      JAVA_OPTS: "-XX:MaxRAMPercentage=65.0"
+      APP_PORT: 8080
+    ports:
+      - "127.0.0.1:18001:8080"
+    mem_limit: 768m
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  db_data:
+  redis_data:
