@@ -136,3 +136,22 @@ jobs:
             echo "- Health check: Passed"
             echo "- API smoke test: Passed"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Create staging release manifest
+        env:
+          IMAGE_DIGEST: ${{ needs.build.outputs.digest }}
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          jq -n \
+            --arg commit "$TESTED_SHA" \
+            --arg digest "$IMAGE_DIGEST" \
+            --arg run_id "$GITHUB_RUN_ID" \
+            --arg run_attempt "$GITHUB_RUN_ATTEMPT" \
+            '{commit: $commit, digest: $digest, run_id: $run_id, run_attempt: $run_attempt, environment: "staging"}' > staged-release.json
+
+      - name: Upload staging release manifest
+        uses: actions/upload-artifact@v7
+        with:
+          name: staged-release-${{ github.run_attempt }}
+          path: staged-release.json
+          retention-days: 30
+          if-no-files-found: error

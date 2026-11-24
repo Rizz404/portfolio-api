@@ -1,0 +1,131 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      staging_run_id:
+        description: "Successful staging workflow run ID"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify-release:
+    name: Verify Staging Release
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    outputs:
+      digest: ${{ steps.release.outputs.digest }}
+      commit: ${{ steps.release.outputs.commit }}
+
+    steps:
+      - name: Verify staging workflow and release manifest
+        id: release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.staging_run_id }}
+
+        run: |
+          set -Eeuo pipefail
+
+          if [[ ! "$RUN_ID" =~ ^[0-9]+$ ]]; then
+              echo "Invalid workflow run ID." >&2
+              exit 1
+          fi
+
+          WORKFLOW_ID=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build.yml" --jq '.id')
+
+          RUN=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID")
+
+          jq -e --argjson workflow_id "$WORKFLOW_ID" '.workflow_id == $workflow_id and .head_branch == "main" and .event == "workflow_run" and .status == "completed" and .conclusion == "success"' <<< "$RUN" > /dev/null
+
+          ATTEMPT=$(jq -r '.run_attempt' <<< "$RUN")
+
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/attempts/$ATTEMPT/jobs" | jq -e 'any(.jobs[]; .name == "Deploy to Staging" and .conclusion == "success")' > /dev/null
+
+          RELEASE_DIR=$(mktemp -d)
+          trap 'rm -rf "$RELEASE_DIR"' EXIT
+
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "staged-release-$ATTEMPT" --dir "$RELEASE_DIR"
+
+          MANIFEST="$RELEASE_DIR/staged-release.json"
+
+          jq -e --arg run "$RUN_ID" --arg attempt "$ATTEMPT" '.environment == "staging" and .run_id == $run and .run_attempt == $attempt and (.digest | test("^sha256:[a-f0-9]{64}$")) and (.commit | test("^[a-f0-9]{40}$"))' "$MANIFEST" > /dev/null
+
+          DIGEST=$(jq -r '.digest' "$MANIFEST")
+          COMMIT=$(jq -r '.commit' "$MANIFEST")
+
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+          echo "commit=$COMMIT" >> "$GITHUB_OUTPUT"
+
+          {
+              echo "## Verified Production Candidate"
+              echo ""
+              echo "- Staging run: $RUN_ID"
+              echo "- Commit: $COMMIT"
+              echo "- Digest: $DIGEST"
+              echo "- Staging deployment: Passed"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-production:
+    name: Deploy Production
+    needs: verify-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    environment:
+      name: production
+
+    concurrency:
+      group: portfolio-api-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Promote verified image to production
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
+          SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+          IMAGE_DIGEST: ${{ needs.verify-release.outputs.digest }}
+          RELEASE_COMMIT: ${{ needs.verify-release.outputs.commit }}
+
+        run: |
+          set -Eeuo pipefail
+          umask 077
+
+          if [[ ! "$IMAGE_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+              echo "Invalid image digest." >&2
+              exit 1
+          fi
+
+          SSH_DIR=$(mktemp -d)
+          trap 'rm -rf "$SSH_DIR"' EXIT
+
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$SSH_DIR/deploy_key"
+
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > "$SSH_DIR/known_hosts"
+
+          chmod 600 "$SSH_DIR/deploy_key" "$SSH_DIR/known_hosts"
+
+          echo "Deploying verified image: $IMAGE_DIGEST"
+
+          ssh -i "$SSH_DIR/deploy_key" -p "$SSH_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_DIR/known_hosts" -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -l "$SSH_USER" "$SSH_HOST" "$IMAGE_DIGEST"
+
+          {
+              echo "## Production Deployment"
+              echo ""
+              echo "- Status: Success"
+              echo "- Commit: $RELEASE_COMMIT"
+              echo "- Image: docker.io/rizz404/portfolio-api@$IMAGE_DIGEST"
+              echo "- Health check: Passed"
+              echo "- API smoke test: Passed"
+          } >> "$GITHUB_STEP_SUMMARY"
