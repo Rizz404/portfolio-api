@@ -46,7 +46,7 @@ compose() {
     local override="$3"
     shift 3
 
-    env -i PATH="$PATH" HOME=/root BACKEND_IMAGE="$image" docker compose -p "$PROJECT" --env-file "$env_file" -f docker-compose.yml -f "$override" "$@"
+    env -i PATH="$PATH" HOME=/root BACKEND_IMAGE="$image" PRODUCTION_SPRING_PROFILE=prod docker compose -p "$PROJECT" --env-file "$env_file" -f docker-compose.yml -f "$override" "$@"
 }
 
 migration_history() {
@@ -61,6 +61,12 @@ smoke_test() {
 
     curl --noproxy '*' -fsS --max-time 15 "http://127.0.0.1:$port/api/v1/projects" |
         python3 -c 'import json,sys; sys.exit(json.load(sys.stdin).get("status") != "success")' || return 1
+}
+
+record_event() {
+    if ! printf '%s\t%s\t%s\t%s\t%s\n' "$(date -u +%FT%TZ)" "$1" "$2" "$3" "$(basename "$BACKUP_DIR")" >> "$DEPLOY_DIR/release-history.tsv"; then
+        echo "Warning: unable to write release history." >&2
+    fi
 }
 
 echo "Validating staging image..."
@@ -122,6 +128,7 @@ install -d -m 700 "$BACKUP_ROOT"
 BACKUP_DIR=$(mktemp -d "$BACKUP_ROOT/deploy-$(date -u +%Y%m%dT%H%M%SZ)-XXXXXX")
 
 OLD_ID=$(docker inspect --format '{{.Image}}' "$PROD_BACKEND")
+OLD_REF=$(docker inspect --format '{{.Config.Image}}' "$PROD_BACKEND")
 
 OLD_PROFILE=$(docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$PROD_BACKEND" | sed -n 's/^SPRING_PROFILES_ACTIVE=//p')
 
@@ -160,7 +167,7 @@ docker exec -i "$PROD_DB" pg_restore --list < "$BACKUP_DIR/database.dump" > "$BA
 
 (
     cd "$BACKUP_DIR"
-    sha256sum .env docker-compose.yml compose.production.yaml database.dump rollback.compose.json > SHA256SUMS
+    sha256sum .env docker-compose.yml compose.production.yaml database.dump rollback.compose.json image-id.txt rollback-image.txt migration-history.txt database-contents.txt > SHA256SUMS
     sha256sum -c SHA256SUMS
 )
 
@@ -174,7 +181,9 @@ docker pull "$IMAGE"
 TEMP_ENV=$(mktemp .env.production.XXXXXX)
 trap 'rm -f -- "$TEMP_ENV"' EXIT
 
-sed "s|^BACKEND_IMAGE=.*|BACKEND_IMAGE=$IMAGE|" .env > "$TEMP_ENV"
+sed -e "s|^BACKEND_IMAGE=.*|BACKEND_IMAGE=$IMAGE|" -e '/^PRODUCTION_SPRING_PROFILE=/d' .env > "$TEMP_ENV"
+
+printf '\nPRODUCTION_SPRING_PROFILE=prod\n' >> "$TEMP_ENV"
 
 deploy_backend() {
     compose "$IMAGE" "$TEMP_ENV" compose.production.yaml up -d --no-deps --no-build --pull never --wait --wait-timeout 180 backend || return 1
@@ -186,41 +195,58 @@ deploy_backend() {
     [[ "$(migration_history "$PROD_DB")" == "$PROD_HISTORY" ]] || return 1
 }
 
+record_event "DEPLOY_STARTED" "$OLD_REF" "$IMAGE"
+
 echo "Deploying production backend..."
 
 if deploy_backend && mv -f "$TEMP_ENV" .env; then
+    record_event "DEPLOY_SUCCESS" "$OLD_REF" "$IMAGE"
+
     echo "Production deployment successful."
     echo "Deployed image: $IMAGE"
     echo "Backup: $BACKUP_DIR"
     exit 0
 fi
 
+record_event "DEPLOY_FAILED" "$OLD_REF" "$IMAGE"
+
 echo "Production deployment failed." >&2
 echo "Preparing emergency rollback..." >&2
 
 # Stop the failed backend before checking database state.
+
+# Stop the failed backend before checking database state.
 if ! compose "$IMAGE" "$TEMP_ENV" compose.production.yaml stop backend; then
+    record_event "ROLLBACK_REFUSED" "$IMAGE" "$ROLLBACK_IMAGE"
+
     echo "Unable to stop failed backend. Manual intervention required." >&2
     exit 1
 fi
 
 if ! CURRENT_HISTORY=$(migration_history "$PROD_DB"); then
+    record_event "ROLLBACK_REFUSED" "$IMAGE" "$ROLLBACK_IMAGE"
+
     echo "Unable to verify database state. Automatic rollback refused." >&2
     exit 1
 fi
 
 if [[ "$CURRENT_HISTORY" != "$PROD_HISTORY" ]]; then
+    record_event "ROLLBACK_REFUSED" "$IMAGE" "$ROLLBACK_IMAGE"
+
     echo "Database migrations changed. Automatic rollback refused." >&2
     echo "Manual intervention required. Backup: $BACKUP_DIR" >&2
     exit 1
 fi
 
-if compose "$ROLLBACK_IMAGE" "$BACKUP_DIR/.env" "$BACKUP_DIR/rollback.compose.json" up -d --no-deps --no-build --pull never --wait --wait-timeout 180 backend && smoke_test 8001; then
+if compose "$ROLLBACK_IMAGE" "$BACKUP_DIR/.env" "$BACKUP_DIR/rollback.compose.json" up -d --no-deps --no-build --pull never --wait --wait-timeout 180 backend && [[ "$(docker inspect --format '{{.Image}}' "$PROD_BACKEND")" == "$OLD_ID" ]] && smoke_test 8001; then
+    record_event "ROLLBACK_SUCCESS" "$IMAGE" "$ROLLBACK_IMAGE"
+
     echo "Emergency rollback successful." >&2
     echo "Restored image: $ROLLBACK_IMAGE" >&2
 else
+    record_event "ROLLBACK_FAILED" "$IMAGE" "$ROLLBACK_IMAGE"
+
     echo "Emergency rollback failed. Manual intervention required." >&2
 fi
 
-# The requested deployment failed, even if rollback succeeded.
 exit 1

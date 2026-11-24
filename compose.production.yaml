@@ -2,4 +2,4 @@ services:
   backend:
     image: ${BACKEND_IMAGE:?Production image is required}
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: ${PRODUCTION_SPRING_PROFILE-prod}

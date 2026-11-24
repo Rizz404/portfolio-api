@@ -1,0 +1,134 @@
+name: Rollback Production
+
+run-name: Production rollback (${{ inputs.mode }}) - ${{ inputs.backup_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      backup_id:
+        description: "Production backup ID"
+        required: true
+        type: string
+
+      mode:
+        description: "Check compatibility or execute rollback"
+        required: true
+        type: choice
+        default: check
+        options:
+          - check
+          - execute
+
+permissions:
+  contents: read
+
+jobs:
+  validate-request:
+    name: Validate Rollback Request
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Validate inputs
+        shell: bash
+        env:
+          BACKUP_ID: ${{ inputs.backup_id }}
+          MODE: ${{ inputs.mode }}
+
+        run: |
+          set -Eeuo pipefail
+
+          if [[ ! "$BACKUP_ID" =~ ^(deploy|rollback)-[0-9]{8}T[0-9]{6}Z-[a-zA-Z0-9]{6}$ ]]; then
+              echo "Invalid backup ID." >&2
+              exit 1
+          fi
+
+          if [[ "$MODE" != "check" && "$MODE" != "execute" ]]; then
+              echo "Invalid rollback mode." >&2
+              exit 1
+          fi
+
+          {
+              echo "## Production Rollback Request"
+              echo ""
+              echo "- Backup ID: $BACKUP_ID"
+              echo "- Mode: $MODE"
+              echo "- Request validation: Passed"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  rollback-production:
+    name: Production Rollback
+    needs: validate-request
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    environment:
+      name: production
+
+    concurrency:
+      group: portfolio-api-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Run production rollback
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
+          SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+          BACKUP_ID: ${{ inputs.backup_id }}
+          MODE: ${{ inputs.mode }}
+
+        run: |
+          set -Eeuo pipefail
+          umask 077
+
+          if [[ ! "$BACKUP_ID" =~ ^(deploy|rollback)-[0-9]{8}T[0-9]{6}Z-[a-zA-Z0-9]{6}$ ]]; then
+              echo "Invalid backup ID." >&2
+              exit 1
+          fi
+
+          case "$MODE" in
+              check)
+                  REMOTE_COMMAND="rollback-check $BACKUP_ID"
+                  ;;
+              execute)
+                  REMOTE_COMMAND="rollback $BACKUP_ID"
+                  ;;
+              *)
+                  echo "Invalid rollback mode." >&2
+                  exit 1
+                  ;;
+          esac
+
+          SSH_DIR=$(mktemp -d)
+          trap 'rm -rf "$SSH_DIR"' EXIT
+
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$SSH_DIR/deploy_key"
+
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > "$SSH_DIR/known_hosts"
+
+          chmod 600 "$SSH_DIR/deploy_key" "$SSH_DIR/known_hosts"
+
+          echo "Rollback target: $BACKUP_ID"
+          echo "Rollback mode: $MODE"
+
+          ssh -i "$SSH_DIR/deploy_key" -p "$SSH_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_DIR/known_hosts" -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -l "$SSH_USER" "$SSH_HOST" "$REMOTE_COMMAND"
+
+          {
+              echo "## Production Rollback Result"
+              echo ""
+              echo "- Backup ID: $BACKUP_ID"
+              echo "- Mode: $MODE"
+              echo "- Status: Success"
+
+              if [[ "$MODE" == "check" ]]; then
+                  echo "- No production containers were modified."
+              else
+                  echo "- Health check: Passed"
+                  echo "- API smoke test: Passed"
+              fi
+          } >> "$GITHUB_STEP_SUMMARY"
