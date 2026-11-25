@@ -135,7 +135,7 @@ if [[ "$(docker image inspect --format '{{.Id}}' "$CURRENT_IMAGE")" != "$CURRENT
     exit 1
 fi
 
-CONFIGURED_PROFILE=$(env -i PATH="$PATH" HOME=/root docker compose -p "$PROJECT" --env-file .env -f docker-compose.yml -f compose.production.yaml config -f compose.monitoring.yaml --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["backend"]["environment"]["SPRING_PROFILES_ACTIVE"])')
+CONFIGURED_PROFILE=$(env -i PATH="$PATH" HOME=/root docker compose -p "$PROJECT" --env-file .env -f docker-compose.yml -f compose.production.yaml -f compose.monitoring.yaml config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["backend"]["environment"]["SPRING_PROFILES_ACTIVE"])')
 
 if [[ "$CONFIGURED_PROFILE" != "$CURRENT_PROFILE" ]]; then
     echo "Current Spring profile configuration mismatch." >&2
@@ -175,6 +175,7 @@ docker image tag "$CURRENT_ID" "$RECOVERY_IMAGE"
 cp .env "$BACKUP_DIR/.env"
 cp docker-compose.yml "$BACKUP_DIR/docker-compose.yml"
 cp compose.production.yaml "$BACKUP_DIR/compose.production.yaml"
+cp compose.monitoring.yaml "$BACKUP_DIR/compose.monitoring.yaml"
 
 printf '%s\n' "$CURRENT_ID" > "$BACKUP_DIR/image-id.txt"
 printf '%s\n' "$RECOVERY_IMAGE" > "$BACKUP_DIR/rollback-image.txt"
@@ -200,7 +201,7 @@ docker exec -i "$DB" pg_restore --list < "$BACKUP_DIR/database.dump" > "$BACKUP_
 
 (
     cd "$BACKUP_DIR"
-    sha256sum .env docker-compose.yml compose.production.yaml database.dump rollback.compose.json image-id.txt rollback-image.txt migration-history.txt database-contents.txt > SHA256SUMS
+    sha256sum .env docker-compose.yml compose.production.yaml compose.monitoring.yaml database.dump rollback.compose.json image-id.txt rollback-image.txt migration-history.txt database-contents.txt > SHA256SUMS
     sha256sum -c SHA256SUMS
 )
 
