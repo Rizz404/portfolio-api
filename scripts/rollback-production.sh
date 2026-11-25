@@ -38,7 +38,7 @@ compose() {
     local env_file="$3"
     shift 3
 
-    env -i PATH="$PATH" HOME=/root BACKEND_IMAGE="$image" PRODUCTION_SPRING_PROFILE="$profile" docker compose -p "$PROJECT" --env-file "$env_file" -f docker-compose.yml -f compose.production.yaml "$@"
+    env -i PATH="$PATH" HOME=/root BACKEND_IMAGE="$image" PRODUCTION_SPRING_PROFILE="$profile" docker compose -p "$PROJECT" --env-file "$env_file" -f docker-compose.yml -f compose.production.yaml -f compose.monitoring.yaml "$@"
 }
 
 migration_history() {
@@ -135,7 +135,7 @@ if [[ "$(docker image inspect --format '{{.Id}}' "$CURRENT_IMAGE")" != "$CURRENT
     exit 1
 fi
 
-CONFIGURED_PROFILE=$(env -i PATH="$PATH" HOME=/root docker compose -p "$PROJECT" --env-file .env -f docker-compose.yml -f compose.production.yaml config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["backend"]["environment"]["SPRING_PROFILES_ACTIVE"])')
+CONFIGURED_PROFILE=$(env -i PATH="$PATH" HOME=/root docker compose -p "$PROJECT" --env-file .env -f docker-compose.yml -f compose.production.yaml config -f compose.monitoring.yaml --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["backend"]["environment"]["SPRING_PROFILES_ACTIVE"])')
 
 if [[ "$CONFIGURED_PROFILE" != "$CURRENT_PROFILE" ]]; then
     echo "Current Spring profile configuration mismatch." >&2

@@ -46,7 +46,7 @@ compose() {
     local override="$3"
     shift 3
 
-    env -i PATH="$PATH" HOME=/root BACKEND_IMAGE="$image" PRODUCTION_SPRING_PROFILE=prod docker compose -p "$PROJECT" --env-file "$env_file" -f docker-compose.yml -f "$override" "$@"
+    env -i PATH="$PATH" HOME=/root BACKEND_IMAGE="$image" PRODUCTION_SPRING_PROFILE=prod docker compose -p "$PROJECT" --env-file "$env_file" -f docker-compose.yml -f "$override" -f compose.monitoring.yaml "$@"
 }
 
 migration_history() {
@@ -139,6 +139,7 @@ docker image tag "$OLD_ID" "$ROLLBACK_IMAGE"
 cp .env "$BACKUP_DIR/.env"
 cp docker-compose.yml "$BACKUP_DIR/docker-compose.yml"
 cp compose.production.yaml "$BACKUP_DIR/compose.production.yaml"
+cp compose.monitoring.yaml "$BACKUP_DIR/compose.monitoring.yaml"
 
 printf '%s\n' "$OLD_ID" > "$BACKUP_DIR/image-id.txt"
 printf '%s\n' "$ROLLBACK_IMAGE" > "$BACKUP_DIR/rollback-image.txt"
@@ -167,7 +168,7 @@ docker exec -i "$PROD_DB" pg_restore --list < "$BACKUP_DIR/database.dump" > "$BA
 
 (
     cd "$BACKUP_DIR"
-    sha256sum .env docker-compose.yml compose.production.yaml database.dump rollback.compose.json image-id.txt rollback-image.txt migration-history.txt database-contents.txt > SHA256SUMS
+    sha256sum .env docker-compose.yml compose.production.yaml compose.monitoring.yaml database.dump rollback.compose.json image-id.txt rollback-image.txt migration-history.txt database-contents.txt > SHA256SUMS
     sha256sum -c SHA256SUMS
 )
 

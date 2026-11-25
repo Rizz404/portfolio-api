@@ -1,0 +1,14 @@
+services:
+  backend:
+    environment:
+      MONITORING_METRICS_PASSWORD: ${MONITORING_METRICS_PASSWORD:-}
+    networks:
+      default: {}
+      monitoring:
+        aliases:
+          - portfolio-api-production-metrics
+
+networks:
+  monitoring:
+    external: true
+    name: portfolio-prod-metrics
