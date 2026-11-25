@@ -47,7 +47,7 @@ jobs:
 
           ATTEMPT=$(jq -r '.run_attempt' <<< "$RUN")
 
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/attempts/$ATTEMPT/jobs" | jq -e 'any(.jobs[]; .name == "Deploy to Staging" and .conclusion == "success")' > /dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/attempts/$ATTEMPT/jobs" | jq -e 'any(.jobs[]; .name == "Deploy to Staging" and .conclusion == "success") and any(.jobs[]; .name == "Container Security Scan" and .conclusion == "success")' > /dev/null
 
           RELEASE_DIR=$(mktemp -d)
           trap 'rm -rf "$RELEASE_DIR"' EXIT
