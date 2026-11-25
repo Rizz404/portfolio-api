@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -105,5 +106,19 @@ public class SecurityConfig {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  public FilterRegistrationBean<JwtAuthFilter> jwtFilterRegistration() {
+    var registration = new FilterRegistrationBean<>(jwtAuthFilter);
+    registration.setEnabled(false);
+    return registration;
+  }
+
+  @Bean
+  public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration() {
+    var registration = new FilterRegistrationBean<>(rateLimitFilter);
+    registration.setEnabled(false);
+    return registration;
   }
 }
