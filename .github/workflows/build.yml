@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout tested commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           persist-credentials: false
@@ -37,17 +37,17 @@ jobs:
           echo "short_sha=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
         id: image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           push: true
@@ -57,9 +57,36 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  scan-image:
+    name: Container Security Scan
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Scan published Docker image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: "v0.76.2"
+          scan-type: "image"
+          image-ref: "docker.io/rizz404/portfolio-api@${{ needs.build.outputs.digest }}"
+          scanners: "vuln"
+          format: "json"
+          output: "trivy-image.json"
+          exit-code: "0"
+          ignore-unfixed: false
+          cache: "false"
+
+      - name: Enforce vulnerability policy
+        shell: bash
+        run: |
+          jq -r '.Results[] | .Vulnerabilities[]? | [.Severity, .VulnerabilityID, .PkgName, .InstalledVersion, .FixedVersion] | @tsv' trivy-image.json
+
+          jq -e '(.Results | type == "array" and length > 0) and ([.Results[] | .Vulnerabilities[]? | select(.Severity == "HIGH" or .Severity == "CRITICAL")] | length == 0)' trivy-image.json
+
   deploy-staging:
     name: Deploy to Staging
-    needs: build
+    needs: [build, scan-image]
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -149,7 +176,7 @@ jobs:
             '{commit: $commit, digest: $digest, run_id: $run_id, run_attempt: $run_attempt, environment: "staging"}' > staged-release.json
 
       - name: Upload staging release manifest
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: staged-release-${{ github.run_attempt }}
           path: staged-release.json
